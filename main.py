@@ -82,6 +82,10 @@ class PassTurnButton:
         self.rect = pygame.Rect(self.x,self.y,50,50)
         self.lastClick = 0
 
+    def checkClick(self):
+        if pygame.mouse.get_pressed()[0] and self.lastClick == 0 and self.rect.collidepoint(pygame.mouse.get_pos()):
+            return True
+
     def isClicked(self, game):
         if pygame.mouse.get_pressed()[0] and self.lastClick == 0 and self.rect.collidepoint(pygame.mouse.get_pos()):
             for i in range(len(game.cards)):
@@ -105,10 +109,16 @@ class PassTurnButton:
                     game.turn = 0
                     game.players[0].totalMana += 1
                     game.players[0].mana = game.players[0].totalMana
+                
+            game.turn = int(game.turn == 0)
+            game.players[game.turn].totalMana += 1
+            game.players[game.turn].mana = game.players[0].totalMana
         self.lastClick = pygame.mouse.get_pressed()[0]
 
     def update(self,game):
-        self.isClicked(game)
+        if self.checkClick():
+            self.isClicked(game)
+        self.lastCLick = pygame.mouse.get_pressed()[0]
 
 class Player:
     def __init__(self, totalMana) -> None:
