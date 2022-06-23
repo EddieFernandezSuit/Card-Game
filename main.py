@@ -160,7 +160,6 @@ def start(game):
     for player in game.players:
         random.shuffle(player.deck)
 
-
     handPositionY = [5, game.SCREEN_HEIGHT - 205]
     fieldPositionY = [210, game.SCREEN_HEIGHT - 410]
 
