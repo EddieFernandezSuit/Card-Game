@@ -138,6 +138,9 @@ def drawOutlineText(game,str,x,y,):
     game.screen.blit(game.myFont.render(str, 1, Colors.WHITE),
                      (x, y))
 
+def cardPositionX(i):
+    return 5 + 205 * (i + 1)
+
 def start(game):
     game.players = [Player(1), Player(0)]
     game.deleteCards = []
@@ -157,8 +160,6 @@ def start(game):
     for player in game.players:
         random.shuffle(player.deck)
 
-    def cardPositionX(i):
-        return 5 + 205 * (i + 1)
 
     handPositionY = [5, game.SCREEN_HEIGHT - 205]
     fieldPositionY = [210, game.SCREEN_HEIGHT - 410]
@@ -195,7 +196,7 @@ def update(game):
         game.cards[i].update(game)
 
     for i in range(len(game.players[0].hand)):
-        game.players[0].hand[i].x = 5 + 205 * (i + 1)
+        game.players[0].hand[i].x = cardPositionX(i)
 
     for i in range(len(game.players[1].hand)):
         game.players[1].hand[i].x = 5 + 205 * (i + 1)
