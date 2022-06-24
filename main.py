@@ -5,7 +5,7 @@ import Colors
 import Game
 
 class Card:
-    def __init__(self, name, mana, damage, health, side) -> None:
+    def __init__(self, name, mana, damage, health, playerNum) -> None:
         self.x = 5
         self.y = 5
         self.name = name
@@ -16,14 +16,14 @@ class Card:
         self.rect = pygame.Rect(self.x,self.y,200,200)
         self.isSelected = 0
         self.lastClick = 0
-        self.side = side
+        self.playerNum = playerNum
         self.place = 'hand'
         self.fieldPosition= 0
         self.attackUsed = 0
 
     def isClicked(self, game):
         if pygame.mouse.get_pressed()[0] and self.lastClick == 0 and self.rect.collidepoint(pygame.mouse.get_pos()) :
-            if game.phase == 'play' and ((game.players[0].mana >= self.mana and self.side == 0) or (self.side == 1 and game.players[1].mana >= self.mana)) and game.turn == self.side :
+            if game.phase == 'play' and ((game.players[0].mana >= self.mana and self.playerNum == 0) or (self.playerNum == 1 and game.players[1].mana >= self.mana)) and game.turn == self.playerNum :
                 if game.isSelected == 0:
                     if self.isSelected == 0:
                         self.isSelected = 1
@@ -41,16 +41,16 @@ class Card:
                             game.cards[i].isSelected = 0
                             game.cards[i].attackUsed = 1
                             break
-                elif game.isSelected == 0  and self.attackUsed == 0 and self.side == game.turn:
+                elif game.isSelected == 0  and self.attackUsed == 0 and self.playerNum == game.turn:
                     count = 0
                     for i in range(len(game.cards)):
-                        if game.cards[i].side != self.side and game.cards[i].place == 'field':
+                        if game.cards[i].playerNum != self.playerNum and game.cards[i].place == 'field':
                             count+=1
                     if count == 0:
                         self.attackUsed = 1
-                        if self.side == 0:
+                        if self.playerNum == 0:
                             game.player.health -= self.damage
-                        elif self.side == 1:
+                        elif self.playerNum == 1:
                             game.players[0].health -= self.damage
                     else:
                         self.isSelected = 1
@@ -66,13 +66,13 @@ class Card:
         self.isClicked(game)
 
 class EmptyZone:
-    def __init__(self, x, y, side):
+    def __init__(self, x, y, playerNum):
         self.image = pygame.image.load('emptyZone.png')
         self.x = x
         self.y = y
         self.rect = pygame.Rect(self.x,self.y,200,200)
         self.isFull = 0
-        self.side = side
+        self.playerNum = playerNum
 
 class PassTurnButton:
     def __init__(self,game):
@@ -81,44 +81,28 @@ class PassTurnButton:
         self.y = game.SCREEN_HEIGHT/2 - 25
         self.rect = pygame.Rect(self.x,self.y,50,50)
         self.lastClick = 0
+        self.clicker = Clicker(self.rect, self.onClick, (game))
 
-    def checkClick(self):
-        if pygame.mouse.get_pressed()[0] and self.lastClick == 0 and self.rect.collidepoint(pygame.mouse.get_pos()):
-            return True
-
-    def isClicked(self, game):
-        if pygame.mouse.get_pressed()[0] and self.lastClick == 0 and self.rect.collidepoint(pygame.mouse.get_pos()):
-            for i in range(len(game.cards)):
-                game.cards[i].isSelected = 0
-                game.isSelected = 0
-                game.cards[i].attackUsed = 0
-            if game.phase == 'play':
-                game.phase = 'battle'
-            elif game.phase == 'battle':
-                for j in range(len(game.emptyZones)):
-                    game.emptyZones[j].isFull = 0
-                    for i in range(len(game.cards)):
-                        if game.cards[i].x == game.emptyZones[j].x and game.cards[i].y == game.emptyZones[j].y:
-                            game.emptyZones[j].isFull = 1
-                game.phase = 'play'
-                if game.turn == 0:
-                    game.turn = 1
-                    game.players[1].totalMana += 1
-                    game.players[1].mana = game.players[1].totalMana
-                else:
-                    game.turn = 0
-                    game.players[0].totalMana += 1
-                    game.players[0].mana = game.players[0].totalMana
-                
+    def onClick(self, game):
+        for i in range(len(game.cards)):
+            game.cards[i].isSelected = 0
+            game.isSelected = 0
+            game.cards[i].attackUsed = 0
+        if game.phase == 'play':
+            game.phase = 'battle'
+        elif game.phase == 'battle':
+            for j in range(len(game.emptyZones)):
+                game.emptyZones[j].isFull = 0
+                for i in range(len(game.cards)):
+                    if game.cards[i].x == game.emptyZones[j].x and game.cards[i].y == game.emptyZones[j].y:
+                        game.emptyZones[j].isFull = 1
+            game.phase = 'play'
             game.turn = int(game.turn == 0)
             game.players[game.turn].totalMana += 1
             game.players[game.turn].mana = game.players[0].totalMana
-        self.lastClick = pygame.mouse.get_pressed()[0]
 
     def update(self,game):
-        if self.checkClick():
-            self.isClicked(game)
-        self.lastCLick = pygame.mouse.get_pressed()[0]
+        self.clicker.update()
 
 class Player:
     def __init__(self, totalMana) -> None:
@@ -127,6 +111,7 @@ class Player:
         self.mana = 1
         self.deck = []
         self.hand = []
+
 
 def damage(damager,damaged,game):
     damaged.health -= damager.damage
@@ -159,13 +144,13 @@ def start(game):
     game.turn = 0
     game.isSelected = 0
 
-    for player in game.players:
+    for index, player in enumerate(game.players):
         for x in range(10):
-            player.deck.append(Card('TGuy1', 1, 1, 1, 0))
+            player.deck.append(Card('TGuy1', 1, 1, 1, index))
         for x in range(10):
-            player.deck.append(Card('TGuy1', 2, 2, 2, 0))
+            player.deck.append(Card('TGuy2', 2, 2, 2, index))
         for x in range(10):
-            player.deck.append(Card('TGuy1', 3, 3, 3, 0))
+            player.deck.append(Card('TGuy3', 3, 3, 3, index))
     
     for player in game.players:
         random.shuffle(player.deck)
@@ -190,7 +175,7 @@ def start(game):
 
     for x in range(2):
         for y in range(5):
-            game.emptyZones.append(EmptyZone(cardPositionX(y), fieldPositionY[x], 0))
+            game.emptyZones.append(EmptyZone(cardPositionX(y), fieldPositionY[x], x))
 
 def update(game):
     for event in pygame.event.get():
@@ -215,12 +200,12 @@ def update(game):
         for i in range(len(game.emptyZones)):
             if pygame.mouse.get_pressed()[0] and game.emptyZones[i].rect.collidepoint(pygame.mouse.get_pos()) and game.emptyZones[i].isFull == 0:
                 for j in range(len(game.cards)):
-                    if game.cards[j].isSelected == 1 and game.emptyZones[i].side == game.cards[j].side and game.phase == 'play' and game.cards[j].place == 'hand':
+                    if game.cards[j].isSelected == 1 and game.emptyZones[i].playerNum == game.cards[j].playerNum and game.phase == 'play' and game.cards[j].place == 'hand':
                         game.cards[j].place = 'field'
                         game.cards[j].x = game.emptyZones[i].x
                         game.cards[j].y = game.emptyZones[i].y
                         game.cards[j].isSelected = 0
-                        if game.cards[j].side == 0:
+                        if game.cards[j].playerNum == 0:
                             for k in range(len(game.players[0].hand)):
                                 if game.players[0].hand[k] == game.cards[j]:
                                     game.players[0].hand.pop(k)
@@ -232,7 +217,7 @@ def update(game):
                                     break
                         game.isSelected = 0
                         game.emptyZones[i].isFull = 1
-                        if game.cards[j].side == 0:
+                        if game.cards[j].playerNum == 0:
                             game.players[0].mana -= game.cards[j].mana
                         else:
                             game.players[1].mana -= game.cards[j].mana
