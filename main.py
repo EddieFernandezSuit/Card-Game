@@ -96,7 +96,7 @@ class PassTurnButton:
             game.turn = int(game.turn == 0)
             game.players[game.turn].totalMana += 1
             game.players[game.turn].mana = game.players[0].totalMana
-            game.turnRectangle.y = 1150
+            game.turnRectangle.y = 450
 
     def update(self):
         self.clicker.update()
@@ -134,6 +134,8 @@ def start(game):
     game.passTurnButton = PassTurnButton(game)
     game.turn = 0
     game.isSelected = 0
+    game.turnRectangle = pygame.Rect(150, 0, 1150, 450)
+
 
     for index, player in enumerate(game.players):
         for x in range(10):
@@ -250,7 +252,6 @@ def draw(game):
     drawOutlineText(game, str(game.turn), game.passTurnButton.x, game.passTurnButton.y - game.fontSize)
     drawOutlineText(game, str(game.phase), game.passTurnButton.x, game.passTurnButton.y- game.fontSize * 2)
 
-    game.turnRectangle = pygame.Rect(150, 0, 1150, 450)
     pygame.draw.rect(game.screen, Colors.BLACK, game.turnRectangle, 3)
 
 Game(start, update, draw)
