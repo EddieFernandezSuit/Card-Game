@@ -1,11 +1,13 @@
+from turtle import Vec2D
 import pygame
 import sys
 import random
 import Colors
-import Game
+from Game import Game
+from Clicker import Clicker
 
 class Card:
-    def __init__(self, name, mana, damage, health, playerNum) -> None:
+    def __init__(self, name, mana, damage, health, playerNum, game) -> None:
         self.x = 5
         self.y = 5
         self.name = name
@@ -15,55 +17,50 @@ class Card:
         self.image = pygame.image.load('jungle.jpg')
         self.rect = pygame.Rect(self.x,self.y,200,200)
         self.isSelected = 0
-        self.lastClick = 0
         self.playerNum = playerNum
         self.place = 'hand'
         self.fieldPosition= 0
         self.attackUsed = 0
+        self.clicker = Clicker(self.rect, self.onClick, (game))
 
-    def isClicked(self, game):
-        if pygame.mouse.get_pressed()[0] and self.lastClick == 0 and self.rect.collidepoint(pygame.mouse.get_pos()) :
-            if game.phase == 'play' and ((game.players[0].mana >= self.mana and self.playerNum == 0) or (self.playerNum == 1 and game.players[1].mana >= self.mana)) and game.turn == self.playerNum :
-                if game.isSelected == 0:
-                    if self.isSelected == 0:
-                        self.isSelected = 1
-                        game.isSelected = 1
-                elif game.isSelected == 1:
-                    if self.isSelected == 1:
-                        self.isSelected = 0
+    def onClick(self, game):
+        if game.phase == 'play' and ((game.players[0].mana >= self.mana and self.playerNum == 0) or (self.playerNum == 1 and game.players[1].mana >= self.mana)) and game.turn == self.playerNum :
+            if game.isSelected == 0:
+                if self.isSelected == 0:
+                    self.isSelected = 1
+                    game.isSelected = 1
+            elif game.isSelected == 1:
+                if self.isSelected == 1:
+                    self.isSelected = 0
+                    game.isSelected = 0
+        elif game.phase == 'battle' and self.place == 'field':
+            if game.isSelected == 1:
+                for i in range(len(game.cards)):
+                    if game.cards[i].isSelected == 1 and game.cards[i].place == 'field' and game.cards[i] != self:
+                        damage(game.cards[i], self, game)
                         game.isSelected = 0
-            elif game.phase == 'battle' and self.place == 'field':
-                if game.isSelected == 1:
-                    for i in range(len(game.cards)):
-                        if game.cards[i].isSelected == 1 and game.cards[i].place == 'field' and game.cards[i] != self:
-                            damage(game.cards[i], self, game)
-                            game.isSelected = 0
-                            game.cards[i].isSelected = 0
-                            game.cards[i].attackUsed = 1
-                            break
-                elif game.isSelected == 0  and self.attackUsed == 0 and self.playerNum == game.turn:
-                    count = 0
-                    for i in range(len(game.cards)):
-                        if game.cards[i].playerNum != self.playerNum and game.cards[i].place == 'field':
-                            count+=1
-                    if count == 0:
-                        self.attackUsed = 1
-                        if self.playerNum == 0:
-                            game.player.health -= self.damage
-                        elif self.playerNum == 1:
-                            game.players[0].health -= self.damage
-                    else:
-                        self.isSelected = 1
-                        game.isSelected = 1
+                        game.cards[i].isSelected = 0
+                        game.cards[i].attackUsed = 1
+                        break
+            elif game.isSelected == 0  and self.attackUsed == 0 and self.playerNum == game.turn:
+                count = 0
+                for i in range(len(game.cards)):
+                    if game.cards[i].playerNum != self.playerNum and game.cards[i].place == 'field':
+                        count+=1
+                if count == 0:
+                    self.attackUsed = 1
+                    if self.playerNum == 0:
+                        game.player.health -= self.damage
+                    elif self.playerNum == 1:
+                        game.players[0].health -= self.damage
+                else:
+                    self.isSelected = 1
+                    game.isSelected = 1
 
-
-        self.lastClick = pygame.mouse.get_pressed()[0]
-
-
-    def update(self, game):
+    def update(self):
         self.rect.x = self.x
         self.rect.y = self.y
-        self.isClicked(game)
+        self.clicker.update()
 
 class EmptyZone:
     def __init__(self, x, y, playerNum):
@@ -80,7 +77,6 @@ class PassTurnButton:
         self.x = game.SCREEN_WIDTH - 200
         self.y = game.SCREEN_HEIGHT/2 - 25
         self.rect = pygame.Rect(self.x,self.y,50,50)
-        self.lastClick = 0
         self.clicker = Clicker(self.rect, self.onClick, (game))
 
     def onClick(self, game):
@@ -100,8 +96,9 @@ class PassTurnButton:
             game.turn = int(game.turn == 0)
             game.players[game.turn].totalMana += 1
             game.players[game.turn].mana = game.players[0].totalMana
+            game.turnRectangle.y = 1150
 
-    def update(self,game):
+    def update(self):
         self.clicker.update()
 
 class Player:
@@ -112,7 +109,6 @@ class Player:
         self.deck = []
         self.hand = []
 
-
 def damage(damager,damaged,game):
     damaged.health -= damager.damage
     if damaged.health <= 0:
@@ -122,16 +118,11 @@ def damage(damager,damaged,game):
                 break
 
 def drawOutlineText(game,str,x,y,):
-    game.screen.blit(game.myFont.render(str, 1, Colors.BLACK),
-                     (x + 1, y + 1))
-    game.screen.blit(game.myFont.render(str, 1, Colors.BLACK),
-                     (x - 1, y + 1))
-    game.screen.blit(game.myFont.render(str, 1, Colors.BLACK),
-                     (x + 1, y - 1))
-    game.screen.blit(game.myFont.render(str, 1, Colors.BLACK),
-                     (x - 1, y - 1))
-    game.screen.blit(game.myFont.render(str, 1, Colors.WHITE),
-                     (x, y))
+    game.screen.blit(game.font.render(str, 1, Colors.BLACK), (x + 1, y + 1))
+    game.screen.blit(game.font.render(str, 1, Colors.BLACK), (x - 1, y + 1))
+    game.screen.blit(game.font.render(str, 1, Colors.BLACK), (x + 1, y - 1))
+    game.screen.blit(game.font.render(str, 1, Colors.BLACK), (x - 1, y - 1))
+    game.screen.blit(game.font.render(str, 1, Colors.WHITE), (x, y))
 
 def cardPositionX(i):
     return 5 + 205 * (i + 1)
@@ -146,11 +137,11 @@ def start(game):
 
     for index, player in enumerate(game.players):
         for x in range(10):
-            player.deck.append(Card('TGuy1', 1, 1, 1, index))
+            player.deck.append(Card('TGuy1', 1, 1, 1, index, game))
         for x in range(10):
-            player.deck.append(Card('TGuy2', 2, 2, 2, index))
+            player.deck.append(Card('TGuy2', 2, 2, 2, index, game))
         for x in range(10):
-            player.deck.append(Card('TGuy3', 3, 3, 3, index))
+            player.deck.append(Card('TGuy3', 3, 3, 3, index, game))
     
     for player in game.players:
         random.shuffle(player.deck)
@@ -185,9 +176,9 @@ def update(game):
             if event.key == pygame.K_SPACE:
                 a = 1
 
-    game.passTurnButton.update(game)
+    game.passTurnButton.update()
     for i in range(len(game.cards)):
-        game.cards[i].update(game)
+        game.cards[i].update()
 
     for i in range(len(game.players[0].hand)):
         game.players[0].hand[i].x = cardPositionX(i)
@@ -228,25 +219,38 @@ def update(game):
         game.deleteCards.pop(i)
 
 def draw(game):
+    def drawImage(object):
+        # object must contain an image variable and an x and y variable
+        game.screen.blit(object.image, (object.x, object.y))
+
     for x in range(len(game.emptyZones)):
-        game.screen.blit(game.emptyZones[x].image, (game.emptyZones[x].x, game.emptyZones[x].y))
+        drawImage(game.emptyZones[x])
 
     for x in range(len(game.cards)):
-        game.screen.blit(game.cards[x].image, (game.cards[x].x, game.cards[x].y))
+        drawImage(game.cards[x])
+        # game.screen.blit(game.cards[x].image, (game.cards[x].x, game.cards[x].y))
         temp = [str(game.cards[x].name), 'M: ' + str(game.cards[x].mana), 'D: ' + str(game.cards[x].damage),
                 'H: ' + str(game.cards[x].health)]
         for y in range(len(temp)):
             drawOutlineText(game, temp[y] ,game.cards[x].x + 5, game.cards[x].y + 5 + y * game.fontSize)
-
+        
         if game.cards[x].isSelected:
             drawOutlineText(game,'X', game.cards[x].x + 100,game.cards[x].y +100)
 
-    drawOutlineText(game, 'Mana: ' + str(game.players[0].mana) + '/' + str(game.players[0].totalMana), game.SCREEN_WIDTH - 200, 50)
-    drawOutlineText(game, 'Health: ' + str(game.players[0].health), game.SCREEN_WIDTH - 200, 50 + game.fontSize)
-    drawOutlineText(game, 'Mana: ' + str(game.players[1].mana) + '/' + str(game.players[1].totalMana), game.SCREEN_WIDTH - 200, game.SCREEN_HEIGHT-50)
-    drawOutlineText(game, 'Health: ' + str(game.players[1].health), game.SCREEN_WIDTH - 200, game.SCREEN_HEIGHT-50 + game.fontSize)
-    game.screen.blit(game.passTurnButton.image, (game.passTurnButton.x, game.passTurnButton.y))
+    UIManaX = game.SCREEN_WIDTH - 200
+    UIBaseManaY = [50, game.SCREEN_HEIGHT-50]
+
+    for index, player in enumerate(game.players):
+        drawOutlineText(game, 'Mana: ' + str(player.mana) + '/' + str(player.totalMana), UIManaX, UIBaseManaY[index])
+        drawOutlineText(game, 'Health: ' + str(player.health), UIManaX, UIBaseManaY[index] + game.fontSize)
+        
+    # game.screen.blit(game.passTurnButton.image, (game.passTurnButton.x, game.passTurnButton.y))
+    drawImage(game.passTurnButton)
+
     drawOutlineText(game, str(game.turn), game.passTurnButton.x, game.passTurnButton.y - game.fontSize)
     drawOutlineText(game, str(game.phase), game.passTurnButton.x, game.passTurnButton.y- game.fontSize * 2)
 
-game = Game.Game(start, update, draw)
+    game.turnRectangle = pygame.Rect(150, 0, 1150, 450)
+    pygame.draw.rect(game.screen, Colors.BLACK, game.turnRectangle, 3)
+
+Game(start, update, draw)
