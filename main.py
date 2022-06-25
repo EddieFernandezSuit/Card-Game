@@ -33,7 +33,8 @@ class Card:
                 if self.isSelected == 1:
                     self.isSelected = 0
                     game.isSelected = 0
-        elif game.phase == 'battle' and self.place == 'field':
+        # elif game.phase == 'battle' and self.place == 'field':
+        elif self.place == 'field':
             if game.isSelected == 1:
                 for i in range(len(game.cards)):
                     if game.cards[i].isSelected == 1 and game.cards[i].place == 'field' and game.cards[i] != self:
@@ -85,8 +86,8 @@ class PassTurnButton:
             game.isSelected = 0
             game.cards[i].attackUsed = 0
         if game.phase == 'play':
-            game.phase = 'battle'
-        elif game.phase == 'battle':
+        #     game.phase = 'battle'
+        # elif game.phase == 'battle':
             for j in range(len(game.emptyZones)):
                 game.emptyZones[j].isFull = 0
                 for i in range(len(game.cards)):
@@ -96,7 +97,8 @@ class PassTurnButton:
             game.turn = int(game.turn == 0)
             game.players[game.turn].totalMana += 1
             game.players[game.turn].mana = game.players[0].totalMana
-            game.turnRectangle.y = 450
+            turnRectangleY = [0, 450]
+            game.turnRectangle.y = turnRectangleY[game.turn]
 
     def update(self):
         self.clicker.update()
