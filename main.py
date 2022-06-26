@@ -1,3 +1,4 @@
+from asyncio.windows_events import NULL
 from turtle import Vec2D
 import pygame
 import sys
@@ -16,7 +17,6 @@ class Card:
         self.health = health
         self.image = pygame.image.load('jungle.jpg')
         self.rect = pygame.Rect(self.x,self.y,200,200)
-        self.isSelected = 0
         self.playerNum = playerNum
         self.place = 'hand'
         self.fieldPosition= 0
@@ -24,39 +24,16 @@ class Card:
         self.clicker = Clicker(self.rect, self.onClick, (game))
 
     def onClick(self, game):
-        if game.phase == 'play' and game.players[self.playerNum].mana >= self.mana and game.turn == self.playerNum:
-            if game.isSelected == 0:
-                if self.isSelected == 0:
-                    self.isSelected = 1
-                    game.isSelected = 1
-            elif game.isSelected == 1:
-                if self.isSelected == 1:
-                    self.isSelected = 0
-                    game.isSelected = 0
-        # elif game.phase == 'battle' and self.place == 'field':
-        elif self.place == 'field':
-            if game.isSelected == 1:
-                for i in range(len(game.cards)):
-                    if game.cards[i].isSelected == 1 and game.cards[i].place == 'field' and game.cards[i] != self:
-                        damage(game.cards[i], self, game)
-                        game.isSelected = 0
-                        game.cards[i].isSelected = 0
-                        game.cards[i].attackUsed = 1
-                        break
-            elif game.isSelected == 0  and self.attackUsed == 0 and self.playerNum == game.turn:
-                count = 0
-                for i in range(len(game.cards)):
-                    if game.cards[i].playerNum != self.playerNum and game.cards[i].place == 'field':
-                        count+=1
-                if count == 0:
-                    self.attackUsed = 1
-                    # if self.playerNum == 0:
-                    game.players[int(self.playerNum == 0)].health -= self.damage
-                    # elif self.playerNum == 1:
-                        # game.players[0].health -= self.damage
-                else:
-                    self.isSelected = 1
-                    game.isSelected = 1
+        if game.selectedCard == self:
+            game.selectedCard = NULL
+        elif game.selectedCard == NULL:
+            if game.turn == self.playerNum and ((self.place == 'hand' and game.players[self.playerNum].mana >= self.mana and game.turn == self.playerNum) or (self.place == 'field' and self.attackUsed == 0)):
+                game.selectedCard = self
+        else:
+            if self.place == 'field' and game.selectedCard.place == 'field':
+                damage(game.selectedCard, self, game)
+                game.selectedCard.attackUsed = 1
+                game.selectedCard = NULL
 
     def update(self):
         self.rect.x = self.x
@@ -64,13 +41,30 @@ class Card:
         self.clicker.update()
 
 class EmptyZone:
-    def __init__(self, x, y, playerNum):
+    def __init__(self, x, y, playerNum, game):
         self.image = pygame.image.load('emptyZone.png')
         self.x = x
         self.y = y
         self.rect = pygame.Rect(self.x,self.y,200,200)
         self.isFull = 0
         self.playerNum = playerNum
+        self.clicker = Clicker(self.rect, self.click, (game))
+    
+    def click(self, game):
+        if self.isFull == 0 and game.selectedCard != NULL and self.playerNum == game.selectedCard.playerNum and game.selectedCard.place == 'hand':
+            game.selectedCard.place = 'field'
+            game.selectedCard.x = self.x
+            game.selectedCard.y = self.y
+            self.isFull = 1
+            game.players[game.selectedCard.playerNum].mana -= game.selectedCard.mana
+            for k in range(len(game.players[game.selectedCard.playerNum].hand)):
+                if game.players[game.selectedCard.playerNum].hand[k] == game.selectedCard:
+                    game.players[game.selectedCard.playerNum].hand.pop(k)
+                    break
+
+    
+    def update(self):
+        self.clicker.update()
 
 class PassTurnButton:
     def __init__(self,game):
@@ -82,12 +76,9 @@ class PassTurnButton:
 
     def onClick(self, game):
         for i in range(len(game.cards)):
-            game.cards[i].isSelected = 0
-            game.isSelected = 0
+            game.selectedCard = NULL
             game.cards[i].attackUsed = 0
         if game.phase == 'play':
-        #     game.phase = 'battle'
-        # elif game.phase == 'battle':
             for j in range(len(game.emptyZones)):
                 game.emptyZones[j].isFull = 0
                 for i in range(len(game.cards)):
@@ -136,9 +127,8 @@ def start(game):
     game.phase = 'play'
     game.passTurnButton = PassTurnButton(game)
     game.turn = 0
-    game.isSelected = 0
     game.turnRectangle = pygame.Rect(150, 0, 1150, 450)
-
+    game.selectedCard = NULL
 
     for index, player in enumerate(game.players):
         for x in range(10):
@@ -171,7 +161,7 @@ def start(game):
 
     for x in range(2):
         for y in range(5):
-            game.emptyZones.append(EmptyZone(cardPositionX(y), fieldPositionY[x], x))
+            game.emptyZones.append(EmptyZone(cardPositionX(y), fieldPositionY[x], x, game))
 
 def update(game):
     for event in pygame.event.get():
@@ -192,31 +182,8 @@ def update(game):
         game.players[1].hand[i].x = 5 + 205 * (i + 1)
         game.players[1].hand[i].y = game.SCREEN_HEIGHT - 205
 
-    if game.isSelected == 1 and game.phase == 'play':
-        for i in range(len(game.emptyZones)):
-            if pygame.mouse.get_pressed()[0] and game.emptyZones[i].rect.collidepoint(pygame.mouse.get_pos()) and game.emptyZones[i].isFull == 0:
-                for j in range(len(game.cards)):
-                    if game.cards[j].isSelected == 1 and game.emptyZones[i].playerNum == game.cards[j].playerNum and game.phase == 'play' and game.cards[j].place == 'hand':
-                        game.cards[j].place = 'field'
-                        game.cards[j].x = game.emptyZones[i].x
-                        game.cards[j].y = game.emptyZones[i].y
-                        game.cards[j].isSelected = 0
-                        if game.cards[j].playerNum == 0:
-                            for k in range(len(game.players[0].hand)):
-                                if game.players[0].hand[k] == game.cards[j]:
-                                    game.players[0].hand.pop(k)
-                                    break
-                        else:
-                            for k in range(len(game.players[1].hand)):
-                                if game.players[1].hand[k] == game.cards[j]:
-                                    game.players[1].hand.pop(k)
-                                    break
-                        game.isSelected = 0
-                        game.emptyZones[i].isFull = 1
-                        if game.cards[j].playerNum == 0:
-                            game.players[0].mana -= game.cards[j].mana
-                        else:
-                            game.players[1].mana -= game.cards[j].mana
+    for i in range(len(game.emptyZones)):
+        game.emptyZones[i].update()
 
     for i in reversed(range(len(game.deleteCards))):
         print(i)
@@ -239,9 +206,9 @@ def draw(game):
         for y in range(len(temp)):
             drawOutlineText(game, temp[y] ,game.cards[x].x + 5, game.cards[x].y + 5 + y * game.fontSize)
         
-        if game.cards[x].isSelected:
-            drawOutlineText(game,'X', game.cards[x].x + 100,game.cards[x].y +100)
 
+    if game.selectedCard != NULL:
+        drawOutlineText(game,'X', game.selectedCard.x + 100,game.selectedCard.y +100)
     UIManaX = game.SCREEN_WIDTH - 200
     UIBaseManaY = [50, game.SCREEN_HEIGHT-100]
 
