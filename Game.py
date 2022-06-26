@@ -6,7 +6,7 @@ class Game:
         pygame.init()
         self.SCREEN_WIDTH = 1600
         self.SCREEN_HEIGHT = 900
-        self.fontSize = 25
+        self.fontSize = 35
         fontName = "freesansbold"
         self.font = pygame.font.SysFont(fontName, self.fontSize)
         self.resizeScreen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT), pygame.HWSURFACE|pygame.DOUBLEBUF|pygame.RESIZABLE)

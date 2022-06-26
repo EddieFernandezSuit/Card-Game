@@ -24,7 +24,7 @@ class Card:
         self.clicker = Clicker(self.rect, self.onClick, (game))
 
     def onClick(self, game):
-        if game.phase == 'play' and ((game.players[0].mana >= self.mana and self.playerNum == 0) or (self.playerNum == 1 and game.players[1].mana >= self.mana)) and game.turn == self.playerNum :
+        if game.phase == 'play' and game.players[self.playerNum].mana >= self.mana and game.turn == self.playerNum:
             if game.isSelected == 0:
                 if self.isSelected == 0:
                     self.isSelected = 1
@@ -50,10 +50,10 @@ class Card:
                         count+=1
                 if count == 0:
                     self.attackUsed = 1
-                    if self.playerNum == 0:
-                        game.player.health -= self.damage
-                    elif self.playerNum == 1:
-                        game.players[0].health -= self.damage
+                    # if self.playerNum == 0:
+                    game.players[int(self.playerNum == 0)].health -= self.damage
+                    # elif self.playerNum == 1:
+                        # game.players[0].health -= self.damage
                 else:
                     self.isSelected = 1
                     game.isSelected = 1
@@ -110,6 +110,7 @@ class Player:
         self.mana = 1
         self.deck = []
         self.hand = []
+        self.field = []
 
 def damage(damager,damaged,game):
     damaged.health -= damager.damage
@@ -242,7 +243,7 @@ def draw(game):
             drawOutlineText(game,'X', game.cards[x].x + 100,game.cards[x].y +100)
 
     UIManaX = game.SCREEN_WIDTH - 200
-    UIBaseManaY = [50, game.SCREEN_HEIGHT-50]
+    UIBaseManaY = [50, game.SCREEN_HEIGHT-100]
 
     for index, player in enumerate(game.players):
         drawOutlineText(game, 'Mana: ' + str(player.mana) + '/' + str(player.totalMana), UIManaX, UIBaseManaY[index])
