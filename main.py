@@ -1,5 +1,4 @@
 from asyncio.windows_events import NULL
-from turtle import Vec2D
 import pygame
 import sys
 import random
@@ -27,7 +26,9 @@ class Card:
         if game.selectedCard == self:
             game.selectedCard = NULL
         elif game.selectedCard == NULL:
-            if game.turn == self.playerNum and ((self.place == 'hand' and game.players[self.playerNum].mana >= self.mana and game.turn == self.playerNum) or (self.place == 'field' and self.attackUsed == 0)):
+            if len(game.players[int(self.playerNum == 0)].field) == 0 and self.place == 'field' and self.attackUsed == 0:
+                game.players[int(self.playerNum == 0)].health -= self.damage
+            elif game.turn == self.playerNum and ((self.place == 'hand' and game.players[self.playerNum].mana >= self.mana and game.turn == self.playerNum) or (self.place == 'field' and self.attackUsed == 0)):
                 game.selectedCard = self
         else:
             if self.place == 'field' and game.selectedCard.place == 'field':
@@ -53,6 +54,7 @@ class EmptyZone:
     def click(self, game):
         if self.isFull == 0 and game.selectedCard != NULL and self.playerNum == game.selectedCard.playerNum and game.selectedCard.place == 'hand':
             game.selectedCard.place = 'field'
+            game.players[self.playerNum].field.append(game.selectedCard)
             game.selectedCard.x = self.x
             game.selectedCard.y = self.y
             self.isFull = 1
@@ -61,6 +63,7 @@ class EmptyZone:
                 if game.players[game.selectedCard.playerNum].hand[k] == game.selectedCard:
                     game.players[game.selectedCard.playerNum].hand.pop(k)
                     break
+            game.selectedCard = NULL
 
     
     def update(self):
@@ -106,10 +109,8 @@ class Player:
 def damage(damager,damaged,game):
     damaged.health -= damager.damage
     if damaged.health <= 0:
-        for i in range(len(game.cards)):
-            if game.cards[i] == damaged:
-                game.deleteCards.append(i)
-                break
+        game.players[damaged.playerNum].field.remove(damaged)
+        game.cards.remove(damaged)
 
 def drawOutlineText(game,str,x,y,):
     game.screen.blit(game.font.render(str, 1, Colors.BLACK), (x + 1, y + 1))
@@ -123,7 +124,6 @@ def cardPositionX(i):
 
 def start(game):
     game.players = [Player(1), Player(0)]
-    game.deleteCards = []
     game.phase = 'play'
     game.passTurnButton = PassTurnButton(game)
     game.turn = 0
@@ -172,7 +172,7 @@ def update(game):
                 a = 1
 
     game.passTurnButton.update()
-    for i in range(len(game.cards)):
+    for i in reversed(range(len(game.cards))):
         game.cards[i].update()
 
     for i in range(len(game.players[0].hand)):
@@ -182,17 +182,11 @@ def update(game):
         game.players[1].hand[i].x = 5 + 205 * (i + 1)
         game.players[1].hand[i].y = game.SCREEN_HEIGHT - 205
 
-    for i in range(len(game.emptyZones)):
+    for i in reversed(range(len(game.emptyZones))):
         game.emptyZones[i].update()
-
-    for i in reversed(range(len(game.deleteCards))):
-        print(i)
-        game.cards.pop(game.deleteCards[i])
-        game.deleteCards.pop(i)
 
 def draw(game):
     def drawImage(object):
-        # object must contain an image variable and an x and y variable
         game.screen.blit(object.image, (object.x, object.y))
 
     for x in range(len(game.emptyZones)):
@@ -200,15 +194,13 @@ def draw(game):
 
     for x in range(len(game.cards)):
         drawImage(game.cards[x])
-        # game.screen.blit(game.cards[x].image, (game.cards[x].x, game.cards[x].y))
         temp = [str(game.cards[x].name), 'M: ' + str(game.cards[x].mana), 'D: ' + str(game.cards[x].damage),
                 'H: ' + str(game.cards[x].health)]
         for y in range(len(temp)):
             drawOutlineText(game, temp[y] ,game.cards[x].x + 5, game.cards[x].y + 5 + y * game.fontSize)
         
-
     if game.selectedCard != NULL:
-        drawOutlineText(game,'X', game.selectedCard.x + 100,game.selectedCard.y +100)
+        drawOutlineText(game,'X', game.selectedCard.x + 100, game.selectedCard.y +100)
     UIManaX = game.SCREEN_WIDTH - 200
     UIBaseManaY = [50, game.SCREEN_HEIGHT-100]
 
@@ -216,7 +208,6 @@ def draw(game):
         drawOutlineText(game, 'Mana: ' + str(player.mana) + '/' + str(player.totalMana), UIManaX, UIBaseManaY[index])
         drawOutlineText(game, 'Health: ' + str(player.health), UIManaX, UIBaseManaY[index] + game.fontSize)
         
-    # game.screen.blit(game.passTurnButton.image, (game.passTurnButton.x, game.passTurnButton.y))
     drawImage(game.passTurnButton)
 
     drawOutlineText(game, str(game.turn), game.passTurnButton.x, game.passTurnButton.y - game.fontSize)
