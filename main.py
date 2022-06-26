@@ -169,7 +169,7 @@ def update(game):
             sys.exit()
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
-                a = 1
+                game.passTurnButton.onClick(game)
 
     game.passTurnButton.update()
     for i in reversed(range(len(game.cards))):
