@@ -5,21 +5,22 @@ import sys
 import random
 import Colors
 from Game import Game
-from Clicker import Clicker
-from ImageHandler import ImageHandler
+from GameObject import GameObject
+from handlers.Clicker import Clicker
+from handlers.ImageHandler import ImageHandler
 from Card import Card
-from TextHandler import TextHandler
+from handlers.TextHandler import TextHandler
 
-
-class EmptyZone:
+class EmptyZone(GameObject):
     def __init__(self, x, y, playerNum, game):
-        self.imageHandler = ImageHandler(pygame.image.load('emptyZone.png'),self,game.screen)
+        super().__init__(game)
+        self.imageHandler = ImageHandler(pygame.image.load('images/emptyZone.png'),self,game.screen)
         self.x = x
         self.y = y
         self.rect = pygame.Rect(self.x,self.y,200,200)
         self.isFull = 0
         self.playerNum = playerNum
-        self.clicker = Clicker(self.rect, self.click, (game))
+        self.clicker = Clicker(self.rect, self.click, (game), self)
     
     def click(self, game):
         if self.isFull == 0 and game.selectedCard != NULL and self.playerNum == game.selectedCard.playerNum and game.selectedCard.place == 'hand':
@@ -35,17 +36,15 @@ class EmptyZone:
                     break
             game.selectedCard = NULL
 
-    def update(self):
-        self.clicker.update()
-        self.imageHandler.update()
-
-class PassTurnButton:
+class PassTurnButton(GameObject):
     def __init__(self,game):
-        self.imageHandler = ImageHandler(pygame.image.load('PassTurn.png'), self, game.screen)
+        super().__init__(game)
+        self.handlers = []
         self.x = game.SCREEN_WIDTH - 200
         self.y = game.SCREEN_HEIGHT/2 - 25
         self.rect = pygame.Rect(self.x,self.y,50,50)
-        self.clicker = Clicker(self.rect, self.onClick, (game))
+        self.imageHandler = ImageHandler(pygame.image.load('images/PassTurn.png'), self, game.screen)
+        self.clicker = Clicker(self.rect, self.onClick, (game), self)
 
     def onClick(self, game):
         for i in range(len(game.cards)):
@@ -64,27 +63,31 @@ class PassTurnButton:
             turnRectangleY = [0, 450]
             game.turnRectangle.y = turnRectangleY[game.turn]
 
-    def update(self, game):
-        self.clicker.update()
-        self.imageHandler.update()
-
-class Player:
-    def __init__(self, game, playerNum) -> None:
+class Player(GameObject):
+    def __init__(self, game, num) -> None:
+        super().__init__(game)
+        self.x = 0
+        self.y = 0
         self.health = 20
-        self.totalMana = int(playerNum == 0)
+        self.totalMana = int(num == 0)
         self.mana = 1
         self.deck = []
         self.hand = []
         self.field = []
-        self.playerNum = playerNum
+        self.num = num
+        self.game = game
+
         UIBaseManaX = game.SCREEN_WIDTH - 200
         UIBaseManaY = [50, game.SCREEN_HEIGHT-100]
-        self.healthText = TextHandler(game, 'Health: ' + str(self.health), UIBaseManaX, UIBaseManaY[self.playerNum],1, pygame.Vector2(0,0))
-        self.manaText = TextHandler(game, 'Mana: ' + str(self.mana) + '/' + str(self.totalMana), UIBaseManaX, UIBaseManaY, 1, pygame.Vector2(0,0))
-    
+        self.healthText = TextHandler(game, 'Health: ' + str(self.health), UIBaseManaX, UIBaseManaY[self.num],1, self)
+        self.manaText = TextHandler(game, 'Mana: ' + str(self.mana) + '/' + str(self.totalMana), UIBaseManaX, UIBaseManaY[self.num] + game.font.size('1')[1], 1, self)
+
     def update(self):
-        self.healthText.update()
-        self.manaText.update()
+        super().update()
+        handY = [0, self.game.SCREEN_HEIGHT - 205]
+        for index, card in enumerate(self.hand):
+            card.x = 5 + 205 * (index + 1)
+            card.y = handY[self.num]
 
 def drawOutlineText(game,str,x,y,):
     game.screen.blit(game.font.render(str, 1, Colors.BLACK), (x + 1, y + 1))
@@ -103,7 +106,14 @@ def start(game):
     game.turn = 0
     game.turnRectangle = pygame.Rect(150, 0, 1150, 450)
     game.selectedCard = NULL
-    # game.selectedCardText = TextHandler(game, 'X', 100, 100, 0, game.selectedCard)
+
+    handPositionY = [5, game.SCREEN_HEIGHT - 205]
+    fieldPositionY = [210, game.SCREEN_HEIGHT - 410]
+    game.emptyZones = []
+
+    for x in range(2):
+        for y in range(5):
+            game.emptyZones.append(EmptyZone(cardPositionX(y), fieldPositionY[x], x, game))
 
     for index, player in enumerate(game.players):
         for x in range(10):
@@ -115,9 +125,6 @@ def start(game):
     
     for player in game.players:
         random.shuffle(player.deck)
-
-    handPositionY = [5, game.SCREEN_HEIGHT - 205]
-    fieldPositionY = [210, game.SCREEN_HEIGHT - 410]
 
     for w, player in enumerate(game.players):
         for x in range(5):
@@ -132,11 +139,6 @@ def start(game):
         for card in player.hand:
             game.cards.append(card)
 
-    game.emptyZones = []
-
-    for x in range(2):
-        for y in range(5):
-            game.emptyZones.append(EmptyZone(cardPositionX(y), fieldPositionY[x], x, game))
 
 def update(game):
     for event in pygame.event.get():
@@ -146,24 +148,16 @@ def update(game):
             if event.key == pygame.K_SPACE:
                 game.passTurnButton.onClick(game)
 
-    game.passTurnButton.update(game)
-    # game.selectedCardText.update()
+    # game.passTurnButton.update()
 
-    for i in reversed(range(len(game.emptyZones))):
-        game.emptyZones[i].update()
+    # for i in reversed(range(len(game.emptyZones))):
+    #     game.emptyZones[i].update()
         
-    for i in reversed(range(len(game.cards))):
-        game.cards[i].update(game)
-
-    for i in range(len(game.players[0].hand)):
-        game.players[0].hand[i].x = cardPositionX(i)
-
-    for i in range(len(game.players[1].hand)):
-        game.players[1].hand[i].x = 5 + 205 * (i + 1)
-        game.players[1].hand[i].y = game.SCREEN_HEIGHT - 205
+    # for i in reversed(range(len(game.cards))):
+    #     game.cards[i].update(game)
     
-    for player in game.players:
-        player.update()
+    # for player in game.players:
+    #     player.update()
 
 def draw(game):
     if game.selectedCard != NULL:

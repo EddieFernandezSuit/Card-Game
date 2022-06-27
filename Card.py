@@ -1,26 +1,30 @@
 
 from asyncio.windows_events import NULL
 import pygame
-from ImageHandler import ImageHandler
-from Clicker import Clicker
+from GameObject import GameObject
+from handlers.ImageHandler import ImageHandler
+from handlers.Clicker import Clicker
 import Colors
-from TextHandler import TextHandler
+from handlers.TextHandler import TextHandler
+from GameObject import GameObject
 
-class Card:
+class Card(GameObject):
     x = 0
     y = 0
     def __init__(self, name, mana, damage, health, playerNum, game) -> None:
+        super().__init__(game)
         self.name = name
         self.mana = mana
         self.damage = damage
         self.health = health
-        self.rect = pygame.Rect(self.x,self.y,200,200)
+        self.image = pygame.image.load('images/jungle.jpg')
+        self.rect = self.image.get_rect()
         self.playerNum = playerNum
         self.place = 'hand'
         self.fieldPosition = 0
         self.attackUsed = 0
-        self.clicker = Clicker(self.rect, self.onClick, (game))
-        self.imageHandler = ImageHandler(pygame.image.load('jungle.jpg'), self, game.screen)
+        self.clicker = Clicker(self.rect, self.onClick, (game), self)
+        self.imageHandler = ImageHandler(self.image, self, game.screen)
         self.statsStr = [str(self.name), 'M: ' + str(self.mana), 'D: ' + str(self.damage), 'H: ' + str(self.health)]
         self.statsText = []
         for index, statStr in enumerate(self.statsStr):
@@ -41,7 +45,7 @@ class Card:
                 game.selectedCard.attackUsed = 1
                 game.selectedCard = NULL
 
-    def update(self,game):
+    def update(self):
         self.rect.x = self.x
         self.rect.y = self.y
         self.clicker.update()

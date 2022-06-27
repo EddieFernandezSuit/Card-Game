@@ -11,10 +11,12 @@ class Game:
         self.font = pygame.font.SysFont(fontName, fontSize)
         self.resizeScreen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT), pygame.HWSURFACE|pygame.DOUBLEBUF|pygame.RESIZABLE)
         self.screen = self.resizeScreen.copy()
-        # self.resizeScreen = pygame.display.set_mode((900,900), pygame.HWSURFACE|pygame.DOUBLEBUF|pygame.RESIZABLE)
+        self.gameObjects = []
         start(self)
         while True:
             self.screen.fill(Colors.GREY)
+            for gameObject in self.gameObjects:
+                gameObject.update()
             update(self)
             draw(self)
             pygame.display.update()
