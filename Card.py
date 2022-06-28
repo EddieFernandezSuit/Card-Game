@@ -2,17 +2,17 @@
 from asyncio.windows_events import NULL
 import pygame
 from GameObject import GameObject
-from handlers.ImageHandler import ImageHandler
-from handlers.Clicker import Clicker
-import Colors
-from handlers.TextHandler import TextHandler
+from Handlers.ImageHandler import ImageHandler
+from Handlers.Clicker import Clicker
+from Handlers.TextHandler import TextHandler
 from GameObject import GameObject
 
 class Card(GameObject):
-    x = -200
-    y = 0
+    # x = -200
+    # y = 0
     def __init__(self, name, mana, damage, health, playerNum, game) -> None:
         super().__init__(game)
+        self.position = pygame.Vector2(-200,0)
         self.name = name
         self.mana = mana
         self.damage = damage
@@ -47,8 +47,8 @@ class Card(GameObject):
 
     def update(self):
         super().update()
-        self.rect.x = self.x
-        self.rect.y = self.y
+        self.rect.x = self.position.x
+        self.rect.y = self.position.y
 
     def damage(damager,damaged,game):
         damaged.health -= damager.damage

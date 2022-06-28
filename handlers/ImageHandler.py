@@ -10,7 +10,7 @@ class ImageHandler:
         self.draw()
 
     def draw(self):
-        self.screen.blit(self.image, (self.object.x, self.object.y))
+        self.screen.blit(self.image, (self.object.position))
 
     def drawImage(self, game):
-        game.screen.blit(self.image, (self.object.x, self.object.y))
+        game.screen.blit(self.image, (self.object.position.x, self.object.position.y))
