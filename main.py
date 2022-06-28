@@ -148,17 +148,6 @@ def update(game):
             if event.key == pygame.K_SPACE:
                 game.passTurnButton.onClick(game)
 
-    # game.passTurnButton.update()
-
-    # for i in reversed(range(len(game.emptyZones))):
-    #     game.emptyZones[i].update()
-        
-    # for i in reversed(range(len(game.cards))):
-    #     game.cards[i].update(game)
-    
-    # for player in game.players:
-    #     player.update()
-
 def draw(game):
     if game.selectedCard != NULL:
         drawOutlineText(game,'X', game.selectedCard.x + 100, game.selectedCard.y +100)

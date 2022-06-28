@@ -9,7 +9,7 @@ from handlers.TextHandler import TextHandler
 from GameObject import GameObject
 
 class Card(GameObject):
-    x = 0
+    x = -200
     y = 0
     def __init__(self, name, mana, damage, health, playerNum, game) -> None:
         super().__init__(game)
@@ -46,18 +46,9 @@ class Card(GameObject):
                 game.selectedCard = NULL
 
     def update(self):
+        super().update()
         self.rect.x = self.x
         self.rect.y = self.y
-        self.clicker.update()
-        self.imageHandler.update()
-        for text in self.statsText:
-            text.update()
-        # self.draw(game)
-
-    # def draw(self, game):
-    #     temp = [str(self.name), 'M: ' + str(self.mana), 'D: ' + str(self.damage), 'H: ' + str(self.health)]
-    #     for y in range(len(temp)):
-    #         drawOutlineText(game, temp[y] ,self.x + 5, self.y + 5 + y * game.font.size(temp[y])[1])
 
     def damage(damager,damaged,game):
         damaged.health -= damager.damage
