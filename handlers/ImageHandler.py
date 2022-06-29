@@ -6,6 +6,7 @@ class ImageHandler(GameObject):
         self.image = pygame.image.load(filePath)
         self.screen = game.screen
         self.position = position
+        self.angle = 0
     
     def update(self):
         self.draw()
@@ -13,6 +14,10 @@ class ImageHandler(GameObject):
     def draw(self):
         self.screen.blit(self.image, (self.position))
         
+    def setAngle(self, angle):
+        self.angle = angle
+        self.image = pygame.transform.rotate(self.image, self.angle)
+
     def getCenter(self):
         return pygame.Vector2(self.position.x + self.image.get_rect().width/2, self.position.y + self.image.get_rect().height/2)
 

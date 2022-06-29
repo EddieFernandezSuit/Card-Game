@@ -13,8 +13,7 @@ class Arrow(GameObject):
         self.destination = destination - self.imageHandler.getCenter()
         self.direction = (destination - self.position).normalize()
         self.speed = 20
-        self.angle = math.degrees(math.atan2(self.direction.x, self.direction.y)) + 180
-        self.imageHandler.image = pygame.transform.rotate(self.imageHandler.image, self.angle)
+        self.imageHandler.setAngle(math.degrees(math.atan2(self.direction.x, self.direction.y)) + 180)
         
     def update(self):
         self.position += self.direction * self.speed
