@@ -5,8 +5,6 @@ import random
 import Colors
 from Game import Game
 from GameObject import GameObject
-from Handlers.Clicker import Clicker
-from Handlers.ImageHandler import ImageHandler
 from Card import Card
 from Handlers.TextHandler import TextHandler
 from EmptyZone import EmptyZone
