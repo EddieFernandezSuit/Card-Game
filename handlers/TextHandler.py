@@ -1,29 +1,31 @@
 import Colors
 import pygame
 
-class TextHandler:
-    def __init__(self, game, str, relativeX, relativeY, isOutline, object) -> None:
+from GameObject import GameObject
+
+class TextHandler(GameObject):
+    def __init__(self, game, str, isOutline, position, positionOffset) -> None:
+        super().__init__(game)
         self.str = str
         self.isOutline = isOutline
         self.game = game
-        self.relativeX = relativeX
-        self.relativeY = relativeY
-        self.position = pygame.Vector2()
-        self.object = object
-        self.object.handlers.append(self)
+        self.basePosition = position
+        self.positionOffset = positionOffset
+        # self.truePosition = position + positionOffset
     
     def update(self):
-        self.position.x = self.object.position.x + self.relativeX
-        self.position.y = self.object.position.y + self.relativeY
+        # self.truePosition = self.basePosition + self.positionOffset
         self.draw()
 
     def draw(self):
         if(self.isOutline):
-            self.drawOutlineText(self.game, self.str, self.position.x, self.position.y)
+            self.drawOutlineText(self.game, self.str, self.basePosition + self.positionOffset)
         else:
-            self.game.screen.blit(self.game.font.render(self.str, Colors.BLACK), (self.position.x, self.position.y))
+            self.game.screen.blit(self.game.font.render(self.str, Colors.BLACK), (self.truePosition))
 
-    def drawOutlineText(self, game,str,x,y):
+    def drawOutlineText(self, game, str, position):
+        x = position.x
+        y = position.y
         game.screen.blit(game.font.render(str, 1, Colors.BLACK), (x + 1, y + 1))
         game.screen.blit(game.font.render(str, 1, Colors.BLACK), (x - 1, y + 1))
         game.screen.blit(game.font.render(str, 1, Colors.BLACK), (x + 1, y - 1))

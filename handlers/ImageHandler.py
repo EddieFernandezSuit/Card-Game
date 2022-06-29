@@ -1,16 +1,20 @@
-
-class ImageHandler:
-    def __init__(self, image, object, screen) -> None:
-        self.image = image
-        self.object = object
-        self.screen = screen
-        self.object.handlers.append(self)
+from GameObject import GameObject
+import pygame
+class ImageHandler(GameObject):
+    def __init__(self, filePath, position, game) -> None:
+        super().__init__(game)
+        self.image = pygame.image.load(filePath)
+        self.screen = game.screen
+        self.position = position
     
     def update(self):
         self.draw()
 
     def draw(self):
-        self.screen.blit(self.image, (self.object.position))
+        self.screen.blit(self.image, (self.position))
+        
+    def getCenter(self):
+        return pygame.Vector2(self.position.x + self.image.get_rect().width/2, self.position.y + self.image.get_rect().height/2)
 
-    def drawImage(self, game):
-        game.screen.blit(self.image, (self.object.position.x, self.object.position.y))
+def positionCenter(position, rect):
+    return pygame.Vector2(position.x + rect.width/2, position.y + rect.height/2)

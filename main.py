@@ -13,7 +13,6 @@ from PassTurnButton import PassTurnButton
 class Player(GameObject):
     def __init__(self, game, num) -> None:
         super().__init__(game)
-        self.position = pygame.Vector2()
         self.health = 20
         self.totalMana = int(num == 0)
         self.mana = 1
@@ -24,11 +23,10 @@ class Player(GameObject):
         self.game = game
         UIBaseManaX = game.SCREEN_WIDTH - 200
         UIBaseManaY = [50, game.SCREEN_HEIGHT-100]
-        self.healthText = TextHandler(game, 'Health: ' + str(self.health), UIBaseManaX, UIBaseManaY[self.num],1, self)
-        self.manaText = TextHandler(game, 'Mana: ' + str(self.mana) + '/' + str(self.totalMana), UIBaseManaX, UIBaseManaY[self.num] + game.font.size('1')[1], 1, self)
+        self.healthText = TextHandler(game, 'Health: ' + str(self.health), 1, pygame.Vector2(0,0), pygame.Vector2(UIBaseManaX, UIBaseManaY[self.num]), )
+        self.manaText = TextHandler(game, 'Mana: ' + str(self.mana) + '/' + str(self.totalMana), 1,pygame.Vector2(0,0), pygame.Vector2(UIBaseManaX, UIBaseManaY[self.num] + game.font.size('1')[1]))
 
     def update(self):
-        super().update()
         handY = [0, self.game.SCREEN_HEIGHT - 205]
         for index, card in enumerate(self.hand):
             card.position.x = 5 + 205 * (index + 1)
@@ -83,7 +81,6 @@ def start(game):
         for card in player.hand:
             game.cards.append(card)
 
-
 def update(game):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -94,7 +91,6 @@ def update(game):
 
 def draw(game):
     if game.selectedCard != NULL:
-        # drawOutlineText(game,'X', game.selectedCard.position.x + 100, game.selectedCard.position.y +100)
         drawOutlineText(game,'X', game.selectedCard.position.x + 100, game.selectedCard.position.y +100)
 
     pygame.draw.rect(game.screen, Colors.BLACK, game.turnRectangle, 3)

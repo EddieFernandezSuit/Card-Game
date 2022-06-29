@@ -10,8 +10,8 @@ class PassTurnButton(GameObject):
         self.handlers = []
         self.position = pygame.Vector2(game.SCREEN_WIDTH - 200, game.SCREEN_HEIGHT/2 - 25)
         self.rect = pygame.Rect(self.position.x,self.position.y,50,50)
-        self.imageHandler = ImageHandler(pygame.image.load('images/PassTurn.png'), self, game.screen)
-        self.clicker = Clicker(self.rect, self.onClick, (game), self)
+        self.imageHandler = ImageHandler('images/PassTurn.png',self.position, game)
+        self.clicker = Clicker(self.rect, self.onClick, (game), game)
 
     def onClick(self, game):
         for i in range(len(game.cards)):
@@ -28,7 +28,7 @@ class PassTurnButton(GameObject):
             game.players[game.turn].totalMana += 1
             game.players[game.turn].mana = game.players[0].totalMana
             turnRectangleY = [0, 450]
-            game.turnRectangle.position.y = turnRectangleY[game.turn]
+            game.turnRectangle.y = turnRectangleY[game.turn]
 
 
 
