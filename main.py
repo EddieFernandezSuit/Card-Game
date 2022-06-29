@@ -72,8 +72,6 @@ def start(game):
 
     for w, player in enumerate(game.players):
         for x in range(5):
-            # player.deck[-1].position.x = cardPositionX(w)
-            # player.deck[-1].position.y = handPositionY[w]
             player.deck[-1].position.x = cardPositionX(w)
             player.deck[-1].position.y = handPositionY[w]
             player.hand.append(player.deck[-1])
