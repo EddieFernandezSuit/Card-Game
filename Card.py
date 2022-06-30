@@ -12,6 +12,7 @@ from Arrow import Arrow
 class Card(GameObject):
     def __init__(self, name, mana, damage, health, playerNum, game) -> None:
         super().__init__(game)
+        self.game = game
         self.position = pygame.Vector2(-200,0)
         self.name = name
         self.mana = mana
@@ -37,20 +38,30 @@ class Card(GameObject):
                 self.attackUsed = 1
                 game.players[int(self.playerNum == 0)].health -= self.damage
             elif game.turn == self.playerNum and ((self.place == 'hand' and game.players[self.playerNum].mana >= self.mana and game.turn == self.playerNum) or (self.place == 'field' and self.attackUsed == 0)):
-                game.selectedCard = self                
+                game.selectedCard = self
         elif self.place == 'field' and game.selectedCard.place == 'field':
                 Arrow(game, game.selectedCard.imageHandler.getCenter(), self.imageHandler.getCenter())
                 self.dealDamage(game.selectedCard, self, game)
                 game.selectedCard.attackUsed = 1
                 game.selectedCard = NULL
+    
+    def delete(self):
+        for statsText in self.statsText:
+            self.game.gameObjects.remove(statsText)
+        self.game.gameObjects.remove(self.clicker)
+        self.game.gameObjects.remove(self.imageHandler)
+
+        self.game.players[self.playerNum].field.remove(self)
+        self.game.cards.remove(self)
+        self.game.gameObjects.remove(self)
 
     def update(self):
         self.rect.x = self.position.x
         self.rect.y = self.position.y
 
-    def dealDamage(self, damager,damaged,game):
+    def dealDamage(self, damager, damaged, game):
         damaged.health -= damager.damage
+        self.statsText[3].str = 'H: ' + str(self.health)
         if damaged.health <= 0:
-            game.players[damaged.playerNum].field.remove(damaged)
-            game.cards.remove(damaged)
+            self.delete()
 
