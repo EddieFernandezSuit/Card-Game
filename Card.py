@@ -37,6 +37,7 @@ class Card(GameObject):
             if len(game.players[int(self.playerNum == 0)].field) == 0 and self.place == 'field' and self.attackUsed == 0:
                 self.attackUsed = 1
                 game.players[int(self.playerNum == 0)].health -= self.damage
+                Arrow(game, self.imageHandler.getCenter(), game.players[int(self.playerNum == 0)].healthText.truePosition)
             elif game.turn == self.playerNum and ((self.place == 'hand' and game.players[self.playerNum].mana >= self.mana and game.turn == self.playerNum) or (self.place == 'field' and self.attackUsed == 0)):
                 game.selectedCard = self
         elif self.place == 'field' and game.selectedCard.place == 'field':

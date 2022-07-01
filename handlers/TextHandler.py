@@ -11,7 +11,7 @@ class TextHandler(GameObject):
         self.game = game
         self.basePosition = position
         self.positionOffset = positionOffset
-        # self.truePosition = position + positionOffset
+        self.truePosition = position + positionOffset
     
     def update(self):
         # self.truePosition = self.basePosition + self.positionOffset

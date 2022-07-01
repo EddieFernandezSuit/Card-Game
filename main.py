@@ -27,6 +27,8 @@ class Player(GameObject):
         self.manaText = TextHandler(game, 'Mana: ' + str(self.mana) + '/' + str(self.totalMana), 1,pygame.Vector2(0,0), pygame.Vector2(UIBaseManaX, UIBaseManaY[self.num] + game.font.size('1')[1]))
 
     def update(self):
+        self.healthText.str = 'Health: ' + str(self.health)
+        self.manaText = 'Mana: ' + str(self.mana)
         handY = [0, self.game.SCREEN_HEIGHT - 205]
         for index, card in enumerate(self.hand):
             card.position.x = 5 + 205 * (index + 1)
