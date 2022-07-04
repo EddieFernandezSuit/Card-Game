@@ -23,7 +23,7 @@ class Player(GameObject):
         self.game = game
         UIBaseManaX = game.SCREEN_WIDTH - 200
         UIBaseManaY = [50, game.SCREEN_HEIGHT-100]
-        self.healthText = TextHandler(game, 'Health: ' + str(self.health), 1, pygame.Vector2(0,0), pygame.Vector2(UIBaseManaX, UIBaseManaY[self.num]), )
+        self.healthText = TextHandler(game, 'Health: ' + str(self.health), 1, pygame.Vector2(0,0), pygame.Vector2(UIBaseManaX, UIBaseManaY[self.num]))
         self.manaText = TextHandler(game, 'Mana: ' + str(self.mana) + '/' + str(self.totalMana), 1,pygame.Vector2(0,0), pygame.Vector2(UIBaseManaX, UIBaseManaY[self.num] + game.font.size('1')[1]))
 
     def update(self):

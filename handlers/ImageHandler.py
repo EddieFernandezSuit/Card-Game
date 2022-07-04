@@ -7,6 +7,7 @@ class ImageHandler(GameObject):
         self.screen = game.screen
         self.position = position
         self.angle = 0
+        
     
     def update(self):
         self.draw()

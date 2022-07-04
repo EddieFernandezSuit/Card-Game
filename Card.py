@@ -37,15 +37,23 @@ class Card(GameObject):
             if len(game.players[int(self.playerNum == 0)].field) == 0 and self.place == 'field' and self.attackUsed == 0:
                 self.attackUsed = 1
                 game.players[int(self.playerNum == 0)].health -= self.damage
-                Arrow(game, self.imageHandler.getCenter(), game.players[int(self.playerNum == 0)].healthText.truePosition)
+                rect = game.players[int(self.playerNum == 0)].healthText.img.get_rect()
+                rect.x += game.players[int(self.playerNum == 0)].healthText.truePosition.x
+                rect.y += game.players[int(self.playerNum == 0)].healthText.truePosition.y
+                Arrow(game, self.imageHandler.getCenter(), game.players[int(self.playerNum == 0)].healthText.truePosition, rect)
             elif game.turn == self.playerNum and ((self.place == 'hand' and game.players[self.playerNum].mana >= self.mana and game.turn == self.playerNum) or (self.place == 'field' and self.attackUsed == 0)):
                 game.selectedCard = self
         elif self.place == 'field' and game.selectedCard.place == 'field':
-                Arrow(game, game.selectedCard.imageHandler.getCenter(), self.imageHandler.getCenter())
-                self.dealDamage(game.selectedCard, self, game)
-                game.selectedCard.attackUsed = 1
-                game.selectedCard = NULL
+            selectedCardRect = game.selectedCard.imageHandler.image.get_rect()
+            selectedCardRect.x += game.selectedCard.position.x
+            selectedCardRect.y += game.selectedCard.position.y
+            Arrow(game, game.selectedCard.imageHandler.getCenter(), self.imageHandler.getCenter(), selectedCardRect)
+            # self.dealDamage(game.selectedCard, self, game)
+            # game.selectedCard.attackUsed = 1
+            # game.selectedCard = NULL
     
+    
+
     def delete(self):
         for statsText in self.statsText:
             self.game.gameObjects.remove(statsText)
