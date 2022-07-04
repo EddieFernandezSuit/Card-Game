@@ -20,10 +20,7 @@ class Arrow(GameObject):
     def update(self):
         self.position += self.direction * self.speed
 
-        rect1 = self.imageHandler.image.get_rect()
-        rect1.x += self.imageHandler.position.x
-        rect1.y += self.imageHandler.position.y
-
+        rect1 = self.imageHandler.getRect()
 
         print(rect1.colliderect(self.targetRect))
         if(rect1.colliderect(self.targetRect)):

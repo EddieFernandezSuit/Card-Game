@@ -31,3 +31,9 @@ class TextHandler(GameObject):
         game.screen.blit(game.font.render(str, 1, Colors.BLACK), (x + 1, y - 1))
         game.screen.blit(game.font.render(str, 1, Colors.BLACK), (x - 1, y - 1))
         game.screen.blit(game.font.render(str, 1, Colors.WHITE), (x, y))
+
+    def getRect(self):
+        rect = self.img.get_rect()
+        rect.x += self.truePosition.x
+        rect.y += self.truePosition.y
+        return rect
