@@ -34,6 +34,6 @@ class TextHandler(GameObject):
 
     def getRect(self):
         rect = self.img.get_rect()
-        rect.x += self.truePosition.x
-        rect.y += self.truePosition.y
+        rect.x = self.truePosition.x
+        rect.y = self.truePosition.y
         return rect

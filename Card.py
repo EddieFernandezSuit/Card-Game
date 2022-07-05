@@ -1,6 +1,4 @@
-
 from asyncio.windows_events import NULL
-from turtle import position
 import pygame
 from GameObject import GameObject
 from Handlers.ImageHandler import ImageHandler
@@ -27,6 +25,8 @@ class Card(GameObject):
         self.clicker = Clicker(self.rect, self.onClick, (game), game)
         self.statsStr = [str(self.name), 'M: ' + str(self.mana), 'D: ' + str(self.damage), 'H: ' + str(self.health)]
         self.statsText = []
+        self.growthStatType = 'health'
+        self.growthStat = [self.health]
         for index, statStr in enumerate(self.statsStr):
             self.statsText.append(TextHandler(game, statStr, 1, self.position, pygame.Vector2(5,5 + game.font.size(statStr)[1] * index)))
 
@@ -36,22 +36,19 @@ class Card(GameObject):
         elif game.selectedCard == NULL:
             if len(game.players[int(self.playerNum == 0)].field) == 0 and self.place == 'field' and self.attackUsed == 0:
                 self.attackUsed = 1
-                game.players[int(self.playerNum == 0)].health -= self.damage
-                Arrow(game, self.imageHandler.getCenter(), game.players[int(self.playerNum == 0)].healthText.truePosition, game.players[int(self.playerNum == 0)].healthText.getRect())
+                Arrow(game, self.imageHandler.getCenter(), game.players[int(self.playerNum == 0)].healthText.truePosition, game.players[int(self.playerNum == 0)].healthText.getRect(), self, game.players[int(self.playerNum == 0)])
             elif game.turn == self.playerNum and ((self.place == 'hand' and game.players[self.playerNum].mana >= self.mana and game.turn == self.playerNum) or (self.place == 'field' and self.attackUsed == 0)):
                 game.selectedCard = self
         elif self.place == 'field' and game.selectedCard.place == 'field':
-            Arrow(game, game.selectedCard.imageHandler.getCenter(), self.imageHandler.getCenter(), game.selectedCard.imageHandler.getRect())
-            # self.dealDamage(game.selectedCard, self, game)
-            # game.selectedCard.attackUsed = 1
-            # game.selectedCard = NULL
+            Arrow(game, game.selectedCard.imageHandler.getCenter(), self.imageHandler.getCenter(), self.imageHandler.getRect(), game.selectedCard, self)
+            game.selectedCard.attackUsed = 1
+            game.selectedCard = NULL
 
     def delete(self):
         for statsText in self.statsText:
             self.game.gameObjects.remove(statsText)
         self.game.gameObjects.remove(self.clicker)
         self.game.gameObjects.remove(self.imageHandler)
-
         self.game.players[self.playerNum].field.remove(self)
         self.game.cards.remove(self)
         self.game.gameObjects.remove(self)
@@ -59,10 +56,10 @@ class Card(GameObject):
     def update(self):
         self.rect.x = self.position.x
         self.rect.y = self.position.y
-
-    def dealDamage(self, damager, damaged, game):
-        damaged.health -= damager.damage
         self.statsText[3].str = 'H: ' + str(self.health)
-        if damaged.health <= 0:
-            self.delete()
 
+    def dealDamage(self, target):
+        target.health -= self.damage
+        if target.health <= 0:
+            target.delete()
+            self.growthStat[0] += 1

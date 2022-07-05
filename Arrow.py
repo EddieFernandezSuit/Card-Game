@@ -1,29 +1,30 @@
 import math
-from turtle import pos
 import pygame
 from GameObject import GameObject
 from Handlers.ImageHandler import ImageHandler
 
 class Arrow(GameObject):
-    def __init__(self, game, position, destination, targetRect) -> None:
+    def __init__(self, game, origionPosition, destinationPosition, targetRect, originHealthObject, targetHealthObject) -> None:
         super().__init__(game)
         self.game = game
         self.imageHandler = ImageHandler('Images/arrow.png',pygame.Vector2(), game)
-        self.position = position - self.imageHandler.getCenter()
+        self.position = origionPosition - self.imageHandler.getCenter()
         self.imageHandler.position = self.position
-        self.destination = destination - self.imageHandler.getCenter()
-        self.direction = (destination - self.position).normalize()
+        self.destination = destinationPosition - self.imageHandler.getCenter()
+        self.direction = (destinationPosition - self.position).normalize()
         self.speed = 10
         self.imageHandler.setAngle(math.degrees(math.atan2(self.direction.x, self.direction.y)) + 180)
         self.targetRect = targetRect
-        
+        self.originHealthObject = originHealthObject
+        self.targetHealthObject = targetHealthObject
+
     def update(self):
         self.position += self.direction * self.speed
 
-        rect1 = self.imageHandler.getRect()
+        arrowRect = self.imageHandler.getRect()
 
-        print(rect1.colliderect(self.targetRect))
-        if(rect1.colliderect(self.targetRect)):
+        if(arrowRect.colliderect(self.targetRect)):
+            self.originHealthObject.dealDamage(self.targetHealthObject)
             self.delete()
 
     def delete(self):

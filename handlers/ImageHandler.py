@@ -24,8 +24,8 @@ class ImageHandler(GameObject):
 
     def getRect(self):
         rect = self.image.get_rect()
-        rect.x += self.position.x
-        rect.y += self.position.y
+        rect.x = self.position.x
+        rect.y = self.position.y
         return rect
 
 def positionCenter(position, rect):
