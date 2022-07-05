@@ -9,15 +9,19 @@ class Game:
         fontSize = 35
         fontName = "freesansbold"
         self.font = pygame.font.SysFont(fontName, fontSize)
-        self.resizeScreen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT), pygame.HWSURFACE|pygame.DOUBLEBUF|pygame.RESIZABLE)
-        self.screen = self.resizeScreen.copy()
+        self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
+        # self.screen = self.resizeScreen.copy()
         self.gameObjects = []
+        
+        FPS = 60
+        fpsClock = pygame.time.Clock()
         start(self)
-        while True:
+        while 1:
             self.screen.fill(Colors.GREY)
             for gameObject in self.gameObjects:
                 gameObject.update()
             update(self)
             draw(self)
             pygame.display.update()
-            self.resizeScreen.blit(pygame.transform.scale(self.screen, (self.resizeScreen.get_rect().size)), (0, 0))
+            # self.resizeScreen.blit(pygame.transform.scale(self.screen, (self.resizeScreen.get_rect().size)), (0, 0))
+            fpsClock.tick(FPS)

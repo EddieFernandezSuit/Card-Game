@@ -3,7 +3,7 @@ import pygame
 class ImageHandler(GameObject):
     def __init__(self, filePath, position, game) -> None:
         super().__init__(game)
-        self.image = pygame.image.load(filePath)
+        self.image = pygame.image.load(filePath).convert_alpha()
         self.screen = game.screen
         self.position = position
         self.angle = 0

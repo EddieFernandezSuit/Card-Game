@@ -21,13 +21,11 @@ def cardPositionX(i):
     return 5 + 205 * (i + 1)
 
 def start(game):
-    game.players = [Player(game,0), Player(game,1)]
     game.phase = 'play'
     game.passTurnButton = PassTurnButton(game)
     game.turn = 0
     game.turnRectangle = pygame.Rect(150, 0, 1150, 450)
     game.selectedCard = NULL
-    handPositionY = [5, game.SCREEN_HEIGHT - 205]
     fieldPositionY = [210, game.SCREEN_HEIGHT - 410]
     game.emptyZones = []
 
@@ -35,23 +33,7 @@ def start(game):
         for y in range(5):
             game.emptyZones.append(EmptyZone(pygame.Vector2(cardPositionX(y), fieldPositionY[x]), x, game))
 
-    for index, player in enumerate(game.players):
-        for x in range(10):
-            player.deck.append(Card('TGuy1', 1, 1, 1, index, game))
-        for x in range(10):
-            player.deck.append(Card('TGuy2', 2, 2, 2, index, game))
-        for x in range(10):
-            player.deck.append(Card('TGuy3', 3, 3, 3, index, game))
-    
-    for player in game.players:
-        random.shuffle(player.deck)
-
-    for w, player in enumerate(game.players):
-        for x in range(5):
-            player.deck[-1].position.x = cardPositionX(w)
-            player.deck[-1].position.y = handPositionY[w]
-            player.hand.append(player.deck[-1])
-            player.deck.pop(-1)
+    game.players = [Player(game,0), Player(game,1)]
 
     game.cards = []
 
@@ -60,12 +42,13 @@ def start(game):
             game.cards.append(card)
 
 def update(game):
+    # pass
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                game.passTurnButton.onClick(game)
+    #     if event.type == pygame.KEYDOWN:
+    #         if event.key == pygame.K_SPACE:
+    #             game.passTurnButton.onClick(game)
 
 def draw(game):
     if game.selectedCard != NULL:

@@ -12,7 +12,7 @@ class Arrow(GameObject):
         self.imageHandler.position = self.position
         self.destination = destinationPosition - self.imageHandler.getCenter()
         self.direction = (destinationPosition - self.position).normalize()
-        self.speed = 10
+        self.speed = 20
         self.imageHandler.setAngle(math.degrees(math.atan2(self.direction.x, self.direction.y)) + 180)
         self.targetRect = targetRect
         self.originHealthObject = originHealthObject
