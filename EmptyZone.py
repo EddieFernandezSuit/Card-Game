@@ -26,4 +26,5 @@ class EmptyZone(GameObject):
                 if game.players[game.selectedCard.playerNum].hand[k] == game.selectedCard:
                     game.players[game.selectedCard.playerNum].hand.pop(k)
                     break
+            game.selectedCard.emptyZone = self
             game.selectedCard = NULL

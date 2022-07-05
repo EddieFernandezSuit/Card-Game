@@ -35,17 +35,11 @@ def start(game):
 
     game.players = [Player(game,0), Player(game,1)]
 
-    game.cards = []
-
-    for player in game.players:
-        for card in player.hand:
-            game.cards.append(card)
-
 def update(game):
-    # pass
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            sys.exit()
+    pass
+    # for event in pygame.event.get():
+    #     if event.type == pygame.QUIT:
+    #         sys.exit()
     #     if event.type == pygame.KEYDOWN:
     #         if event.key == pygame.K_SPACE:
     #             game.passTurnButton.onClick(game)

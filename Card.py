@@ -28,6 +28,7 @@ class Card(GameObject):
         self.statsText = []
         self.growthStatType = 'health'
         self.growthStat = self.health
+        self.emptyZone = 0
         for index, statStr in enumerate(self.statsStr):
             self.statsText.append(TextHandler(game, statStr, 1, self.position, pygame.Vector2(5,5 + game.font.size(statStr)[1] * index)))
 
@@ -48,11 +49,11 @@ class Card(GameObject):
     def delete(self):
         for statsText in self.statsText:
             self.game.gameObjects.remove(statsText)
-            
+        
+        self.emptyZone.isFull = 0
         self.game.gameObjects.remove(self.clicker)
         self.game.gameObjects.remove(self.imageHandler)
         self.game.players[self.playerNum].field.remove(self)
-        self.game.cards.remove(self)
         self.game.gameObjects.remove(self)
 
     def update(self):

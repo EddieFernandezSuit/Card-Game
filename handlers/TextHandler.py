@@ -10,7 +10,6 @@ class TextHandler(GameObject):
         self.game = game
         self.basePosition = basePosition
         self.positionOffset = positionOffset
-        # self.position = self.basePosition + self.positionOffset
         self.img = self.game.font.render(self.str, True, Colors.BLACK)
     
     def update(self):

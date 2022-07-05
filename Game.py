@@ -1,3 +1,4 @@
+import sys
 import pygame
 import Colors
 
@@ -17,10 +18,13 @@ class Game:
         fpsClock = pygame.time.Clock()
         start(self)
         while 1:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()
             self.screen.fill(Colors.GREY)
             for gameObject in self.gameObjects:
                 gameObject.update()
-            update(self)
+            # update(self)
             draw(self)
             pygame.display.update()
             # self.resizeScreen.blit(pygame.transform.scale(self.screen, (self.resizeScreen.get_rect().size)), (0, 0))

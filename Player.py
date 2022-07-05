@@ -21,11 +21,11 @@ class Player(GameObject):
         self.manaText = TextHandler(game, 'Mana: ' + str(self.mana) + '/' + str(self.totalMana), 1,pygame.Vector2(0,0), pygame.Vector2(UIBaseManaX, UIBaseManaY[self.num] + game.font.size('1')[1]))
         self.handY = handY = [0, self.game.SCREEN_HEIGHT - 205]
 
-        for x in range(10):
+        for x in range(3):
             self.deck.append(Card('TGuy1', 1, 1, 1, num, game))
-        for x in range(10):
+        for x in range(3):
             self.deck.append(Card('TGuy2', 2, 2, 2, num, game))
-        for x in range(10):
+        for x in range(3):
             self.deck.append(Card('TGuy3', 3, 3, 3, num, game))
 
         random.shuffle(self.deck)
