@@ -20,7 +20,7 @@ class TextHandler(GameObject):
         if(self.isOutline):
             self.drawOutlineText(self.game, self.str, self.position)
         else:
-            self.game.screen.blit(self.game.font.render(self.str, 1, Colors.RED), (self.position))
+            self.game.screen.blit(self.img, (self.position))
 
     def drawOutlineText(self, game, str, position):
         x = position.x
