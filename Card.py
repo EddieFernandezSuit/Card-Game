@@ -96,5 +96,8 @@ class Card(GameObject):
             elif self.growthType == 'damage':
                 self.damage += 1
                 self.statsText[2].str = 'D ' + str(self.damage)
+            else:
+                self.splash += 1
+                self.statsText[4].str = 'Splash ' + str(self.splash)
             FlyingNum(self.game, '+ 1 ' + str(self.growthType), self.position, Colors.GREEN)
             
