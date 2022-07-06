@@ -1,4 +1,5 @@
 import Colors
+from Colors import *
 
 from GameObject import GameObject
 
@@ -10,7 +11,7 @@ class TextHandler(GameObject):
         self.game = game
         self.basePosition = basePosition
         self.positionOffset = positionOffset
-        self.color = Colors.BLACK
+        self.color = WHITE
         self.img = self.game.font.render(self.str, True, Colors.BLACK)
     
     def update(self):
@@ -26,12 +27,12 @@ class TextHandler(GameObject):
     def drawOutlineText(self, game, str, position):
         x = position.x
         y = position.y
-        img = game.font.render(str, 1, Colors.BLACK)
+        img = game.font.render(str, 1, BLACK)
         game.screen.blit(img, (x + 1, y + 1))
         game.screen.blit(img, (x - 1, y + 1))
         game.screen.blit(img, (x + 1, y - 1))
         game.screen.blit(img, (x - 1, y - 1))
-        game.screen.blit(game.font.render(str, 1, Colors.WHITE), (x, y))
+        game.screen.blit(game.font.render(str, 1, self.color), (x, y))
 
     def getRect(self):
         rect = self.img.get_rect()

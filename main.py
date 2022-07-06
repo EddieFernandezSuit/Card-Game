@@ -40,6 +40,10 @@ def update(game):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 game.passTurnButton.onClick(game)
+    
+    # if game.selectedCard != NULL:
+    #     game.selectedCard.position.x = pygame.mouse.get_pos()[0]
+    #     game.selectedCard.position.y = pygame.mouse.get_pos()[1]
 
 def draw(game):
     if game.selectedCard != NULL:
