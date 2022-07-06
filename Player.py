@@ -1,5 +1,6 @@
 import pygame
 from Card import Card
+from Game import Game
 from Zone import Zone
 from GameObject import GameObject
 from Handlers.TextHandler import TextHandler
@@ -31,9 +32,9 @@ class Player(GameObject):
         for x in range(3):
             self.deck.append(Card('TGuy1', 1, 1, 1, num, game, 'health', 0))
         for x in range(3):
-            self.deck.append(Card('TGuy2', 2, 2, 2, num, game, 'damage', 0))
+            self.deck.append(Card('TGuy2', 2, 3, 1, num, game, 'damage', 0))
         for x in range(3):
-            self.deck.append(Card('TGuy3', 3, 3, 3, num, game, 'health', 1))
+            self.deck.append(Card('TGuy3', 3, 2, 4, num, game, 'splash', 1))
 
         random.shuffle(self.deck)
 
@@ -56,9 +57,11 @@ class Player(GameObject):
             card.position.y = self.handY[self.num]
 
     def delete(self):
-        for player in self.players:
-            if player.health <= 0:
+        for player in self.game.players:
+            if player.health[0] <= 0:
                 print('Player ' + str(player.num + 1) + ' wins')
+                self.game = Game(self.game.start,self.game.update,self.game.draw)
+                # self.game.start(self.game)
 
 def cardPositionX(i):
     return 5 + 205 * (i + 1)

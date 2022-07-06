@@ -12,6 +12,7 @@ class PassTurnButton(GameObject):
         self.rect = pygame.Rect(self.position.x,self.position.y,50,50)
         self.imageHandler = ImageHandler('images/PassTurn.png',self.position, game)
         self.clicker = Clicker(self.rect, self.onClick, (game), game)
+        self.turnRectangleY = [0, 450]
 
     def onClick(self, game):
         game.selectedCard = NULL
@@ -22,9 +23,9 @@ class PassTurnButton(GameObject):
         game.turn = int(game.turn == 0)
         game.players[game.turn].totalMana += 1
         game.players[game.turn].mana = game.players[0].totalMana
-        game.players[game.turn].drawCard()
-        turnRectangleY = [0, 450]
-        game.turnRectangle.y = turnRectangleY[game.turn]
+        if len(game.players[game.turn].hand) < 5:
+            game.players[game.turn].drawCard()
+        game.turnRectangle.y = self.turnRectangleY[game.turn]
 
 
 

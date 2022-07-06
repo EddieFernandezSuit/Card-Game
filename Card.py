@@ -1,12 +1,11 @@
 from asyncio.windows_events import NULL
-import pygame
-from FlyingNum import FlyingNum
-from GameObject import GameObject
 from Handlers.ImageHandler import ImageHandler
-from Handlers.Clicker import Clicker
 from Handlers.TextHandler import TextHandler
+from Handlers.Clicker import Clicker
 from GameObject import GameObject
+from FlyingNum import FlyingNum
 from Arrow import Arrow
+import pygame
 import Colors
 
 class Card(GameObject):
@@ -37,8 +36,9 @@ class Card(GameObject):
             self.statsText.append(TextHandler(game, statStr, 1, self.position, pygame.Vector2(5,5 + game.font.size(statStr)[1] * index)))
         
         growthStats ={
+            'damage': 2,
             'health': 3,
-            'damage': 2
+            'splash': 4
         }
         self.statsText[growthStats[growthType]].color = Colors.LIGHTCYAN
 
@@ -51,8 +51,11 @@ class Card(GameObject):
                     self.attackUsed = 1
                     Arrow(self.game, self.imageHandler.getCenter(), self.game.players[int(self.playerNum == 0)].healthText.position, self.game.players[int(self.playerNum == 0)].healthText.getRect(), self, self.game.players[int(self.playerNum == 0)])
                 elif self.splash > 0:
+                    count = 0
                     for card in self.game.players[int(self.playerNum == 0)].field:
-                        Arrow(self.game, self.imageHandler.getCenter(), card.imageHandler.getCenter(), card.imageHandler.getRect(), self, card)
+                        if count <= self.splash:
+                            Arrow(self.game, self.imageHandler.getCenter(), card.imageHandler.getCenter(), card.imageHandler.getRect(), self, card)
+                            count += 1 
                 else:
                     self.game.selectedCard = self
             elif self.place == 'hand' and self.game.players[self.playerNum].mana >= self.mana and self.game.turn == self.playerNum:
@@ -85,14 +88,13 @@ class Card(GameObject):
     def dealDamage(self, target):
         target.health[0] -= self.damage
         if type(target) == type(self):
-            FlyingNum(self.game, '-' + str(self.damage), pygame.Vector2(target.position.x, target.position.y), Colors.RED)
+            FlyingNum(self.game, '- ' + str(self.damage) + ' health', target.position, Colors.RED)
         if target.health[0] <= 0:
             target.delete()
-
             if self.growthType == 'health':
                 self.growthStat[0] += 1
             elif self.growthType == 'damage':
                 self.damage += 1
                 self.statsText[2].str = 'D ' + str(self.damage)
-
-            FlyingNum(self.game, '+ 1', pygame.Vector2(self.position.x, self.position.y), Colors.GREEN)
+            FlyingNum(self.game, '+ 1 ' + str(self.growthType), self.position, Colors.GREEN)
+            

@@ -3,13 +3,12 @@ from GameObject import GameObject
 from Handlers.TextHandler import TextHandler
 from Handlers.TransformHandler import TransformHandler
 from Timer import Timer
-import Colors
 
 class FlyingNum(GameObject):
     def __init__(self, game, str, position, color) -> None:
         super().__init__(game)
-        pos = pygame.Vector2(position.x, position.y - 100)
-        self.textHandler = TextHandler(game, str, 1, pos, pygame.Vector2(100,100))
+        pos = pygame.Vector2(position.x, position.y)
+        self.textHandler = TextHandler(game, str, 1, pos, pygame.Vector2(0,100))
         self.textHandler.color = color
         self.transform = TransformHandler(game, pos)
         self.transform.speed = 3

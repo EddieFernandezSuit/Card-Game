@@ -13,7 +13,9 @@ class Game:
         self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
         # self.screen = self.resizeScreen.copy()
         self.gameObjects = []
-        
+        self.start = start
+        self.update = update
+        self.draw = draw        
         FPS = 60
         fpsClock = pygame.time.Clock()
         start(self)
