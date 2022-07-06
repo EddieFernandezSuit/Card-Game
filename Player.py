@@ -19,7 +19,7 @@ class Player(GameObject):
         UIBaseManaY = [50, game.SCREEN_HEIGHT-100]
         self.healthText = TextHandler(game, 'Health: ' + str(self.health[0]), 1, pygame.Vector2(0,0), pygame.Vector2(UIBaseManaX, UIBaseManaY[self.num]))
         self.manaText = TextHandler(game, 'Mana: ' + str(self.mana) + '/' + str(self.totalMana), 1,pygame.Vector2(0,0), pygame.Vector2(UIBaseManaX, UIBaseManaY[self.num] + game.font.size('1')[1]))
-        self.handY = handY = [0, self.game.SCREEN_HEIGHT - 205]
+        self.handY = [0, self.game.SCREEN_HEIGHT - 205]
 
         for x in range(3):
             self.deck.append(Card('TGuy1', 1, 1, 1, num, game))
@@ -30,14 +30,16 @@ class Player(GameObject):
 
         random.shuffle(self.deck)
 
-        handPositionY = [5, game.SCREEN_HEIGHT - 205]
-
-        for x in range(5):
-            self.deck[-1].position.x = cardPositionX(num)
-            self.deck[-1].position.y = handPositionY[num]
-            self.hand.append(self.deck[-1])
-            self.deck.pop(-1)
-
+        for x in range(4):
+            self.drawCard()
+    
+    def drawCard(self):
+        handPositionY = [5, self.game.SCREEN_HEIGHT - 205]
+        self.deck[-1].position.x = cardPositionX(self.num)
+        self.deck[-1].position.y = handPositionY[self.num]
+        self.hand.append(self.deck[-1])
+        self.deck.pop(-1)
+        
     def update(self):
         self.healthText.str = 'Health: ' + str(self.health[0])
         self.manaText.str = 'Mana: ' + str(self.mana) + '/' + str(self.totalMana)

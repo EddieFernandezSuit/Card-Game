@@ -1,20 +1,18 @@
 from asyncio.windows_events import NULL
-from logging import NullHandler
 import pygame
 import sys
-import random
 import Colors
 from Game import Game
-from Card import Card
 from EmptyZone import EmptyZone
 from PassTurnButton import PassTurnButton
 from Player import Player
 
 def drawOutlineText(game,str,x,y,):
-    game.screen.blit(game.font.render(str, 1, Colors.BLACK), (x + 1, y + 1))
-    game.screen.blit(game.font.render(str, 1, Colors.BLACK), (x - 1, y + 1))
-    game.screen.blit(game.font.render(str, 1, Colors.BLACK), (x + 1, y - 1))
-    game.screen.blit(game.font.render(str, 1, Colors.BLACK), (x - 1, y - 1))
+    img = game.font.render(str, 1, Colors.BLACK)
+    game.screen.blit(img, (x + 1, y + 1))
+    game.screen.blit(img, (x - 1, y + 1))
+    game.screen.blit(img, (x + 1, y - 1))
+    game.screen.blit(img, (x - 1, y - 1))
     game.screen.blit(game.font.render(str, 1, Colors.WHITE), (x, y))
 
 def cardPositionX(i):
@@ -36,13 +34,12 @@ def start(game):
     game.players = [Player(game,0), Player(game,1)]
 
 def update(game):
-    pass
-    # for event in pygame.event.get():
-    #     if event.type == pygame.QUIT:
-    #         sys.exit()
-    #     if event.type == pygame.KEYDOWN:
-    #         if event.key == pygame.K_SPACE:
-    #             game.passTurnButton.onClick(game)
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            sys.exit()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                game.passTurnButton.onClick(game)
 
 def draw(game):
     if game.selectedCard != NULL:

@@ -10,6 +10,7 @@ class TextHandler(GameObject):
         self.game = game
         self.basePosition = basePosition
         self.positionOffset = positionOffset
+        self.color = Colors.BLACK
         self.img = self.game.font.render(self.str, True, Colors.BLACK)
     
     def update(self):
@@ -20,15 +21,16 @@ class TextHandler(GameObject):
         if(self.isOutline):
             self.drawOutlineText(self.game, self.str, self.position)
         else:
-            self.game.screen.blit(self.img, (self.position))
+            self.game.screen.blit(self.game.font.render(self.str, True, self.color), (self.position))
 
     def drawOutlineText(self, game, str, position):
         x = position.x
         y = position.y
-        game.screen.blit(game.font.render(str, 1, Colors.BLACK), (x + 1, y + 1))
-        game.screen.blit(game.font.render(str, 1, Colors.BLACK), (x - 1, y + 1))
-        game.screen.blit(game.font.render(str, 1, Colors.BLACK), (x + 1, y - 1))
-        game.screen.blit(game.font.render(str, 1, Colors.BLACK), (x - 1, y - 1))
+        img = game.font.render(str, 1, Colors.BLACK)
+        game.screen.blit(img, (x + 1, y + 1))
+        game.screen.blit(img, (x - 1, y + 1))
+        game.screen.blit(img, (x + 1, y - 1))
+        game.screen.blit(img, (x - 1, y - 1))
         game.screen.blit(game.font.render(str, 1, Colors.WHITE), (x, y))
 
     def getRect(self):

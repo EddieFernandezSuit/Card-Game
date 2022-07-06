@@ -22,6 +22,7 @@ class PassTurnButton(GameObject):
         game.turn = int(game.turn == 0)
         game.players[game.turn].totalMana += 1
         game.players[game.turn].mana = game.players[0].totalMana
+        game.players[game.turn].drawCard()
         turnRectangleY = [0, 450]
         game.turnRectangle.y = turnRectangleY[game.turn]
 

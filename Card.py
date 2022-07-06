@@ -7,6 +7,7 @@ from Handlers.Clicker import Clicker
 from Handlers.TextHandler import TextHandler
 from GameObject import GameObject
 from Arrow import Arrow
+import Colors
 
 class Card(GameObject):
     def __init__(self, name, mana, damage, health, playerNum, game) -> None:
@@ -64,7 +65,8 @@ class Card(GameObject):
     def dealDamage(self, target):
         target.health[0] -= self.damage
         if type(target) == type(self):
-            FlyingNum(self.game, '-' + str(self.damage), pygame.Vector2(target.position.x, target.position.y))
+            FlyingNum(self.game, '-' + str(self.damage), pygame.Vector2(target.position.x, target.position.y), Colors.RED)
         if target.health[0] <= 0:
             target.delete()
             self.growthStat[0] += 1
+            FlyingNum(self.game, '+ 1', pygame.Vector2(self.position.x, self.position.y), Colors.GREEN)
