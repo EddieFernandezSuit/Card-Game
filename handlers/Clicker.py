@@ -13,4 +13,4 @@ class Clicker(GameObject):
     def update(self):
         if pygame.mouse.get_pressed()[0] and self.lastClick == 0 and self.rect.collidepoint(pygame.mouse.get_pos()):
             self.onClick(self.args)
-        self.lastClick = pygame.mouse.get_pressed()[0]
+        self.lastClick = pygame.mouse.get_pressed()[0] 

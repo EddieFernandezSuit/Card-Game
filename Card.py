@@ -10,7 +10,7 @@ from Arrow import Arrow
 import Colors
 
 class Card(GameObject):
-    def __init__(self, name, mana, damage, health, playerNum, game, growthType) -> None:
+    def __init__(self, name, mana, damage, health, playerNum, game, growthType, splash) -> None:
         super().__init__(game)
         self.game = game
         self.position = pygame.Vector2(-200,0)
@@ -18,48 +18,55 @@ class Card(GameObject):
         self.mana = mana
         self.damage = damage
         self.health = [health]
+        self.splash = splash
+        self.growthType = growthType
+        self.growthStat = self.health
         self.playerNum = playerNum
         self.place = 'hand'
         self.fieldPosition = 0
         self.attackUsed = 0
-        self.growthType = growthType
-        self.growthStat = self.health
         self.imageHandler = ImageHandler('images/jungle.jpg', self.position, game)
         self.rect = self.imageHandler.image.get_rect()
-        self.clicker = Clicker(self.rect, self.onClick, (game), game)
-        self.statsStr = [str(self.name), 'M ' + str(self.mana), 'D ' + str(self.damage), 'H ' + str(self.health[0])]
+        self.clicker = Clicker(self.rect, self.onClick, (), game)
+        self.statsStr = [self.name, 'M ' + str(self.mana), 'D ' + str(self.damage), 'H ' + str(self.health[0])]
         self.statsText = []
+        if splash > 0:
+            self.statsStr.append('Splash '+str(self.splash))
         self.emptyZone = 0
         for index, statStr in enumerate(self.statsStr):
             self.statsText.append(TextHandler(game, statStr, 1, self.position, pygame.Vector2(5,5 + game.font.size(statStr)[1] * index)))
-                   
+        
         g ={
             'health': 3,
             'damage': 2
         }
-        growthIndex = 0
-        if growthType == 'health':
-            growthIndex = 3
-        elif growthType == 'damage':
-            growthIndex = 2
-        
-        if growthIndex != 0:
-            self.statsText[growthIndex].color = Colors.LIGHTCYAN
-        
+        # growthIndex = 0
+        # if growthType == 'health':
+        #     growthIndex = 3
+        # elif growthType == 'damage':
+        #     growthIndex = 2
+        # if growthIndex != 0:
+            # self.statsText[growthIndex].color = Colors.LIGHTCYAN
+        self.statsText[g[growthType]].color = Colors.LIGHTCYAN
 
-    def onClick(self, game):
-        if game.selectedCard == self:
-            game.selectedCard = NULL
-        elif game.selectedCard == NULL:
-            if len(game.players[int(self.playerNum == 0)].field) == 0 and self.place == 'field' and self.attackUsed == 0:
+    def onClick(self, none):
+        if self.game.selectedCard == self:
+            self.game.selectedCard = NULL
+        elif self.game.selectedCard == NULL:
+            if len(self.game.players[int(self.playerNum == 0)].field) == 0 and self.place == 'field' and self.attackUsed == 0:
                 self.attackUsed = 1
-                Arrow(game, self.imageHandler.getCenter(), game.players[int(self.playerNum == 0)].healthText.position, game.players[int(self.playerNum == 0)].healthText.getRect(), self, game.players[int(self.playerNum == 0)])
-            elif game.turn == self.playerNum and ((self.place == 'hand' and game.players[self.playerNum].mana >= self.mana and game.turn == self.playerNum) or (self.place == 'field' and self.attackUsed == 0)):
-                game.selectedCard = self
-        elif self.place == 'field' and game.selectedCard.place == 'field':
-            Arrow(game, game.selectedCard.imageHandler.getCenter(), self.imageHandler.getCenter(), self.imageHandler.getRect(), game.selectedCard, self)
-            game.selectedCard.attackUsed = 1
-            game.selectedCard = NULL
+                Arrow(self.game, self.imageHandler.getCenter(), self.game.players[int(self.playerNum == 0)].healthText.position, self.game.players[int(self.playerNum == 0)].healthText.getRect(), self, self.game.players[int(self.playerNum == 0)])
+            elif self.game.turn == self.playerNum and ((self.place == 'hand' and self.game.players[self.playerNum].mana >= self.mana and self.game.turn == self.playerNum) or (self.place == 'field' and self.attackUsed == 0)):
+                self.game.selectedCard = self
+                
+                for zone in self.game.players[self.playerNum].zones:
+                    if zone.isFull == 0:
+                        zone.click(self.game)
+                        break
+        elif self.place == 'field' and self.game.selectedCard.place == 'field':
+            Arrow(self.game, self.game.selectedCard.imageHandler.getCenter(), self.imageHandler.getCenter(), self.imageHandler.getRect(), self.game.selectedCard, self)
+            self.game.selectedCard.attackUsed = 1
+            self.game.selectedCard = NULL
 
     def delete(self):
         for statsText in self.statsText:

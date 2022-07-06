@@ -4,7 +4,7 @@ from Handlers.ImageHandler import ImageHandler
 import pygame
 from Handlers.Clicker import Clicker
 
-class EmptyZone(GameObject):
+class Zone(GameObject):
     def __init__(self, position, playerNum, game):
         super().__init__(game)
         self.position = position
