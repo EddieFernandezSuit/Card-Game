@@ -1,4 +1,5 @@
 from asyncio.windows_events import NULL
+from turtle import position
 from Handlers.ImageHandler import ImageHandler
 from Handlers.TextHandler import TextHandler
 from Handlers.Clicker import Clicker
@@ -7,6 +8,7 @@ from FlyingNum import FlyingNum
 from Arrow import Arrow
 import pygame
 import Colors
+from Particle import Particle
 
 class Card(GameObject):
     def __init__(self, name, mana, damage, health, playerNum, game, growthType, splash) -> None:
@@ -41,6 +43,7 @@ class Card(GameObject):
             'splash': 4
         }
         self.statsText[growthStats[growthType]].color = Colors.LIGHTCYAN
+        self.canPlayRectangle = pygame.Rect(self.position.x-5, self.position.y -5, 204, 204)
 
     def onClick(self, none):
         if self.game.selectedCard == self:
@@ -51,6 +54,7 @@ class Card(GameObject):
                     self.attackUsed = 1
                     Arrow(self.game, self.imageHandler.getCenter(), self.game.players[int(self.playerNum == 0)].healthText.position, self.game.players[int(self.playerNum == 0)].healthText.getRect(), self, self.game.players[int(self.playerNum == 0)])
                 elif self.splash > 0:
+                    self.attackUsed = 1
                     count = 0
                     for card in self.game.players[int(self.playerNum == 0)].field:
                         if count <= self.splash:
@@ -84,6 +88,13 @@ class Card(GameObject):
         self.rect.x = self.position.x
         self.rect.y = self.position.y
         self.statsText[3].str = 'H ' + str(self.health[0])
+        # Particle(self.game, self.position)
+
+        if self.game.turn == self.playerNum and ((self.place == 'hand' and self.mana <= self.game.players[self.playerNum].mana) or (self.place == 'field' and self.attackUsed == 0)):
+            self.canPlayRectangle.x = self.position.x-2
+            self.canPlayRectangle.y = self.position.y-2
+            pygame.draw.rect(self.game.screen, Colors.GREEN, self.canPlayRectangle, 2)
+
 
     def dealDamage(self, target):
         target.health[0] -= self.damage

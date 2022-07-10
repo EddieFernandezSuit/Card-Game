@@ -22,8 +22,8 @@ class Player(GameObject):
         UIBaseManaY = [50, game.SCREEN_HEIGHT-100]
         self.healthText = TextHandler(game, 'Health: ' + str(self.health[0]), 1, pygame.Vector2(0,0), pygame.Vector2(UIBaseManaX, UIBaseManaY[self.num]))
         self.manaText = TextHandler(game, 'Mana: ' + str(self.mana) + '/' + str(self.totalMana), 1,pygame.Vector2(0,0), pygame.Vector2(UIBaseManaX, UIBaseManaY[self.num] + game.font.size('1')[1]))
-        self.handY = [0, self.game.SCREEN_HEIGHT - 205]
         
+        self.handY = [5, self.game.SCREEN_HEIGHT - 205]
         fieldPositionY = [210, game.SCREEN_HEIGHT - 410]
 
         for y in range(5):
@@ -64,4 +64,4 @@ class Player(GameObject):
                 # self.game.start(self.game)
 
 def cardPositionX(i):
-    return 5 + 205 * (i + 1)
+    return 5 + 210 * (i + 1)
