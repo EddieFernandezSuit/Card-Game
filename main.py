@@ -24,8 +24,6 @@ def start(game):
     game.selectedCard = NULL
     game.players = [Player(game,0), Player(game,1)]
 
-    
-
 def update(game):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:

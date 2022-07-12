@@ -11,27 +11,42 @@ import Colors
 from Particle import Particle
 
 class Card(GameObject):
-    def __init__(self, name, mana, damage, health, playerNum, game, growthType, splash) -> None:
+    def __init__(self, game, playerNum, name) -> None:
         super().__init__(game)
+
+        cardStats = [
+            ['Name', 'Image Path', 'Mana', 'Damage', 'Health', 'Growth Type','Splash'],
+            ['Jungle Delver','jungle.jpg', 1, 1, 1, 'health', 0],
+            ['Bird','bird.jpg', 2, 1, 3, 'damage', 0],
+            ['Turtle','turtle.jpg', 3, 2,4,'splash', 1],
+        ]
+
+        addCard = []
+        for card in cardStats:
+            if card[0].lower() == name.lower():
+                addCard = card
+                break
+
         self.game = game
         self.position = pygame.Vector2(-200,0)
         self.name = name
-        self.mana = mana
-        self.damage = damage
-        self.health = [health]
-        self.splash = splash
-        self.growthType = growthType
+        self.imageFilePath = addCard[1]
+        self.mana = addCard[2]
+        self.damage = addCard[3]
+        self.health = [addCard[4]]
+        self.growthType = addCard[5]
+        self.splash = addCard[6]
         self.growthStat = self.health
         self.playerNum = playerNum
         self.place = 'hand'
         self.fieldPosition = 0
         self.attackUsed = 0
-        self.imageHandler = ImageHandler('images/jungle.jpg', self.position, game)
+        self.imageHandler = ImageHandler('images/' + self.imageFilePath, self.position, game)
         self.rect = self.imageHandler.image.get_rect()
         self.clicker = Clicker(self.rect, self.onClick, (), game)
         self.statsStr = [self.name, 'M ' + str(self.mana), 'D ' + str(self.damage), 'H ' + str(self.health[0])]
         self.statsText = []
-        if splash > 0:
+        if self.splash > 0:
             self.statsStr.append('Splash '+str(self.splash))
         self.emptyZone = 0
         for index, statStr in enumerate(self.statsStr):
@@ -42,8 +57,8 @@ class Card(GameObject):
             'health': 3,
             'splash': 4
         }
-        self.statsText[growthStats[growthType]].color = Colors.LIGHTCYAN
-        self.canPlayRectangle = pygame.Rect(self.position.x-5, self.position.y -5, 208, 208)
+        self.statsText[growthStats[self.growthType]].color = Colors.LIGHTCYAN
+        self.canPlayRectangle = pygame.Rect(0, 0, 210, 210)
 
         
 
@@ -52,9 +67,9 @@ class Card(GameObject):
             self.game.selectedCard = NULL
         elif self.game.selectedCard == NULL:
             if self.place == 'field' and self.attackUsed == 0:
-                if len(self.game.players[int(self.playerNum == 0)].field) == 0:
+                if len(self.game.players[self.playerNum == 0].field) == 0:
                     self.attackUsed = 1
-                    Arrow(self.game, self.imageHandler.getCenter(), self.game.players[int(self.playerNum == 0)].healthText.position, self.game.players[int(self.playerNum == 0)].healthText.getRect(), self, self.game.players[int(self.playerNum == 0)])
+                    Arrow(self.game, self.imageHandler.getCenter(), self.game.players[self.playerNum == 0].healthText.position, self.game.players[int(self.playerNum == 0)].healthText.getRect(), self, self.game.players[int(self.playerNum == 0)])
                 elif self.splash > 0:
                     self.attackUsed = 1
                     count = 0
@@ -93,9 +108,9 @@ class Card(GameObject):
         # Particle(self.game, self.position)
 
         if self.game.turn == self.playerNum and ((self.place == 'hand' and self.mana <= self.game.players[self.playerNum].mana) or (self.place == 'field' and self.attackUsed == 0)):
-            self.canPlayRectangle.x = self.position.x-4
-            self.canPlayRectangle.y = self.position.y-4
-            pygame.draw.rect(self.game.screen, Colors.GREEN, self.canPlayRectangle, 4)
+            self.canPlayRectangle.x = self.position.x-5
+            self.canPlayRectangle.y = self.position.y-5
+            pygame.draw.rect(self.game.screen, Colors.GREEN, self.canPlayRectangle, 5)
 
 
     def dealDamage(self, target):

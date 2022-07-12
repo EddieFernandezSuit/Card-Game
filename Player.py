@@ -30,13 +30,14 @@ class Player(GameObject):
         for y in range(5):
             self.zones.append(Zone(pygame.Vector2(cardPositionX(y), fieldPositionY[num]), num, game))
 
-        for x in range(3):
-            self.addCard('Jungle Delver')
-        for x in range(3):
-            self.addCard('Bird')
-        for x in range(3):
-            self.addCard('Turtle')
+        def addCard(cardName):
+            self.deck.append(Card(self.game, self.num, cardName))
 
+        for x in range(3):
+            addCard('Jungle Delver')
+            addCard('Bird')
+            addCard('Turtle')
+            
         random.shuffle(self.deck)
 
         for x in range(4):
@@ -61,21 +62,7 @@ class Player(GameObject):
         for player in self.game.players:
             if player.health[0] <= 0:
                 print('Player ' + str(player.num + 1) + ' wins')
-                self.game = Game(self.game.start,self.game.update,self.game.draw)
-
-    def addCard(self, cardName):
-        cardStats = [
-            ['Name', 'Mana', 'Damage', 'Health', 'Growth Type','Splash'],
-            ['Jungle Delver', 1, 1, 1, 'health', 0],
-            ['Bird', 2, 1, 3, 'damage', 0],
-            ['Turtle', 3, 2,4,'splash', 1],
-        ]
-        addCard = 0
-        for card in cardStats:
-            if card[0].lower() == cardName.lower():
-                addCard = card
-                break
-        self.deck.append(Card(addCard[0],addCard[1],addCard[2],addCard[3],self.num,self.game,addCard[4],addCard[5]))
+                self.game = Game(self.game.start,self.game.update,self.game.draw)        
 
 def cardPositionX(i):
     return 5 + 210 * (i + 1)
