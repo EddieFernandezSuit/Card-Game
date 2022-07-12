@@ -43,7 +43,9 @@ class Card(GameObject):
             'splash': 4
         }
         self.statsText[growthStats[growthType]].color = Colors.LIGHTCYAN
-        self.canPlayRectangle = pygame.Rect(self.position.x-5, self.position.y -5, 204, 204)
+        self.canPlayRectangle = pygame.Rect(self.position.x-5, self.position.y -5, 208, 208)
+
+        
 
     def onClick(self, none):
         if self.game.selectedCard == self:
@@ -91,9 +93,9 @@ class Card(GameObject):
         # Particle(self.game, self.position)
 
         if self.game.turn == self.playerNum and ((self.place == 'hand' and self.mana <= self.game.players[self.playerNum].mana) or (self.place == 'field' and self.attackUsed == 0)):
-            self.canPlayRectangle.x = self.position.x-2
-            self.canPlayRectangle.y = self.position.y-2
-            pygame.draw.rect(self.game.screen, Colors.GREEN, self.canPlayRectangle, 2)
+            self.canPlayRectangle.x = self.position.x-4
+            self.canPlayRectangle.y = self.position.y-4
+            pygame.draw.rect(self.game.screen, Colors.GREEN, self.canPlayRectangle, 4)
 
 
     def dealDamage(self, target):

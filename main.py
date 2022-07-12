@@ -1,10 +1,10 @@
-from asyncio.windows_events import NULL
 import pygame
 import sys
 import Colors
-from Game import Game
+from asyncio.windows_events import NULL
 from PassTurnButton import PassTurnButton
 from Player import Player
+from Game import Game
 
 def drawOutlineText(game,str,x,y,):
     img = game.font.render(str, 1, Colors.BLACK)
@@ -24,6 +24,8 @@ def start(game):
     game.selectedCard = NULL
     game.players = [Player(game,0), Player(game,1)]
 
+    
+
 def update(game):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -35,7 +37,6 @@ def update(game):
 def draw(game):
     if game.selectedCard != NULL:
         drawOutlineText(game,'X', game.selectedCard.position.x + 100, game.selectedCard.position.y +100)
-
     pygame.draw.rect(game.screen, Colors.BLACK, game.turnRectangle, 3)
 
 Game(start, update, draw)
