@@ -14,9 +14,6 @@ def drawOutlineText(game,str,x,y,):
     game.screen.blit(img, (x - 1, y - 1))
     game.screen.blit(game.font.render(str, 1, Colors.WHITE), (x, y))
 
-def cardPositionX(i):
-    return 5 + 205 * (i + 1)
-
 def start(game):
     game.passTurnButton = PassTurnButton(game)
     game.turn = 0

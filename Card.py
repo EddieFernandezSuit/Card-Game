@@ -8,17 +8,17 @@ from FlyingNum import FlyingNum
 from Arrow import Arrow
 import pygame
 import Colors
-from Particle import Particle
 
 class Card(GameObject):
     def __init__(self, game, playerNum, name) -> None:
         super().__init__(game)
 
         cardStats = [
-            ['Name', 'Image Path', 'Mana', 'Damage', 'Health', 'Growth Type','Splash'],
-            ['Jungle Delver','jungle.jpg', 1, 1, 1, 'health', 0],
-            ['Bird','bird.jpg', 2, 1, 3, 'damage', 0],
-            ['Turtle','turtle.jpg', 3, 2,4,'splash', 1],
+            ['Name',        'Image Path',   'Mana', 'Damage',   'Health',   'Growth Type',  'Splash',   'Armor'],
+            ['Jungle Delver','jungle.jpg',  1,      1,          1,          'health',       0,          0],
+            ['Bird',        'bird.jpg',     2,      1,          3,          'damage',       0,          0],
+            ['Turtle',      'turtle.jpg',   3,      2,          4,          'splash',       1,          0],
+            ['Armordillo',  'armadillo.jpg',4,      1,          7,          'armor',        0,          1]
         ]
 
         addCard = []
@@ -55,12 +55,11 @@ class Card(GameObject):
         growthStats ={
             'damage': 2,
             'health': 3,
-            'splash': 4
+            'splash': 4,
+            'armor': 5
         }
         self.statsText[growthStats[self.growthType]].color = Colors.LIGHTCYAN
         self.canPlayRectangle = pygame.Rect(0, 0, 210, 210)
-
-        
 
     def onClick(self, none):
         if self.game.selectedCard == self:

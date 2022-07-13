@@ -37,6 +37,7 @@ class Player(GameObject):
             addCard('Jungle Delver')
             addCard('Bird')
             addCard('Turtle')
+            addCard('Armordillo')
             
         random.shuffle(self.deck)
 
