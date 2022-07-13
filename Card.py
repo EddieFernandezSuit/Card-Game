@@ -104,7 +104,6 @@ class Card(GameObject):
         self.rect.x = self.position.x
         self.rect.y = self.position.y
         self.statsText[3].str = 'H ' + str(self.health[0])
-        # Particle(self.game, self.position)
 
         if self.game.turn == self.playerNum and ((self.place == 'hand' and self.mana <= self.game.players[self.playerNum].mana) or (self.place == 'field' and self.attackUsed == 0)):
             self.canPlayRectangle.x = self.position.x-5
