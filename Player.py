@@ -11,6 +11,7 @@ class Player(GameObject):
     def __init__(self, game, num) -> None:
         super().__init__(game)
         self.health = [20]
+        self.armor = 0
         self.totalMana = int(num == 0)
         self.mana = int(num == 0)
         self.deck = []
@@ -38,6 +39,7 @@ class Player(GameObject):
             addCard('Bird')
             addCard('Turtle')
             addCard('Armordillo')
+            # addCard('Bats')
             
         random.shuffle(self.deck)
 
