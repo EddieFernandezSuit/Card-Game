@@ -8,13 +8,13 @@ class FlyingNum(GameObject):
     def __init__(self, game, str, position, color) -> None:
         super().__init__(game)
         pos = pygame.Vector2(position.x, position.y)
-        self.textHandler = TextHandler(game, str, 1, pos, pygame.Vector2(0,100))
+        self.textHandler = TextHandler(game, str, 1, pos, pygame.Vector2(0,100), self.game.smallFont)
         self.textHandler.color = color
         self.transform = TransformHandler(game, pos)
         self.transform.speed = 3
-        self.transform.gravity = .1
+        self.transform.gravity = .06
         self.transform.direction = (position - pygame.Vector2(position.x, position.y + 1)).normalize()
-        self.timer = Timer(50, self.destroy)
+        self.timer = Timer(60, self.destroy)
 
     def update(self):
         self.timer.update()

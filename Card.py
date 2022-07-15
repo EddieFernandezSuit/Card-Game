@@ -1,6 +1,5 @@
 from asyncio.windows_events import NULL
-from operator import index
-from pstats import Stats
+from Game import Game
 from Handlers.ImageHandler import ImageHandler
 from Handlers.TextHandler import TextHandler
 from Handlers.Clicker import Clicker
@@ -9,63 +8,34 @@ from FlyingNum import FlyingNum
 from Arrow import Arrow
 import pygame
 import Colors
+import json
+from Particle import Particle
 
 class Card(GameObject):
     def __init__(self, game, playerNum, name) -> None:
         super().__init__(game)
 
-        cardStats = [
-            ['Name',        'Image Path',   'Growth Type', 'Mana', 'Damage',   'Health',     'Splash',   'Armor',    'Drain'],
-            ['Jungle Delver','jungle.jpg',  'Health',       1,      1,          1,                 0,          0,          0],
-            ['Bird',        'bird.jpg',     'Damage',       2,      1,          3,                 0,          0,          0],
-            ['Turtle',      'turtle.jpg',   'Splash',       3,      2,          4,                 1,          0,          0],
-            ['Armordillo',  'armadillo.jpg','Armor',        4,      1,          6,                 0,          1,          0],
-            # ['Bats',         'bat.jpg',    'Drain',       5,      4,          6,                  0,          0,          1]
-        ]
-
-        addCard = []
-        for card in cardStats:
-            if card[0].lower() == name.lower():
-                addCard = card
-                break
-
+        cardData = json.load(open('cardData.json'))
+        self.stats = cardData[name]
+        self.name = name
         self.game = game
         self.position = pygame.Vector2(-200,0)
-        self.imageFilePath = addCard[1]
-        self.growthType = addCard[2]
-        self.stats = {
-            'Name': addCard[0],
-            'Mana': addCard[3],
-            'Damage': addCard[4],
-            'Health': addCard[5],
-            'Splash': addCard[6],
-            'Armor': addCard[7],
-            'Drain': addCard[8],
-        }
-
         self.playerNum = playerNum
         self.place = 'hand'
         self.attackUsed = 0
-        self.imageHandler = ImageHandler('images/' + self.imageFilePath, self.position, game)
+        self.imageHandler = ImageHandler('images/' + self.name.lower() + '.jpg', self.position, game)
         self.rect = self.imageHandler.image.get_rect()
         self.clicker = Clicker(self.rect, self.onClick, (), game)
-        self.statsText = []
-        self.growthIndex = 0
-
+        self.statsText = {}
         self.emptyZone = 0
         ncount = 0
+        self.statsText['Name'] = TextHandler(game, self.name, 1, self.position, pygame.Vector2(5,5 + game.smallFont.size('A')[1] * ncount), self.game.smallFont)
         for key in self.stats:
-            if key == self.growthType:
-                self.growthIndex = ncount
-            if self.stats[key] != 0:
-                textStr = key + ' ' +  str(self.stats[key])
-                if key == 'Name':
-                    textStr = str(self.stats[key])
-                
-                self.statsText.append(TextHandler(game, textStr, 1, self.position, pygame.Vector2(5,5 + game.font.size('A')[1] * ncount) )) 
+            if self.stats[key] != 0 and key != 'Growth Type':
                 ncount += 1
+                self.statsText[key] = TextHandler(game, key + ' ' +  str(self.stats[key]), 1, self.position, pygame.Vector2(5,5 + game.smallFont.size('A')[1] * ncount), self.game.smallFont)
 
-        self.statsText[self.growthIndex].color = Colors.LIGHTCYAN
+        self.statsText[self.stats['Growth Type']].color = Colors.LIGHTCYAN
         self.canPlayRectangle = pygame.Rect(0, 0, 210, 210)
 
     def onClick(self, none):
@@ -99,7 +69,7 @@ class Card(GameObject):
 
     def delete(self):
         for statsText in self.statsText:
-            self.game.gameObjects.remove(statsText)
+            self.game.gameObjects.remove(self.statsText[statsText])
         
         self.emptyZone.isFull = 0
         self.game.gameObjects.remove(self.clicker)
@@ -122,14 +92,15 @@ class Card(GameObject):
         if trueDamage < 0:
             trueDamage = 0
         target.setHealth(target.stats['Health'] - trueDamage)
+        self.setHealth(self.stats['Health'] + self.stats['Drain'])
         if type(target) == type(self):
             FlyingNum(self.game, '- ' + str(trueDamage) + ' health', target.position, Colors.RED)
         if target.stats['Health'] <= 0:
             target.delete()
-            self.stats[self.growthType] += 1
-            self.statsText[self.growthIndex].str = self.growthType + ' ' + str(self.stats[self.growthType])
-            FlyingNum(self.game, '+ 1 ' + str(self.growthType), self.position, Colors.GREEN)
+            self.stats[self.stats['Growth Type']] += 1
+            self.statsText[self.stats['Growth Type']].str = self.stats['Growth Type'] + ' ' + str(self.stats[self.stats['Growth Type']])
+            FlyingNum(self.game, '+ 1 ' + str(self.stats['Growth Type']), self.position, Colors.GREEN)
     
     def setHealth(self, health):
         self.stats['Health'] = health
-        self.statsText[3].str = 'Health ' + str(self.stats['Health'])
+        self.statsText['Health'].str = 'Health ' + str(self.stats['Health'])

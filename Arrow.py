@@ -7,7 +7,7 @@ class Arrow(GameObject):
     def __init__(self, game, origionPosition, destinationPosition, targetRect, originHealthObject, targetHealthObject) -> None:
         super().__init__(game)
         self.game = game
-        self.imageHandler = ImageHandler('Images/arrow.png',pygame.Vector2(), game)
+        self.imageHandler = ImageHandler('Images/arrow.jpg',pygame.Vector2(), game)
         self.position = origionPosition - self.imageHandler.getCenter()
         self.imageHandler.position = self.position
         self.destination = destinationPosition - self.imageHandler.getCenter()

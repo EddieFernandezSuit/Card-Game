@@ -1,0 +1,47 @@
+{
+    "Jungle Delver": {
+        "Growth Type":"Health",
+        "Mana":1,
+        "Damage":1,
+        "Health":1,
+        "Splash":0,
+        "Armor":0,
+        "Drain":0
+    },
+    "Bird": {
+        "Growth Type":"Damage",
+        "Mana":2,
+        "Damage":1,
+        "Health":3,
+        "Splash":0,
+        "Armor":0,
+        "Drain":0
+    },
+    "Turtle":{
+        "Growth Type":"Splash",
+        "Mana":3,
+        "Damage":2,
+        "Health":4,
+        "Splash":1,
+        "Armor":0,
+        "Drain":0
+    },
+    "Armadilo": {
+        "Growth Type":"Armor",
+        "Mana":4,
+        "Damage":1,
+        "Health":6,
+        "Splash":0,
+        "Armor":1,
+        "Drain":0
+    },
+    "Bats":{
+        "Growth Type":"Drain",
+        "Mana":5,
+        "Damage":4,
+        "Health":5,
+        "Splash":0,
+        "Armor":0,
+        "Drain":1
+    }
+}

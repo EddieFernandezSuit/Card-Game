@@ -23,10 +23,10 @@ class Player(GameObject):
         self.zones = []
         self.num = num
         self.game = game
-        UIBaseManaX = game.SCREEN_WIDTH - 200
+        UIBaseManaX = game.SCREEN_WIDTH - 250
         UIBaseManaY = [50, game.SCREEN_HEIGHT-100]
-        self.healthText = TextHandler(game, 'Health: ' + str(self.stats['Health']), 1, pygame.Vector2(0,0), pygame.Vector2(UIBaseManaX, UIBaseManaY[self.num]))
-        self.manaText = TextHandler(game, 'Mana: ' + str(self.mana) + '/' + str(self.totalMana), 1,pygame.Vector2(0,0), pygame.Vector2(UIBaseManaX, UIBaseManaY[self.num] + game.font.size('1')[1]))
+        self.healthText = TextHandler(game, 'Health: ' + str(self.stats['Health']), 1, pygame.Vector2(0,0), pygame.Vector2(UIBaseManaX, UIBaseManaY[self.num]), game.bigFont)
+        self.manaText = TextHandler(game, 'Mana: ' + str(self.mana) + '/' + str(self.totalMana), 1,pygame.Vector2(0,0), pygame.Vector2(UIBaseManaX, UIBaseManaY[self.num] + game.bigFont.size('1')[1]), game.bigFont)
         
         self.handY = [5, self.game.SCREEN_HEIGHT - 205]
         fieldPositionY = [210, game.SCREEN_HEIGHT - 410]
@@ -41,8 +41,8 @@ class Player(GameObject):
             addCard('Jungle Delver')
             addCard('Bird')
             addCard('Turtle')
-            addCard('Armordillo')
-            # addCard('Bats')
+            addCard('Armadilo')
+            addCard('Bats')
             
         random.shuffle(self.deck)
 

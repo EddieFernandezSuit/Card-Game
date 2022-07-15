@@ -18,6 +18,7 @@ class Zone(GameObject):
         if self.isFull == 0 and game.selectedCard != NULL and self.playerNum == game.selectedCard.playerNum and game.selectedCard.place == 'hand':
             game.selectedCard.place = 'field'
             game.players[game.selectedCard.playerNum].field.append(game.selectedCard)
+            # game.selectedCard.position = self.position
             game.selectedCard.position.x = self.position.x
             game.selectedCard.position.y = self.position.y
             self.isFull = 1
