@@ -86,7 +86,6 @@ class Card(GameObject):
             self.canPlayRectangle.y = self.position.y-5
             pygame.draw.rect(self.game.screen, Colors.GREEN, self.canPlayRectangle, 5)
 
-
     def dealDamage(self, target):
         trueDamage = self.stats["Damage"] - target.stats['Armor']
         if trueDamage < 0:
