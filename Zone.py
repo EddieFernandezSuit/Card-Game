@@ -21,7 +21,7 @@ class Zone(GameObject):
             game.selectedCard.position.x = self.position.x
             game.selectedCard.position.y = self.position.y
             self.isFull = 1
-            game.players[game.selectedCard.playerNum].mana -= game.selectedCard.mana
+            game.players[game.selectedCard.playerNum].mana -= game.selectedCard.stats['Mana']
             for k in range(len(game.players[game.selectedCard.playerNum].hand)):
                 if game.players[game.selectedCard.playerNum].hand[k] == game.selectedCard:
                     game.players[game.selectedCard.playerNum].hand.pop(k)

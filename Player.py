@@ -1,4 +1,3 @@
-from re import A
 import pygame
 from Card import Card
 from Game import Game
@@ -10,7 +9,11 @@ import random
 class Player(GameObject):
     def __init__(self, game, num) -> None:
         super().__init__(game)
-        self.health = [20]
+        self.stats = {
+            'Armor': 0,
+            'Health': 20
+        }
+        # self.health = [20]
         self.armor = 0
         self.totalMana = int(num == 0)
         self.mana = int(num == 0)
@@ -22,7 +25,7 @@ class Player(GameObject):
         self.game = game
         UIBaseManaX = game.SCREEN_WIDTH - 200
         UIBaseManaY = [50, game.SCREEN_HEIGHT-100]
-        self.healthText = TextHandler(game, 'Health: ' + str(self.health[0]), 1, pygame.Vector2(0,0), pygame.Vector2(UIBaseManaX, UIBaseManaY[self.num]))
+        self.healthText = TextHandler(game, 'Health: ' + str(self.stats['Health']), 1, pygame.Vector2(0,0), pygame.Vector2(UIBaseManaX, UIBaseManaY[self.num]))
         self.manaText = TextHandler(game, 'Mana: ' + str(self.mana) + '/' + str(self.totalMana), 1,pygame.Vector2(0,0), pygame.Vector2(UIBaseManaX, UIBaseManaY[self.num] + game.font.size('1')[1]))
         
         self.handY = [5, self.game.SCREEN_HEIGHT - 205]
@@ -55,7 +58,7 @@ class Player(GameObject):
         self.hand[-1].position.y = handPositionY[self.num]
         
     def update(self):
-        self.healthText.str = 'Health: ' + str(self.health[0])
+        self.healthText.str = 'Health: ' + str(self.stats['Health'])
         self.manaText.str = 'Mana: ' + str(self.mana) + '/' + str(self.totalMana)
         for index, card in enumerate(self.hand):
             card.position.x = cardPositionX(index)
@@ -63,9 +66,12 @@ class Player(GameObject):
 
     def delete(self):
         for player in self.game.players:
-            if player.health[0] <= 0:
+            if player.stats['Health'] <= 0:
                 print('Player ' + str(player.num + 1) + ' wins')
-                self.game = Game(self.game.start,self.game.update,self.game.draw)        
+                self.game = Game(self.game.start,self.game.update,self.game.draw)
+
+    def setHealth(self, health):
+        self.stats['Health'] = health   
 
 def cardPositionX(i):
     return 5 + 210 * (i + 1)
