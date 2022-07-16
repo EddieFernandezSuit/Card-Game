@@ -9,7 +9,6 @@ from Arrow import Arrow
 import pygame
 import Colors
 import json
-from Particle import Particle
 
 class Card(GameObject):
     def __init__(self, game, playerNum, name) -> None:
@@ -92,8 +91,8 @@ class Card(GameObject):
             trueDamage = 0
         target.setHealth(target.stats['Health'] - trueDamage)
         self.setHealth(self.stats['Health'] + self.stats['Drain'])
-        if type(target) == type(self):
-            FlyingNum(self.game, '- ' + str(trueDamage) + ' health', target.position, Colors.RED)
+        # if type(target) == type(self):
+            # FlyingNum(self.game, '- ' + str(trueDamage) + ' health', target.position, Colors.RED)
         if target.stats['Health'] <= 0:
             target.delete()
             self.stats[self.stats['Growth Type']] += 1
@@ -101,5 +100,7 @@ class Card(GameObject):
             FlyingNum(self.game, '+ 1 ' + str(self.stats['Growth Type']), self.position, Colors.GREEN)
     
     def setHealth(self, health):
-        self.stats['Health'] = health
-        self.statsText['Health'].str = 'Health ' + str(self.stats['Health'])
+        if self.stats['Health'] - health != 0:
+            FlyingNum(self.game, str(health - self.stats['Health'] ) + ' health', self.position, Colors.RED)
+            self.stats['Health'] = health
+            self.statsText['Health'].str = 'Health ' + str(self.stats['Health'])
