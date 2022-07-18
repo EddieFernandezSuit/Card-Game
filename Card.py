@@ -1,5 +1,4 @@
 from asyncio.windows_events import NULL
-from Game import Game
 from Handlers.ImageHandler import ImageHandler
 from Handlers.TextHandler import TextHandler
 from Handlers.Clicker import Clicker
