@@ -4,7 +4,9 @@ from Game import Game
 from Zone import Zone
 from GameObject import GameObject
 from Handlers.TextHandler import TextHandler
+from FlyingNum import FlyingNum
 import random
+import Colors
 
 class Player(GameObject):
     def __init__(self, game, num) -> None:
@@ -13,7 +15,6 @@ class Player(GameObject):
             'Armor': 0,
             'Health': 20
         }
-        # self.health = [20]
         self.armor = 0
         self.totalMana = int(num == 0)
         self.mana = int(num == 0)
@@ -48,7 +49,6 @@ class Player(GameObject):
 
         for x in range(4):
             self.drawCard()
-
     
     def drawCard(self):
         handPositionY = [5, self.game.SCREEN_HEIGHT - 205]
@@ -58,7 +58,6 @@ class Player(GameObject):
         self.hand[-1].position.y = handPositionY[self.num]
         
     def update(self):
-        self.healthText.str = 'Health: ' + str(self.stats['Health'])
         self.manaText.str = 'Mana: ' + str(self.mana) + '/' + str(self.totalMana)
         for index, card in enumerate(self.hand):
             card.position.x = cardPositionX(index)
@@ -69,9 +68,17 @@ class Player(GameObject):
             if player.stats['Health'] <= 0:
                 print('Player ' + str(player.num + 1) + ' wins')
                 self.game = Game(self.game.start,self.game.update,self.game.draw)
+    
+    def setStat(self, statName, newStat):
+        statChange = newStat - self.stats[statName]
+        if statChange != 0:
+            color = ''
+            if statChange < 0: color = Colors.RED
+            elif statChange > 0: color = Colors.GREEN
 
-    def setHealth(self, health):
-        self.stats['Health'] = health   
+            FlyingNum(self.game, str(statChange ) + ' ' + statName, self.healthText.position, color)
+            self.stats[statName] = newStat
+            self.healthText.str = statName + ' ' + str(self.stats[statName])
 
 def cardPositionX(i):
     return 5 + 210 * (i + 1)

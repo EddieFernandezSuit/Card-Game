@@ -88,18 +88,25 @@ class Card(GameObject):
         trueDamage = self.stats["Damage"] - target.stats['Armor']
         if trueDamage < 0:
             trueDamage = 0
-        target.setHealth(target.stats['Health'] - trueDamage)
-        self.setHealth(self.stats['Health'] + self.stats['Drain'])
-        # if type(target) == type(self):
-            # FlyingNum(self.game, '- ' + str(trueDamage) + ' health', target.position, Colors.RED)
+        target.setStat('Health', target.stats['Health'] - trueDamage)
+        self.setStat('Health',self.stats['Health'] + self.stats['Drain'])
         if target.stats['Health'] <= 0:
             target.delete()
-            self.stats[self.stats['Growth Type']] += 1
-            self.statsText[self.stats['Growth Type']].str = self.stats['Growth Type'] + ' ' + str(self.stats[self.stats['Growth Type']])
-            FlyingNum(self.game, '+ 1 ' + str(self.stats['Growth Type']), self.position, Colors.GREEN)
-    
-    def setHealth(self, health):
-        if self.stats['Health'] - health != 0:
-            FlyingNum(self.game, str(health - self.stats['Health'] ) + ' health', self.position, Colors.RED)
-            self.stats['Health'] = health
-            self.statsText['Health'].str = 'Health ' + str(self.stats['Health'])
+            self.setStat(self.stats['Growth Type'], self.stats[self.stats['Growth Type']] + 1)
+
+    def setStat(self, statName, newStat):
+        statChange = newStat - self.stats[statName]
+        if statChange != 0:
+            color = ''
+            if statChange < 0: color = Colors.RED
+            elif statChange > 0: color = Colors.GREEN
+
+            FlyingNum(self.game, str(statChange ) + ' ' + statName, self.position, color)
+            self.stats[statName] = newStat
+            self.statsText[statName].str = statName + ' ' + str(self.stats[statName])
+
+            
+        
+
+        
+
