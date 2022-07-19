@@ -40,25 +40,30 @@ class Card(GameObject):
         if self.game.selectedCard == self:
             self.game.selectedCard = NULL
         elif self.game.selectedCard == NULL:
-            if self.place == 'field' and self.attackUsed == 0:
-                if len(self.game.players[self.playerNum == 0].field) == 0:
-                    self.attackUsed = 1
-                    Arrow(self.game, self.imageHandler.getCenter(), self.game.players[self.playerNum == 0].healthText.position, self.game.players[int(self.playerNum == 0)].healthText.getRect(), self, self.game.players[int(self.playerNum == 0)])
-                elif self.stats['Splash'] > 0:
-                    self.attackUsed = 1
-                    count = 0
-                    for card in self.game.players[int(self.playerNum == 0)].field:
-                        if count <= self.stats['Splash']:
-                            Arrow(self.game, self.imageHandler.getCenter(), card.imageHandler.getCenter(), card.imageHandler.getRect(), self, card)
-                            count += 1 
-                else:
+            if self.game.turn == self.playerNum:
+                if self.place == 'field' and self.attackUsed == 0:
+                    if len(self.game.players[self.playerNum == 0].field) == 0:
+                        self.attackUsed = 1
+                        Arrow(self.game, self.imageHandler.getCenter(), self.game.players[self.playerNum == 0].healthText.position, self.game.players[int(self.playerNum == 0)].healthText.getRect(), self, self.game.players[int(self.playerNum == 0)])
+                    elif len(self.game.players[self.playerNum == 0].field) == 1:
+                        self.attackUsed = 1
+                        arrowTarget = self.game.players[self.playerNum == 0].field[0]
+                        Arrow(self.game, self.imageHandler.getCenter(), arrowTarget.imageHandler.getCenter(), arrowTarget.imageHandler.getRect(), self, arrowTarget)
+                    elif self.stats['Splash'] > 0:
+                        self.attackUsed = 1
+                        count = 0
+                        for card in self.game.players[int(self.playerNum == 0)].field:
+                            if count <= self.stats['Splash']:
+                                Arrow(self.game, self.imageHandler.getCenter(), card.imageHandler.getCenter(), card.imageHandler.getRect(), self, card)
+                                count += 1 
+                    else:
+                        self.game.selectedCard = self
+                elif self.place == 'hand' and self.game.players[self.playerNum].mana >= self.stats['Mana']:
                     self.game.selectedCard = self
-            elif self.place == 'hand' and self.game.players[self.playerNum].mana >= self.stats['Mana'] and self.game.turn == self.playerNum:
-                self.game.selectedCard = self
-                for zone in self.game.players[self.playerNum].zones:
-                    if zone.isFull == 0:
-                        zone.click(self.game)
-                        break
+                    for zone in self.game.players[self.playerNum].zones:
+                        if zone.isFull == 0:
+                            zone.click(self.game)
+                            break
             
         elif self.place == 'field' and self.game.selectedCard.place == 'field':
             Arrow(self.game, self.game.selectedCard.imageHandler.getCenter(), self.imageHandler.getCenter(), self.imageHandler.getRect(), self.game.selectedCard, self)
@@ -67,6 +72,7 @@ class Card(GameObject):
 
     def delete(self):
         for statsText in self.statsText:
+            print(statsText)
             self.game.gameObjects.remove(self.statsText[statsText])
         
         self.emptyZone.isFull = 0
@@ -82,17 +88,37 @@ class Card(GameObject):
         if self.game.turn == self.playerNum and ((self.place == 'hand' and self.stats['Mana'] <= self.game.players[self.playerNum].mana) or (self.place == 'field' and self.attackUsed == 0)):
             self.canPlayRectangle.x = self.position.x-5
             self.canPlayRectangle.y = self.position.y-5
-            pygame.draw.rect(self.game.screen, Colors.GREEN, self.canPlayRectangle, 5)
+            pygame.draw.rect(self.game.screen, Colors.LIGHTCYAN, self.canPlayRectangle, 5)
 
     def dealDamage(self, target):
         trueDamage = self.stats["Damage"] - target.stats['Armor']
         if trueDamage < 0:
             trueDamage = 0
+        targetHealthBeforeDeath = target.stats['Health']
         target.setStat('Health', target.stats['Health'] - trueDamage)
         self.setStat('Health',self.stats['Health'] + self.stats['Drain'])
         if target.stats['Health'] <= 0:
-            target.delete()
+
+            i = 0
+            for stat in self.stats:
+                if stat != 'Growth Type' and stat != 'Mana':
+                    if self.stats['Devour'] > i:
+                        found = False
+                        for statText in self.statsText:
+                            if statText == stat:
+                                found = True
+                        if found == False:
+                            self.statsText[stat] = TextHandler(self.game, stat + ' ' +  str(self.stats[stat]), 1, self.position, pygame.Vector2(5,5 + self.game.smallFont.size('A')[1] * (i+3)), self.game.smallFont)
+                        if stat == 'Health':
+                            self.setStat(stat, self.stats[stat] + targetHealthBeforeDeath)
+                        else:
+                            self.setStat(stat, self.stats[stat] + target.stats[stat])
+                        i += 1
+                    else:
+                        break
+
             self.setStat(self.stats['Growth Type'], self.stats[self.stats['Growth Type']] + 1)
+            target.delete()
 
     def setStat(self, statName, newStat):
         statChange = newStat - self.stats[statName]
@@ -103,10 +129,4 @@ class Card(GameObject):
 
             FlyingNum(self.game, str(statChange ) + ' ' + statName, self.position, color)
             self.stats[statName] = newStat
-            self.statsText[statName].str = statName + ' ' + str(self.stats[statName])
-
-            
-        
-
-        
-
+            self.statsText[statName].str = statName + ' ' + str(self.stats[statName]) 

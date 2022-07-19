@@ -38,12 +38,14 @@ class Player(GameObject):
         def addCard(cardName):
             self.deck.append(Card(self.game, self.num, cardName))
 
-        for x in range(3):
+        for x in range(2):
             addCard('Jungle Delver')
             addCard('Bird')
             addCard('Turtle')
             addCard('Armadilo')
             addCard('Bats')
+            addCard('Shark')
+        addCard('TheOneTheSunTheGunTheOne')
             
         random.shuffle(self.deck)
 
@@ -79,6 +81,12 @@ class Player(GameObject):
             FlyingNum(self.game, str(statChange ) + ' ' + statName, self.healthText.position, color)
             self.stats[statName] = newStat
             self.healthText.str = statName + ' ' + str(self.stats[statName])
+
+    def setMana(self, value):
+        statChange = value - self.mana
+        self.mana = value
+        self.manaText.str = 'Mana: ' + str(self.mana) + '/' + str(self.totalMana)
+        # FlyingNum(self.game, str(statChange ) + ' ' + 'Mana', self.manaText.position, Colors.GREEN)
 
 def cardPositionX(i):
     return 5 + 210 * (i + 1)

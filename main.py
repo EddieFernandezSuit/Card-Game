@@ -2,11 +2,12 @@ import pygame
 import sys
 import Colors
 from asyncio.windows_events import NULL
+from Handlers.ImageHandler import ImageHandler
 from PassTurnButton import PassTurnButton
 from Player import Player
 from Game import Game
 
-def drawOutlineText(game,str,x,y,):
+def drawOutlineText(game,str,x,y):
     img = game.font.render(str, 1, Colors.BLACK)
     game.screen.blit(img, (x + 1, y + 1))
     game.screen.blit(img, (x - 1, y + 1))
@@ -15,6 +16,7 @@ def drawOutlineText(game,str,x,y,):
     game.screen.blit(game.font.render(str, 1, Colors.WHITE), (x, y))
 
 def start(game):
+    game.background = ImageHandler('Images/background.jpg', pygame.Vector2(0,0), game)
     game.passTurnButton = PassTurnButton(game)
     game.turn = 0
     game.turnRectangle = pygame.Rect(150, 0, 1150, 450)
