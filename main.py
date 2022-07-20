@@ -1,11 +1,13 @@
 import pygame
 import sys
+import os
 import Colors
 from asyncio.windows_events import NULL
 from Handlers.ImageHandler import ImageHandler
-from PassTurnButton import PassTurnButton
-from Player import Player
+from GameObjects.PassTurnButton import PassTurnButton
+from GameObjects.Player import Player
 from Game import Game
+
 
 def drawOutlineText(game,str,x,y):
     img = game.font.render(str, 1, Colors.BLACK)

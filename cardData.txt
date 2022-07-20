@@ -1,8 +1,0 @@
-[
-    ['Name',        'Image Path',   'Growth Type', 'Mana', 'Damage',   'Health',     'Splash',   'Armor',    'Drain'],
-    ['Jungle Delver','jungle.jpg',  'Health',       1,      1,          1,                 0,          0,          0],
-    ['Bird',        'bird.jpg',     'Damage',       2,      1,          3,                 0,          0,          0],
-    ['Turtle',      'turtle.jpg',   'Splash',       3,      2,          4,                 1,          0,          0],
-    ['Armordillo',  'armadillo.jpg','Armor',        4,      1,          6,                 0,          1,          0],
-    # ['Bats',         'bat.jpg',    'Drain',       5,      4,          6,                  0,          0,          1]
-]
