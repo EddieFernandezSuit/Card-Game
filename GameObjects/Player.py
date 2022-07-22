@@ -1,3 +1,4 @@
+import csv
 import pygame
 from GameObjects.Card import Card
 from Game import Game
@@ -26,8 +27,8 @@ class Player(GameObject):
         self.game = game
         UIBaseManaX = game.SCREEN_WIDTH - 250
         UIBaseManaY = [50, game.SCREEN_HEIGHT-100]
-        self.healthText = TextHandler(game, 'Health: ' + str(self.stats['Health']), 1, pygame.Vector2(0,0), pygame.Vector2(UIBaseManaX, UIBaseManaY[self.num]), game.bigFont)
-        self.manaText = TextHandler(game, 'Mana: ' + str(self.mana) + '/' + str(self.totalMana), 1,pygame.Vector2(0,0), pygame.Vector2(UIBaseManaX, UIBaseManaY[self.num] + game.bigFont.size('1')[1]), game.bigFont)
+        self.healthText = TextHandler(game, 'Health: ' + str(self.stats['Health']), pygame.Vector2(0,0), pygame.Vector2(UIBaseManaX, UIBaseManaY[self.num]), game.bigFont)
+        self.manaText = TextHandler(game, 'Mana: ' + str(self.mana) + '/' + str(self.totalMana),pygame.Vector2(0,0), pygame.Vector2(UIBaseManaX, UIBaseManaY[self.num] + game.bigFont.size('1')[1]), game.bigFont)
         
         self.handY = [5, self.game.SCREEN_HEIGHT - 205]
         fieldPositionY = [210, game.SCREEN_HEIGHT - 410]
@@ -38,14 +39,22 @@ class Player(GameObject):
         def addCard(cardName):
             self.deck.append(Card(self.game, self.num, cardName))
 
-        for x in range(2):
-            addCard('Jungle Delver')
-            addCard('Bird')
-            addCard('Turtle')
-            addCard('Armadilo')
-            addCard('Bats')
-            addCard('Shark')
-        addCard('TheOneTheSunTheGunTheOne')
+        # for x in range(2):
+        #     addCard('Jungle Delver')
+        #     addCard('Bird')
+        #     addCard('Turtle')
+        #     addCard('Armadilo')
+        #     addCard('Bats')
+        #     addCard('Shark')
+
+        with open('deck' + str(self.num), 'r') as file:
+            csvreader = csv.reader(file)
+            for row in csvreader:
+                quantity = row[0]
+                cardName = row[1]
+                for x in range(int(quantity)):
+                    addCard(cardName)
+
             
         random.shuffle(self.deck)
 

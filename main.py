@@ -24,6 +24,7 @@ def start(game):
     game.turnRectangle = pygame.Rect(150, 0, 1150, 450)
     game.selectedCard = NULL
     game.players = [Player(game,0), Player(game,1)]
+    game.arrowFlies = 0
 
 def update(game):
     for event in pygame.event.get():
@@ -39,3 +40,5 @@ def draw(game):
     pygame.draw.rect(game.screen, Colors.BLACK, game.turnRectangle, 3)
 
 Game(start, update, draw)
+
+

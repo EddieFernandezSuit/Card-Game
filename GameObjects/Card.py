@@ -23,19 +23,22 @@ class Card(GameObject):
         self.playerNum = playerNum
         self.place = 'hand'
         self.attackUsed = 0
+
         self.imageHandler = ImageHandler('images/' + self.name.lower() + '.jpg', self.position, game)
         self.rect = self.imageHandler.image.get_rect()
-        self.clicker = Clicker(self.rect, self.onClick, (), game)
+
         self.statsText = {}
-        self.emptyZone = 0
         ncount = 0
-        self.statsText['Name'] = TextHandler(game, self.name, 1, self.position, pygame.Vector2(5,5 + game.smallFont.size('A')[1] * ncount), self.game.smallFont)
+        self.statsText['Name'] = TextHandler(game, self.name, self.position, pygame.Vector2(5,5 + game.smallFont.size('A')[1] * ncount), self.game.smallFont)
         for key in self.stats:
             if self.stats[key] != 0 and key != 'Growth Type':
                 ncount += 1
-                self.statsText[key] = TextHandler(game, key + ' ' +  str(self.stats[key]), 1, self.position, pygame.Vector2(5,5 + game.smallFont.size('A')[1] * ncount), self.game.smallFont)
+                self.statsText[key] = TextHandler(game, key + ' ' +  str(self.stats[key]), self.position, pygame.Vector2(5,5 + game.smallFont.size('A')[1] * ncount), self.game.smallFont)
 
         self.statsText[self.stats['Growth Type']].color = Colors.LIGHTCYAN
+
+        self.clicker = Clicker(self.rect, self.onClick, (), game)
+        self.emptyZone = 0
         self.canPlayRectangle = pygame.Rect(0, 0, 210, 210)
 
     def onClick(self, none):
@@ -46,17 +49,22 @@ class Card(GameObject):
                 if self.place == 'field' and self.attackUsed == 0:
                     if len(self.game.players[self.playerNum == 0].field) == 0:
                         self.attackUsed = 1
-                        Arrow(self.game, self.imageHandler.getCenter(), self.game.players[self.playerNum == 0].healthText.position, self.game.players[int(self.playerNum == 0)].healthText.getRect(), self, self.game.players[int(self.playerNum == 0)])
+                        Arrow(self.game, self, self.game.players[self.playerNum == 0], self.imageHandler, self.game.players[self.playerNum == 0].healthText)
+                        # Arrow(self.game, self.imageHandler.getCenter(), self.game.players[self.playerNum == 0].healthText.getCenter(), self.game.players[int(self.playerNum == 0)].healthText.getRect(), self, self.game.players[int(self.playerNum == 0)])
+                        self.game.arrowFlies = 1
                     elif len(self.game.players[self.playerNum == 0].field) == 1:
                         self.attackUsed = 1
                         arrowTarget = self.game.players[self.playerNum == 0].field[0]
-                        Arrow(self.game, self.imageHandler.getCenter(), arrowTarget.imageHandler.getCenter(), arrowTarget.imageHandler.getRect(), self, arrowTarget)
+                        Arrow(self.game, self, arrowTarget, self.imageHandler, arrowTarget.imageHandler)
+                        # Arrow(self.game, self.imageHandler.getCenter(), arrowTarget.imageHandler.getCenter(), arrowTarget.imageHandler.getRect(), self, arrowTarget)
                     elif self.stats['Splash'] > 0:
                         self.attackUsed = 1
                         count = 0
                         for card in self.game.players[int(self.playerNum == 0)].field:
                             if count <= self.stats['Splash']:
-                                Arrow(self.game, self.imageHandler.getCenter(), card.imageHandler.getCenter(), card.imageHandler.getRect(), self, card)
+                                Arrow(self.game, self, card, self.imageHandler, card.imageHandler)
+                                # Arrow(self.game, self.imageHandler.getCenter(), card.imageHandler.getCenter(), card.imageHandler.getRect(), self, card)
+                                self.game.arrowFlies = 1
                                 count += 1 
                     else:
                         self.game.selectedCard = self
@@ -68,12 +76,15 @@ class Card(GameObject):
                             break
             
         elif self.place == 'field' and self.game.selectedCard.place == 'field':
-            Arrow(self.game, self.game.selectedCard.imageHandler.getCenter(), self.imageHandler.getCenter(), self.imageHandler.getRect(), self.game.selectedCard, self)
+            Arrow(self.game, self.game.selectedCard, self, self.game.selectedCard.imageHandler, self.imageHandler)
+            # Arrow(self.game, self.game.selectedCard.imageHandler.getCenter(), self.imageHandler.getCenter(), self.imageHandler.getRect(), self.game.selectedCard, self)
+            self.game.arrowFlies = 1
             self.game.selectedCard.attackUsed = 1
             self.game.selectedCard = NULL
 
     def delete(self):
         for statsText in self.statsText:
+            print(statsText)
             self.game.gameObjects.remove(self.statsText[statsText])
         
         self.emptyZone.isFull = 0
@@ -85,7 +96,6 @@ class Card(GameObject):
     def update(self):
         self.rect.x = self.position.x
         self.rect.y = self.position.y
-
         if self.game.turn == self.playerNum and ((self.place == 'hand' and self.stats['Mana'] <= self.game.players[self.playerNum].mana) or (self.place == 'field' and self.attackUsed == 0)):
             self.canPlayRectangle.x = self.position.x-5
             self.canPlayRectangle.y = self.position.y-5
@@ -99,7 +109,6 @@ class Card(GameObject):
         target.setStat('Health', target.stats['Health'] - trueDamage)
         self.setStat('Health',self.stats['Health'] + self.stats['Drain'])
         if target.stats['Health'] <= 0:
-
             i = 0
             for stat in self.stats:
                 if stat != 'Growth Type' and stat != 'Mana':
@@ -117,7 +126,6 @@ class Card(GameObject):
                         i += 1
                     else:
                         break
-
             self.setStat(self.stats['Growth Type'], self.stats[self.stats['Growth Type']] + 1)
             target.delete()
 
