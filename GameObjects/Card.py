@@ -49,20 +49,20 @@ class Card(GameObject):
                 if self.place == 'field' and self.attackUsed == 0:
                     if len(self.game.players[self.playerNum == 0].field) == 0:
                         self.attackUsed = 1
-                        Arrow(self.game, self, self.game.players[self.playerNum == 0], self.imageHandler, self.game.players[self.playerNum == 0].healthText)
+                        Arrow(self.game, self, self.game.players[self.playerNum == 0])
                         # Arrow(self.game, self.imageHandler.getCenter(), self.game.players[self.playerNum == 0].healthText.getCenter(), self.game.players[int(self.playerNum == 0)].healthText.getRect(), self, self.game.players[int(self.playerNum == 0)])
                         self.game.arrowFlies = 1
                     elif len(self.game.players[self.playerNum == 0].field) == 1:
                         self.attackUsed = 1
                         arrowTarget = self.game.players[self.playerNum == 0].field[0]
-                        Arrow(self.game, self, arrowTarget, self.imageHandler, arrowTarget.imageHandler)
+                        Arrow(self.game, self, arrowTarget)
                         # Arrow(self.game, self.imageHandler.getCenter(), arrowTarget.imageHandler.getCenter(), arrowTarget.imageHandler.getRect(), self, arrowTarget)
                     elif self.stats['Splash'] > 0:
                         self.attackUsed = 1
                         count = 0
                         for card in self.game.players[int(self.playerNum == 0)].field:
                             if count <= self.stats['Splash']:
-                                Arrow(self.game, self, card, self.imageHandler, card.imageHandler)
+                                Arrow(self.game, self, card)
                                 # Arrow(self.game, self.imageHandler.getCenter(), card.imageHandler.getCenter(), card.imageHandler.getRect(), self, card)
                                 self.game.arrowFlies = 1
                                 count += 1 
@@ -76,7 +76,7 @@ class Card(GameObject):
                             break
             
         elif self.place == 'field' and self.game.selectedCard.place == 'field':
-            Arrow(self.game, self.game.selectedCard, self, self.game.selectedCard.imageHandler, self.imageHandler)
+            Arrow(self.game, self.game.selectedCard)
             # Arrow(self.game, self.game.selectedCard.imageHandler.getCenter(), self.imageHandler.getCenter(), self.imageHandler.getRect(), self.game.selectedCard, self)
             self.game.arrowFlies = 1
             self.game.selectedCard.attackUsed = 1
