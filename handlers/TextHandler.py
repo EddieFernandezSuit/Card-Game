@@ -1,3 +1,4 @@
+from requests import delete
 import Colors
 from Colors import *
 import pygame
@@ -66,7 +67,6 @@ class TextHandler(GameObject):
         self.imageHandlers[3].position = (self.position.x - outlineSize, self.position.y - outlineSize)
 
         self.imageHandler = ImageHandler('Images/bird.jpg',self.position,self.game)
-        # self.imageHandler.position = self.position
         
     def update(self):
         self.position = self.basePosition + self.positionOffset
@@ -81,25 +81,8 @@ class TextHandler(GameObject):
             self.imageHandlers[2].position = (self.position.x + outlineSize, self.position.y - outlineSize)
             self.imageHandlers[3].position = (self.position.x - outlineSize, self.position.y - outlineSize)
 
-        # self.draw()
-
-    # def draw(self):
-    #     self.drawOutlineText(self.game, self.str)
-
-    # def drawOutlineText(self, game, str):
-    #     outlineSize = 1
-    #     outlineImg = self.font.render(str, 1, BLACK)
-    #     game.screen.blit(outlineImg, (self.position.x + outlineSize, self.position.y + outlineSize))
-    #     game.screen.blit(outlineImg, (self.position.x - outlineSize, self.position.y + outlineSize))
-    #     game.screen.blit(outlineImg, (self.position.x + outlineSize, self.position.y - outlineSize))
-    #     game.screen.blit(outlineImg, (self.position.x - outlineSize, self.position.y - outlineSize))
-    #     game.screen.blit(self.img, self.position)
-
-    # def getRect(self):
-    #     rect = self.img.get_rect()
-    #     rect.x = self.position.x
-    #     rect.y = self.position.y
-    #     return rect
-
-    # def getCenter(self):
-    #     return pygame.Vector2(self.position.x + self.img.get_rect().width/2, self.position.y + self.img.get_rect().height/2)
+    def delete(self):
+        for imageHandler in self.imageHandlers:
+            self.game.gameObjects.remove(imageHandler)
+        self.game.gameObjects.remove(self.imageHandler)
+        self.game.gameObjects.remove(self)

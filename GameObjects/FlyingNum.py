@@ -20,7 +20,7 @@ class FlyingNum(GameObject):
         self.timer.update()
 
     def destroy(self):
-        self.game.gameObjects.remove(self.textHandler)
+        self.textHandler.delete()
         self.game.gameObjects.remove(self.transform)
         self.game.gameObjects.remove(self)
         del self
