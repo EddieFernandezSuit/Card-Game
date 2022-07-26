@@ -14,5 +14,5 @@ The first player to dwindle their opponents health to zero wins the game. <br>
 
 ## Controls
 Click on cards in your hand whose mana cost is less than available mana to play them. <br>
-Click on cards on the field to attack with them. 
+Click on cards on the field to attack with them. <br>
 Click on the right arrow or press spacebar to pass your turn to your opponent. <br>
