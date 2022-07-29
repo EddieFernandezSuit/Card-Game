@@ -5,3 +5,7 @@ class GameObject:
     
     def update(self):
         pass
+    
+    def delete(self):
+        self.game.gameObjects.remove(self)
+        del(self)
