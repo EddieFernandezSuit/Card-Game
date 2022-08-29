@@ -8,6 +8,7 @@ class Arrow(GameObject):
     def __init__(self, game, originObject, targetObject) -> None:
         super().__init__(game)
         targetCenter = 0
+        self.used = 0
         self.targetImageHandler = 0
         if (type(originObject) != type(targetObject)):
             self.targetImageHandler = targetObject.healthText.imageHandler
@@ -20,7 +21,7 @@ class Arrow(GameObject):
         self.imageHandler.position = self.position
         self.targetPosition = targetCenter - self.imageHandler.getCenter()
         self.transformhandler = TransformHandler(self.game, self.position)
-        self.transformhandler.direction = (targetCenter- self.position)
+        self.transformhandler.direction = (targetCenter - self.position)
         self.transformhandler.speed = .03
         self.imageHandler.setAngle(math.degrees(math.atan2(self.transformhandler.direction.x, self.transformhandler.direction.y)) + 180)
         self.targetRect = self.targetImageHandler.getRect()
@@ -31,11 +32,16 @@ class Arrow(GameObject):
         arrowRect = self.imageHandler.getRect()
 
         if(arrowRect.colliderect(self.targetRect)):
-            self.originObject.dealDamage(self.targetObject)
-            self.delete()
+            if self.used == 0:
+                self.targetObject.impaledArrows.append(self)
+                self.originObject.dealDamage(self.targetObject)
+                self.used = 1
+                self.transformhandler.speed = 0
+                self.game.arrowFlies = 0
+                # self.delete()
 
     def delete(self):
-        self.game.arrowFlies = 0
+        # self.game.arrowFlies = 0
         self.game.gameObjects.remove(self)
         self.game.gameObjects.remove(self.transformhandler)
         self.game.gameObjects.remove(self.imageHandler)

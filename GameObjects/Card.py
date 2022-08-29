@@ -40,6 +40,7 @@ class Card(GameObject):
         self.clicker = Clicker(self.rect, self.onClick, (), game)
         self.emptyZone = 0
         self.canPlayRectangle = pygame.Rect(0, 0, 210, 210)
+        self.impaledArrows = []
 
     def onClick(self, none):
 
@@ -123,6 +124,10 @@ class Card(GameObject):
                     else:
                         break
             self.setStat(self.stats['Growth Type'], self.stats[self.stats['Growth Type']] + 1)
+            
+            for j in target.impaledArrows:
+                j.delete()
+                
             target.delete()
 
     def setStat(self, statName, newStat):

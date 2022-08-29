@@ -12,6 +12,8 @@ import Colors
 class Player(GameObject):
     def __init__(self, game, num) -> None:
         super().__init__(game)
+
+        self.impaledArrows = []
         self.stats = {
             'Armor': 0,
             'Health': 20
@@ -60,6 +62,7 @@ class Player(GameObject):
 
         for x in range(4):
             self.drawCard()
+        
     
     def drawCard(self):
         handPositionY = [5, self.game.SCREEN_HEIGHT - 205]
@@ -87,7 +90,10 @@ class Player(GameObject):
             if statChange < 0: color = Colors.RED
             elif statChange > 0: color = Colors.GREEN
 
-            FlyingNum(self.game, str(statChange ) + ' ' + statName, self.healthText.position, color)
+            
+            damageNumberSpawnPosition = pygame.Vector2(self.healthText.position.x, self.healthText.position.y - 100)
+            # FlyingNum(self.game, str(statChange ) + ' ' + statName, self.healthText.position, color)
+            FlyingNum(self.game, str(statChange ) + ' ' + statName, damageNumberSpawnPosition, color)
             self.stats[statName] = newStat
             self.healthText.str = statName + ' ' + str(self.stats[statName])
 
