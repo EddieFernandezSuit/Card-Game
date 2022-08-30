@@ -22,12 +22,10 @@ class PassTurnButton(GameObject):
         
         game.turn = int(game.turn == 0)
         
-        # increase mana
         game.players[game.turn].totalMana += 1
         game.players[game.turn].setMana(game.players[game.turn].totalMana)
-        # self.manaText.str = 'Mana: ' + str(self.mana) + '/' + str(self.totalMana)
 
-        if len(game.players[game.turn].hand) < 5:
+        if len(game.players[game.turn].hand) < 5 and len(game.players[game.turn].deck) > 0:
             game.players[game.turn].drawCard()
         game.turnRectangle.y = self.turnRectangleY[game.turn]
 

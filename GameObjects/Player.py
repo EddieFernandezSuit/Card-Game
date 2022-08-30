@@ -89,10 +89,8 @@ class Player(GameObject):
             color = ''
             if statChange < 0: color = Colors.RED
             elif statChange > 0: color = Colors.GREEN
-
             
             damageNumberSpawnPosition = pygame.Vector2(self.healthText.position.x, self.healthText.position.y - 100)
-            # FlyingNum(self.game, str(statChange ) + ' ' + statName, self.healthText.position, color)
             FlyingNum(self.game, str(statChange ) + ' ' + statName, damageNumberSpawnPosition, color)
             self.stats[statName] = newStat
             self.healthText.str = statName + ' ' + str(self.stats[statName])
@@ -101,7 +99,6 @@ class Player(GameObject):
         statChange = value - self.mana
         self.mana = value
         self.manaText.str = 'Mana: ' + str(self.mana) + '/' + str(self.totalMana)
-        # FlyingNum(self.game, str(statChange ) + ' ' + 'Mana', self.manaText.position, Colors.GREEN)
 
 def cardPositionX(i):
     return 5 + 210 * (i + 1)

@@ -1,4 +1,5 @@
 import math
+import random
 import pygame
 from GameObjects.GameObject import GameObject
 from Handlers.ImageHandler import ImageHandler
@@ -17,12 +18,14 @@ class Arrow(GameObject):
         targetCenter = self.targetImageHandler.getCenter()
 
         self.imageHandler = ImageHandler('Images/arrow.jpg',pygame.Vector2(), game)
+        
         self.position = originObject.imageHandler.getCenter() - self.imageHandler.getCenter()
+        self.position.x += random.randint(-50,50)
         self.imageHandler.position = self.position
         self.targetPosition = targetCenter - self.imageHandler.getCenter()
         self.transformhandler = TransformHandler(self.game, self.position)
-        self.transformhandler.direction = (targetCenter - self.position)
-        self.transformhandler.speed = .03
+        self.transformhandler.direction = (targetCenter - self.position).normalize()
+        self.transformhandler.speed = 50
         self.imageHandler.setAngle(math.degrees(math.atan2(self.transformhandler.direction.x, self.transformhandler.direction.y)) + 180)
         self.targetRect = self.targetImageHandler.getRect()
         self.originObject = originObject
