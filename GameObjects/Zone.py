@@ -12,18 +12,19 @@ class Zone(GameObject):
         self.isFull = 0
         self.playerNum = playerNum
         self.clicker = Clicker(self.rect, self.click, (game), game)
+        self.game = game
     
     def click(self, game):
-        if self.isFull == 0 and game.selectedCard != NULL and self.playerNum == game.selectedCard.playerNum and game.selectedCard.place == 'hand':
-            game.selectedCard.place = 'field'
-            game.players[game.selectedCard.playerNum].field.append(game.selectedCard)
-            game.selectedCard.position.x = self.position.x
-            game.selectedCard.position.y = self.position.y
+        if self.isFull == 0 and self.game.states[self.game.currentState]['selectedCard'] != NULL and self.playerNum == self.game.states[self.game.currentState]['selectedCard'].playerNum and self.game.states[self.game.currentState]['selectedCard'].place == 'hand':
+            self.game.states[self.game.currentState]['selectedCard'].place = 'field'
+            self.game.states[self.game.currentState]['players'][self.game.states[self.game.currentState]['selectedCard'].playerNum].field.append(self.game.states[self.game.currentState]['selectedCard'])
+            self.game.states[self.game.currentState]['selectedCard'].position.x = self.position.x
+            self.game.states[self.game.currentState]['selectedCard'].position.y = self.position.y
             self.isFull = 1
-            game.players[game.selectedCard.playerNum].mana -= game.selectedCard.stats['Mana']
-            for k in range(len(game.players[game.selectedCard.playerNum].hand)):
-                if game.players[game.selectedCard.playerNum].hand[k] == game.selectedCard:
-                    game.players[game.selectedCard.playerNum].hand.pop(k)
+            self.game.states[self.game.currentState]['players'][self.game.states[self.game.currentState]['selectedCard'].playerNum].mana -= self.game.states[self.game.currentState]['selectedCard'].stats['Mana']
+            for k in range(len(self.game.states[self.game.currentState]['players'][self.game.states[self.game.currentState]['selectedCard'].playerNum].hand)):
+                if self.game.states[self.game.currentState]['players'][self.game.states[self.game.currentState]['selectedCard'].playerNum].hand[k] == self.game.states[self.game.currentState]['selectedCard']:
+                    self.game.states[self.game.currentState]['players'][self.game.states[self.game.currentState]['selectedCard'].playerNum].hand.pop(k)
                     break
-            game.selectedCard.emptyZone = self
-            game.selectedCard = NULL
+            self.game.states[self.game.currentState]['selectedCard'].emptyZone = self
+            self.game.states[self.game.currentState]['selectedCard'] = NULL

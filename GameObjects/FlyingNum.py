@@ -8,7 +8,7 @@ class FlyingNum(GameObject):
     def __init__(self, game, str, position, color) -> None:
         super().__init__(game)
         pos = pygame.Vector2(position.x, position.y)
-        self.textHandler = TextHandler(game, str, pos, pygame.Vector2(0,100), self.game.smallFont)
+        self.textHandler = TextHandler(game, str, pos, pygame.Vector2(0,100), self.game.states[self.game.currentState]['smallFont'])
         self.textHandler.color = color
         self.transform = TransformHandler(game, pos)
         self.transform.speed = 3
@@ -21,6 +21,6 @@ class FlyingNum(GameObject):
 
     def destroy(self):
         self.textHandler.delete()
-        self.game.gameObjects.remove(self.transform)
-        self.game.gameObjects.remove(self)
+        self.game.states[self.game.currentState]['gameObjects'].remove(self.transform)
+        self.game.states[self.game.currentState]['gameObjects'].remove(self)
         del self

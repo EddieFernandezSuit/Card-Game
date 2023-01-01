@@ -83,6 +83,6 @@ class TextHandler(GameObject):
 
     def delete(self):
         for imageHandler in self.imageHandlers:
-            self.game.gameObjects.remove(imageHandler)
-        self.game.gameObjects.remove(self.imageHandler)
-        self.game.gameObjects.remove(self)
+            self.game.states[self.game.currentState]['gameObjects'].remove(imageHandler)
+        self.game.states[self.game.currentState]['gameObjects'].remove(self.imageHandler)
+        self.game.states[self.game.currentState]['gameObjects'].remove(self)

@@ -29,8 +29,8 @@ class Player(GameObject):
         self.game = game
         UIBaseManaX = game.SCREEN_WIDTH - 250
         UIBaseManaY = [50, game.SCREEN_HEIGHT-100]
-        self.healthText = TextHandler(game, 'Health: ' + str(self.stats['Health']), pygame.Vector2(0,0), pygame.Vector2(UIBaseManaX, UIBaseManaY[self.num]), game.bigFont)
-        self.manaText = TextHandler(game, 'Mana: ' + str(self.mana) + '/' + str(self.totalMana),pygame.Vector2(0,0), pygame.Vector2(UIBaseManaX, UIBaseManaY[self.num] + game.bigFont.size('1')[1]), game.bigFont)
+        self.healthText = TextHandler(game, 'Health: ' + str(self.stats['Health']), pygame.Vector2(0,0), pygame.Vector2(UIBaseManaX, UIBaseManaY[self.num]), game.states[game.currentState]['bigFont'] )
+        self.manaText = TextHandler(game, 'Mana: ' + str(self.mana) + '/' + str(self.totalMana),pygame.Vector2(0,0), pygame.Vector2(UIBaseManaX, UIBaseManaY[self.num] + game.states[game.currentState]['bigFont'].size('1')[1]), game.states[game.currentState]['bigFont'] )
         
         self.handY = [5, self.game.SCREEN_HEIGHT - 205]
         fieldPositionY = [210, game.SCREEN_HEIGHT - 410]

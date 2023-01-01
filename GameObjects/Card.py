@@ -1,5 +1,3 @@
-import os
-import sys
 from asyncio.windows_events import NULL
 from Handlers.ImageHandler import ImageHandler
 from Handlers.TextHandler import TextHandler
@@ -29,11 +27,11 @@ class Card(GameObject):
 
         self.statsText = {}
         ncount = 0
-        self.statsText['Name'] = TextHandler(game, self.name, self.position, pygame.Vector2(5,5 + game.smallFont.size('A')[1] * ncount), self.game.smallFont)
+        self.statsText['Name'] = TextHandler(game, self.name, self.position, pygame.Vector2(5,5 + game.states[game.currentState]['smallFont'].size('A')[1] * ncount), self.game.states[game.currentState]['smallFont'])
         for key in self.stats:
             if self.stats[key] != 0 and key != 'Growth Type':
                 ncount += 1
-                self.statsText[key] = TextHandler(game, key + ' ' +  str(self.stats[key]), self.position, pygame.Vector2(5,5 + game.smallFont.size('A')[1] * ncount), self.game.smallFont)
+                self.statsText[key] = TextHandler(game, key + ' ' +  str(self.stats[key]), self.position, pygame.Vector2(5,5 + game.states[game.currentState]['smallFont'].size('A')[1] * ncount), self.game.states[game.currentState]['smallFont'])
 
         self.statsText[self.stats['Growth Type']].color = Colors.LIGHTCYAN
 
@@ -46,54 +44,54 @@ class Card(GameObject):
 
         def attack(attackingCard, defendingCard):
             attackingCard.attackUsed = 1
-            self.game.arrowFlies = 1
+            self.game.states[self.game.currentState]['arrowFlies'] = 1
             Arrow(self.game, attackingCard, defendingCard)
 
-        if self.game.arrowFlies == 0:
-            if self.game.selectedCard == self:
-                self.game.selectedCard = NULL
-            elif self.game.selectedCard == NULL:
-                if self.game.turn == self.playerNum:
+        if self.game.states[self.game.currentState]['arrowFlies'] == 0:
+            if self.game.states[self.game.currentState]['selectedCard'] == self:
+                self.game.states[self.game.currentState]['selectedCard'] = NULL
+            elif self.game.states[self.game.currentState]['selectedCard'] == NULL:
+                if self.game.states[self.game.currentState]['turn'] == self.playerNum:
                     if self.place == 'field' and self.attackUsed == 0:
-                        if len(self.game.players[self.playerNum == 0].field) == 0:
-                            attack(self, self.game.players[self.playerNum == 0])
-                        elif len(self.game.players[self.playerNum == 0].field) == 1:
-                            attack(self, self.game.players[self.playerNum == 0].field[0])
+                        if len(self.game.states[self.game.currentState]['players'][self.playerNum == 0].field) == 0:
+                            attack(self, self.game.states[self.game.currentState]['players'][self.playerNum == 0])
+                        elif len(self.game.states[self.game.currentState]['players'][self.playerNum == 0].field) == 1:
+                            attack(self, self.game.states[self.game.currentState]['players'][self.playerNum == 0].field[0])
                         elif self.stats['Splash'] > 0:
                             self.attackUsed = 1
-                            self.game.arrowFlies = 1
+                            self.game.states[self.game.currentState]['arrowFlies'] = 1
                             count = 0
-                            for card in self.game.players[int(self.playerNum == 0)].field:
+                            for card in self.game.states[self.game.currentState]['players'][int(self.playerNum == 0)].field:
                                 if count <= self.stats['Splash']:
-                                    Arrow(self.game, self, card)
+                                    Arrow(self.game.states[self.game.currentState], self, card)
                                     count += 1 
                         else:
-                            self.game.selectedCard = self
-                    elif self.place == 'hand' and self.game.players[self.playerNum].mana >= self.stats['Mana']:
-                        for zone in self.game.players[self.playerNum].zones:
+                            self.game.states[self.game.currentState]['selectedCard'] = self
+                    elif self.place == 'hand' and self.game.states[self.game.currentState]['players'][self.playerNum].mana >= self.stats['Mana']:
+                        for zone in self.game.states[self.game.currentState]['players'][self.playerNum].zones:
                             if zone.isFull == 0:
-                                self.game.selectedCard = self
+                                self.game.states[self.game.currentState]['selectedCard'] = self
                                 zone.click(self.game)
                                 break
                 
-            elif self.place == 'field' and self.game.selectedCard.place == 'field':
-                attack(self.game.selectedCard, self)
-                self.game.selectedCard = NULL
+            elif self.place == 'field' and self.game.states[self.game.currentState]['selectedCard'].place == 'field':
+                attack(self.game.states[self.game.currentState]['selectedCard'], self)
+                self.game.states[self.game.currentState]['selectedCard'] = NULL
 
     def delete(self):
         for statsText in self.statsText:
             self.statsText[statsText].delete()
         
         self.emptyZone.isFull = 0
-        self.game.gameObjects.remove(self.clicker)
-        self.game.gameObjects.remove(self.imageHandler)
-        self.game.players[self.playerNum].field.remove(self)
-        self.game.gameObjects.remove(self)
+        self.game.states[self.game.currentState].gameObjects.remove(self.clicker)
+        self.game.states[self.game.currentState].gameObjects.remove(self.imageHandler)
+        self.game.states[self.game.currentState]['players'][self.playerNum].field.remove(self)
+        self.game.states[self.game.currentState].gameObjects.remove(self)
 
     def update(self):
         self.rect.x = self.position.x
         self.rect.y = self.position.y
-        if self.game.turn == self.playerNum and ((self.place == 'hand' and self.stats['Mana'] <= self.game.players[self.playerNum].mana) or (self.place == 'field' and self.attackUsed == 0)):
+        if self.game.states[self.game.currentState]['turn'] == self.playerNum and ((self.place == 'hand' and self.stats['Mana'] <= self.game.states[self.game.currentState]['players'][self.playerNum].mana) or (self.place == 'field' and self.attackUsed == 0)):
             self.canPlayRectangle.x = self.position.x-5
             self.canPlayRectangle.y = self.position.y-5
             pygame.draw.rect(self.game.screen, Colors.LIGHTCYAN, self.canPlayRectangle, 5)
@@ -115,7 +113,7 @@ class Card(GameObject):
                             if statText == stat:
                                 found = True
                         if found == False:
-                            self.statsText[stat] = TextHandler(self.game, stat + ' ' +  str(self.stats[stat]), 1, self.position, pygame.Vector2(5,5 + self.game.smallFont.size('A')[1] * (i+3)), self.game.smallFont)
+                            self.statsText[stat] = TextHandler(self.game, stat + ' ' +  str(self.stats[stat]), 1, self.position, pygame.Vector2(5,5 + self.game.states[self.game.currentState]['smallFont'].size('A')[1] * (i+3)), self.game.states[self.game.currentState]['smallFont'])
                         if stat == 'Health':
                             self.setStat(stat, self.stats[stat] + targetHealthBeforeDeath)
                         else:

@@ -16,18 +16,18 @@ class PassTurnButton(GameObject):
 
     def onClick(self, game):
         game.selectedCard = NULL
-        for player in game.players:
+        for player in game.states[game.currentState]['players']:
             for card in player.field:
                 card.attackUsed = 0
         
-        game.turn = int(game.turn == 0)
+        game.states[game.currentState]['turn'] = int(game.states[game.currentState]['turn'] == 0)
         
-        game.players[game.turn].totalMana += 1
-        game.players[game.turn].setMana(game.players[game.turn].totalMana)
+        game.states[game.currentState]['players'][game.states[game.currentState]['turn']].totalMana += 1
+        game.states[game.currentState]['players'][game.states[game.currentState]['turn']].setMana(game.states[game.currentState]['players'][game.states[game.currentState]['turn']].totalMana)
 
-        if len(game.players[game.turn].hand) < 5 and len(game.players[game.turn].deck) > 0:
-            game.players[game.turn].drawCard()
-        game.turnRectangle.y = self.turnRectangleY[game.turn]
+        if len(game.states[game.currentState]['players'][game.states[game.currentState]['turn']].hand) < 5 and len(game.states[game.currentState]['players'][game.states[game.currentState]['turn']].deck) > 0:
+            game.states[game.currentState]['players'][game.states[game.currentState]['turn']].drawCard()
+        game.states[game.currentState]['turnRectangle'].y = self.turnRectangleY[game.states[game.currentState]['turn']]
 
 
 
