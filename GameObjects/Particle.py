@@ -19,4 +19,4 @@ class Particle(GameObject):
         self.timer.update()
 
     def delete(self):
-        self.game.gameObjects.remove(self)
+        self.game.currentState.remove(self)

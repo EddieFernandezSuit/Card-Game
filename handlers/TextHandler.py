@@ -6,45 +6,6 @@ import pygame
 from GameObjects.GameObject import GameObject
 from Handlers.ImageHandler import ImageHandler
 
-# class TextHandler(GameObject):
-#     def __init__(self, game, str, basePosition, positionOffset, font) -> None:
-#         super().__init__(game)
-#         self.str = str
-#         self.game = game
-#         self.basePosition = basePosition
-#         self.positionOffset = positionOffset
-#         self.position = self.basePosition + self.positionOffset
-#         self.color = WHITE
-#         self.font = font
-#         self.imageHandler = ImageHandler('Images/bird.jpg',self.position,self.game)
-#         self.imageHandler.image = self.font.render(self.str, 1, self.color)
-    
-#     def update(self):
-#         self.position = self.basePosition + self.positionOffset
-#         self.img = self.font.render(self.str, 1, self.color)
-#         self.draw()
-
-#     def draw(self):
-#         self.drawOutlineText(self.game, self.str)
-
-#     def drawOutlineText(self, game, str):
-#         outlineSize = 1
-#         outlineImg = self.font.render(str, 1, BLACK)
-#         game.screen.blit(outlineImg, (self.position.x + outlineSize, self.position.y + outlineSize))
-#         game.screen.blit(outlineImg, (self.position.x - outlineSize, self.position.y + outlineSize))
-#         game.screen.blit(outlineImg, (self.position.x + outlineSize, self.position.y - outlineSize))
-#         game.screen.blit(outlineImg, (self.position.x - outlineSize, self.position.y - outlineSize))
-#         game.screen.blit(self.img, self.position)
-
-#     def getRect(self):
-#         rect = self.img.get_rect()
-#         rect.x = self.position.x
-#         rect.y = self.position.y
-#         return rect
-
-#     def getCenter(self):
-#         return pygame.Vector2(self.position.x + self.img.get_rect().width/2, self.position.y + self.img.get_rect().height/2)
-
 class TextHandler(GameObject):
     def __init__(self, game, str, basePosition, positionOffset, font) -> None:
         super().__init__(game)
@@ -55,6 +16,8 @@ class TextHandler(GameObject):
         self.position = self.basePosition + self.positionOffset
         self.color = WHITE
         self.font = font
+        self.width, self.height = self.font.size(self.str)
+        self.rect = pygame.Rect(self.position.x, self.position.y, self.width, self.height)
 
         self.imageHandlers = []
         for i in range(4):
@@ -69,6 +32,8 @@ class TextHandler(GameObject):
         self.imageHandler = ImageHandler('Images/bird.jpg',self.position,self.game)
         
     def update(self):
+        self.rect.x = self.position.x
+        self.rect.y = self.position.y
         self.position = self.basePosition + self.positionOffset
         self.imageHandler.image = self.font.render(self.str, 1, self.color)
         self.imageHandler.position = self.position
@@ -83,6 +48,6 @@ class TextHandler(GameObject):
 
     def delete(self):
         for imageHandler in self.imageHandlers:
-            self.game.states[self.game.currentState]['gameObjects'].remove(imageHandler)
-        self.game.states[self.game.currentState]['gameObjects'].remove(self.imageHandler)
-        self.game.states[self.game.currentState]['gameObjects'].remove(self)
+            self.game.currentState['gameObjects'].remove(imageHandler)
+        self.game.currentState['gameObjects'].remove(self.imageHandler)
+        self.game.currentState['gameObjects'].remove(self)

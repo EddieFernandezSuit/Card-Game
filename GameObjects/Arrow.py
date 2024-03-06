@@ -16,9 +16,7 @@ class Arrow(GameObject):
         else:
             self.targetImageHandler = targetObject.imageHandler
         targetCenter = self.targetImageHandler.getCenter()
-
-        self.imageHandler = ImageHandler('Images/arrow.jpg',pygame.Vector2(), game)
-        
+        self.imageHandler = ImageHandler('Images/arrow.jpg', pygame.Vector2(), game)
         self.position = originObject.imageHandler.getCenter() - self.imageHandler.getCenter()
         self.position.x += random.randint(-50,50)
         self.imageHandler.position = self.position
@@ -33,18 +31,17 @@ class Arrow(GameObject):
 
     def update(self):
         arrowRect = self.imageHandler.getRect()
-
         if(arrowRect.colliderect(self.targetRect)):
             if self.used == 0:
                 self.targetObject.impaledArrows.append(self)
                 self.originObject.dealDamage(self.targetObject)
                 self.used = 1
                 self.transformhandler.speed = 0
-                self.game.arrowFlies = 0
+                self.game.currentState['arrowFlies'] = 0
                 # self.delete()
 
     def delete(self):
-        # self.game.arrowFlies = 0
-        self.game.gameObjects.remove(self)
-        self.game.gameObjects.remove(self.transformhandler)
-        self.game.gameObjects.remove(self.imageHandler)
+        self.game.currentState["arrowFlies"] = 0
+        self.game.currentState['gameObjects'].remove(self)
+        self.game.currentState["gameObjects"].remove(self.transformhandler)
+        self.game.currentState['gameObjects'].remove(self.imageHandler)

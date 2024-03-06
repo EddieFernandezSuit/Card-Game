@@ -18,6 +18,7 @@ class ImageHandler(GameObject):
         self.image = pygame.image.load(resource_path(filePath)).convert_alpha()
         self.position = position
         self.angle = 0
+        
     
     def update(self):
         self.draw()

@@ -1,7 +1,7 @@
 import pygame
 from GameObjects.GameObject import GameObject
 
-class Clicker(GameObject):
+class ClickHandler(GameObject):
     def __init__(self, rect, onClick, args, game) -> None:
         super().__init__(game)
         self.lastClick = 0

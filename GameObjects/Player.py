@@ -8,6 +8,7 @@ from Handlers.TextHandler import TextHandler
 from GameObjects.FlyingNum import FlyingNum
 import random
 import Colors
+import json
 
 class Player(GameObject):
     def __init__(self, game, num) -> None:
@@ -29,8 +30,8 @@ class Player(GameObject):
         self.game = game
         UIBaseManaX = game.SCREEN_WIDTH - 250
         UIBaseManaY = [50, game.SCREEN_HEIGHT-100]
-        self.healthText = TextHandler(game, 'Health: ' + str(self.stats['Health']), pygame.Vector2(0,0), pygame.Vector2(UIBaseManaX, UIBaseManaY[self.num]), game.states[game.currentState]['bigFont'] )
-        self.manaText = TextHandler(game, 'Mana: ' + str(self.mana) + '/' + str(self.totalMana),pygame.Vector2(0,0), pygame.Vector2(UIBaseManaX, UIBaseManaY[self.num] + game.states[game.currentState]['bigFont'].size('1')[1]), game.states[game.currentState]['bigFont'] )
+        self.healthText = TextHandler(game, 'Health: ' + str(self.stats['Health']), pygame.Vector2(0,0), pygame.Vector2(UIBaseManaX, UIBaseManaY[self.num]), game.fonts['big'] )
+        self.manaText = TextHandler(game, 'Mana: ' + str(self.mana) + '/' + str(self.totalMana),pygame.Vector2(0,0), pygame.Vector2(UIBaseManaX, UIBaseManaY[self.num] + game.fonts['big'].size('1')[1]), game.fonts['big'] )
         
         self.handY = [5, self.game.SCREEN_HEIGHT - 205]
         fieldPositionY = [210, game.SCREEN_HEIGHT - 410]
@@ -49,13 +50,23 @@ class Player(GameObject):
         #     addCard('Bats')
         #     addCard('Shark')
 
-        with open('deck' + str(self.num), 'r') as file:
-            csvreader = csv.reader(file)
-            for row in csvreader:
-                quantity = row[0]
-                cardName = row[1]
+        with open('DeckBox.json') as deckboxFile:
+            deckBoxData = json.load(deckboxFile)
+            deck = deckBoxData[list(deckBoxData.keys())[num]]
+            for card in deck:
+                quantity = card['quantity']
+                cardName = card['name']
                 for x in range(int(quantity)):
                     addCard(cardName)
+
+
+        # with open('deck' + str(self.num), 'r') as file:
+        #     csvreader = csv.reader(file)
+        #     for row in csvreader:
+        #         quantity = row[0]
+        #         cardName = row[1]
+        #         for x in range(int(quantity)):
+        #             addCard(cardName)
 
             
         random.shuffle(self.deck)
@@ -78,10 +89,10 @@ class Player(GameObject):
             card.position.y = self.handY[self.num]
 
     def delete(self):
-        for player in self.game.players:
+        for player in self.game.currentState["players"]:
             if player.stats['Health'] <= 0:
                 print('Player ' + str(player.num + 1) + ' wins')
-                self.game = Game(self.game.start,self.game.update,self.game.draw)
+                self.game = Game(self.game.start, self.game.update, self.game.draw)
     
     def setStat(self, statName, newStat):
         statChange = newStat - self.stats[statName]
