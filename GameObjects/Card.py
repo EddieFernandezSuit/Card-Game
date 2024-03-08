@@ -26,11 +26,12 @@ class Card(GameObject):
 
         self.statsText = {}
         ncount = 0
-        self.statsText['Name'] = TextHandler(game, self.name, self.position, pygame.Vector2(5,5 + game.fonts["medium"].size('A')[1] * ncount), self.game.fonts["medium"])
-        for key in self.stats:
-            if self.stats[key] != 0 and key != 'Growth Type':
+        font_height = game.fonts["medium"].size('A')[1]
+        self.statsText['Name'] = TextHandler(game, self.name, self.position, pygame.Vector2(5,5 + font_height * ncount), self.game.fonts["medium"])
+        for key, value in self.stats.items():
+            if value != 0 and key != 'Growth Type':
                 ncount += 1
-                self.statsText[key] = TextHandler(game, key + ' ' +  str(self.stats[key]), self.position, pygame.Vector2(5,5 + game.fonts["medium"].size('A')[1] * ncount), self.game.fonts["medium"])
+                self.statsText[key] = TextHandler(game, f'{key} {value}', self.position, pygame.Vector2(5,5 + font_height * ncount), self.game.fonts["medium"])
 
         self.statsText[self.stats['Growth Type']].color = Colors.LIGHTCYAN
 
@@ -51,25 +52,28 @@ class Card(GameObject):
                 self.game.currentState['selectedCard'] = NULL
             elif self.game.currentState['selectedCard'] == NULL:
                 if self.game.currentState['turn'] == self.playerNum:
+                    player = self.game.currentState['players'][self.playerNum]
                     if self.place == 'field' and self.attackUsed == 0:
-                        numberOfCardsOnOpponentsField = len(self.game.currentState['players'][self.playerNum == 0].field)
-                        if  numberOfCardsOnOpponentsField == 0:
-                            attack(self, self.game.currentState['players'][self.playerNum == 0])
-                        elif numberOfCardsOnOpponentsField == 1:
-                            attack(self, self.game.currentState['players'][self.playerNum == 0].field[0])
-                        elif self.stats['Splash'] > 0:
-                            self.attackUsed = 1
-                            self.game.currentState['arrowFlies'] = 1
-                            count = 0
-                            for card in self.game.currentState['players'][int(self.playerNum == 0)].field:
+                        number_of_cards_on_opponents_field = len(self.game.currentState['players'][self.playerNum == 0].field)
+                        opponent = self.game.currentState['players'][self.playerNum == 0]
+                        targets = []
+
+                        if self.stats['Splash'] > 0:
+                            for count, card in enumerate(opponent.field):
                                 if count <= self.stats['Splash']:
-                                    Arrow(self.game, self, card)
-                                    count += 1 
+                                    targets.append(card)
+                        elif  number_of_cards_on_opponents_field == 0:
+                            targets = [opponent]
+                        elif number_of_cards_on_opponents_field == 1:
+                            targets = [opponent.field[0]]
                         else:
                             self.game.currentState['selectedCard'] = self
-                    elif self.place == 'hand' and self.game.currentState['players'][self.playerNum].mana >= self.stats['Mana']:
-                        for zone in self.game.currentState['players'][self.playerNum].zones:
-                            if zone.isFull == 0:
+
+                        for target in targets:
+                            attack(self, target)
+                    elif self.place == 'hand' and player.mana >= self.stats['Mana']:
+                        for zone in player.zones:
+                            if not zone.isFull:
                                 self.game.currentState['selectedCard'] = self
                                 zone.click(self.game)
                                 break
@@ -91,8 +95,9 @@ class Card(GameObject):
         self.rect.x = self.position.x
         self.rect.y = self.position.y
         if self.game.currentState['turn'] == self.playerNum and ((self.place == 'hand' and self.stats['Mana'] <= self.game.currentState['players'][self.playerNum].mana) or (self.place == 'field' and self.attackUsed == 0)):
-            self.canPlayRectangle.x = self.position.x-5
-            self.canPlayRectangle.y = self.position.y-5
+            outline_thickness = 5
+            self.canPlayRectangle.x = self.position.x - outline_thickness
+            self.canPlayRectangle.y = self.position.y - outline_thickness
             pygame.draw.rect(self.game.screen, Colors.LIGHTCYAN, self.canPlayRectangle, 5)
 
     def dealDamage(self, target):

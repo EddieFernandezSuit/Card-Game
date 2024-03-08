@@ -20,8 +20,6 @@ class Game:
         start(self)
         while True:
             self.screen.fill(Colors.GREY)
-            for gameObject in self.currentState['gameObjects']:
-                gameObject.update()
             update(self)
             draw(self)
             pygame.display.update()

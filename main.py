@@ -12,54 +12,67 @@ from GameObjects.DeckBox import DeckBox
 from Game import Game
 import json
 
-def drawOutlineText(game, str, x, y):
-    img = game.fonts["medium"].render(str, 1, Colors.BLACK)
-    game.screen.blit(img, (x + 1, y + 1))
-    game.screen.blit(img, (x - 1, y + 1))
-    game.screen.blit(img, (x + 1, y - 1))
-    game.screen.blit(img, (x - 1, y - 1))
-    game.screen.blit(game.fonts["medium"].render(str, 1, Colors.WHITE), (x, y))
+def draw_outline_text(game, str, x, y):
+    text_outline_surface = game.fonts["medium"].render(str, 1, Colors.BLACK)
+    text_surface = game.fonts["medium"].render(str, 1, Colors.WHITE)
 
-def clickPlay(game):
+    offsets = [(1, 1), (-1, 1), (1, -1), (-1, -1)]
+
+    for offset_x, offset_y in offsets:
+        game.screen.blit(text_outline_surface, (x + offset_x, y + offset_y))
+    
+    game.screen.blit(text_surface, (x, y))
+
+def click_play(game):
     game.currentState = game.states['play']
-    game.currentState['background'] = ImageHandler('Images/background.jpg', pygame.Vector2(0,0), game)
-    game.currentState['passTurnButton'] = PassTurnButton(game)
-    game.currentState['turn'] = 0
-    game.currentState['turnRectangle'] = pygame.Rect(150, 0, 1150, 450)
-    game.currentState['selectedCard'] = NULL
-    game.currentState['players'] = [Player(game,0), Player(game,1)]
-    game.currentState['arrowFlies'] = 0
+
+    state = {
+        'background': ImageHandler('Images/background.jpg', pygame.Vector2(0,0), game),
+        'passTurnButton': PassTurnButton(game),
+        'turn': 0,
+        'turnRectangle': pygame.Rect(150, 0, 1150, 450),
+        'selectedCard': NULL,
+        'players': [Player(game,0), Player(game,1)],
+        'arrowFlies': 0
+    }
+
+    game.currentState.update(state)
 
 def to_matrix(l, n):
     return [l[i:i+n] for i in range(0, len(l), n)]
 
-def createDeckBuilderState(game):
+def json_to_dictionary(json_filename):
+    dict = {}
+    with open(json_filename) as file:
+        dict = json.load(file)
+    return dict
+
+def create_deck_builder_state(game):
     game.currentState = game.states['buildDeck']
     game.currentState['background'] = ImageHandler('Images/background.jpg', pygame.Vector2(0,0), game)
-    cardsJson = json.load(open('cardData.json'))
-    collumns = 3
-    cardsInMatrix = to_matrix(list(cardsJson.keys()), collumns)
-
-    for i in range(len(cardsInMatrix)):
-        for j in range(len(cardsInMatrix[i])):
-            cardSize = 200
-            game.currentState['cardsToAdd'].append(DeckBuilderCard(game, cardsInMatrix[i][j], (400 + j * (cardSize + 10), 10 + i * (cardSize + 10))))
-
     game.currentState['deckBox'] = DeckBox(game)
+    
+    card_data = json_to_dictionary('cardData.json')
+    deck_box_data = json_to_dictionary('DeckBox.json')
 
-    deckBoxData = {}
-    with open('DeckBox.json') as deckboxFile:
-        deckBoxData = json.load(deckboxFile)
+    collumns = 3
+    cards_in_matrix = to_matrix(list(card_data.keys()), collumns)
 
-    for key in deckBoxData:
+    for i, _ in enumerate(cards_in_matrix):
+        for j, _ in enumerate(cards_in_matrix[i]):
+            card_size = 200
+            card_spacing = 10
+            game.currentState['cardsToAdd'].append(DeckBuilderCard(game, cards_in_matrix[i][j], (400 + j * (card_size + card_spacing), card_spacing + i * (card_size + card_spacing))))
+
+    for key in deck_box_data:
         deckList = game.currentState['deckBox'].addDeck(key)
-        for card in deckBoxData[key]:
+        for card in deck_box_data[key]:
             deckList.cards.append(card)
 
-    game.currentState['save and exit'] = ClickableText(game, pygame.Vector2(10, game.SCREEN_HEIGHT - game.fonts['medium'].size('A')[1] - 10), saveAndExit, (game), 'Save and Exit', game.fonts['medium'])
+    game.currentState['save and exit'] = ClickableText(game, pygame.Vector2(10, game.SCREEN_HEIGHT - game.fonts['medium'].size('A')[1] - 10), save_and_exit, (game), 'Save and Exit', game.fonts['medium'])
     game.currentState = game.states['menu']
 
-def saveAndExit(game):
+def save_and_exit(game):
     deckBox = {}
     for deckList in game.currentState['deckBox'].deckLists:
         deckBox[deckList.deckName] = deckList.cards
@@ -69,7 +82,7 @@ def saveAndExit(game):
             
     game.currentState = game.states['menu']
 
-def changeToDeckBuilder(game):
+def change_to_deck_builder(game):
     game.currentState = game.states['buildDeck']
 
 
@@ -93,25 +106,27 @@ def start(game):
     game.currentState = game.states['menu']
     game.currentState['background'] = ImageHandler('Images/background.jpg', pygame.Vector2(0,0), game)
     game.currentState['MenuOptions'] = [
-        ClickableText(game, pygame.Vector2(100, 100), clickPlay, (game), 'Play', game.fonts['medium']),
-        ClickableText(game, pygame.Vector2(100, 150), changeToDeckBuilder, (game), 'Build Deck', game.fonts['medium']),
+        ClickableText(game, pygame.Vector2(100, 100), click_play, (game), 'Play', game.fonts['medium']),
+        ClickableText(game, pygame.Vector2(100, 150), change_to_deck_builder, (game), 'Build Deck', game.fonts['medium']),
     ]
 
-    createDeckBuilderState(game)
+    create_deck_builder_state(game)
 
 def update(game):
+    for gameObject in game.currentState['gameObjects']:
+        gameObject.update()
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
-                # game.passTurnButton.onClick(game)
                 game.currentState['passTurnButton'].onClick(game)
 
 def draw(game):
     if game.currentState['stateName'] == 'play':
         if game.currentState['selectedCard'] != NULL:
-            drawOutlineText(game,'X', game.currentState['selectedCard'].position.x + 100, game.currentState['selectedCard'].position.y +100)
+            draw_outline_text(game,'X', game.currentState['selectedCard'].position.x + 100, game.currentState['selectedCard'].position.y +100)
         pygame.draw.rect(game.screen, Colors.BLACK, game.currentState['turnRectangle'], 3)
 
 Game(start, update, draw)

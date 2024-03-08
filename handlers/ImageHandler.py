@@ -13,13 +13,13 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path) 
 
 class ImageHandler(GameObject):
-    def __init__(self, filePath, position, game) -> None:
+    def __init__(self, filePath, position, game, entity) -> None:
         super().__init__(game)
         self.image = pygame.image.load(resource_path(filePath)).convert_alpha()
         self.position = position
+        self.entity = entity
         self.angle = 0
         
-    
     def update(self):
         self.draw()
 
