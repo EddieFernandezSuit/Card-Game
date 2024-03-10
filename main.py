@@ -1,16 +1,18 @@
 import pygame
 import sys
-import os
 import Colors
-from asyncio.windows_events import NULL
-from Handlers.ImageHandler import ImageHandler
-from GameObjects.PassTurnButton import PassTurnButton
-from GameObjects.Player import Player
-from GameObjects.ClickableText import ClickableText
-from GameObjects.DeckBuilderCard import DeckBuilderCard
-from GameObjects.DeckBox import DeckBox
-from Game import Game
 import json
+from asyncio.windows_events import NULL
+from components.image_component import ImageComponent
+from components.transform_component import TransformComponent
+from entities.PassTurnButton import PassTurnButton
+from entities.Player import Player
+from entities.ClickableText import ClickableText
+from entities.DeckBuilderCard import DeckBuilderCard
+from entities.DeckBox import DeckBox
+from entities.background import Background
+from Game import Game
+
 
 def draw_outline_text(game, str, x, y):
     text_outline_surface = game.fonts["medium"].render(str, 1, Colors.BLACK)
@@ -26,8 +28,9 @@ def draw_outline_text(game, str, x, y):
 def click_play(game):
     game.currentState = game.states['play']
 
+    Background(game=game)
+
     state = {
-        'background': ImageHandler('Images/background.jpg', pygame.Vector2(0,0), game),
         'passTurnButton': PassTurnButton(game),
         'turn': 0,
         'turnRectangle': pygame.Rect(150, 0, 1150, 450),
@@ -49,7 +52,8 @@ def json_to_dictionary(json_filename):
 
 def create_deck_builder_state(game):
     game.currentState = game.states['buildDeck']
-    game.currentState['background'] = ImageHandler('Images/background.jpg', pygame.Vector2(0,0), game)
+    
+    Background(game)
     game.currentState['deckBox'] = DeckBox(game)
     
     card_data = json_to_dictionary('cardData.json')
@@ -85,8 +89,6 @@ def save_and_exit(game):
 def change_to_deck_builder(game):
     game.currentState = game.states['buildDeck']
 
-
-
 def start(game):
     game.states = {
         'menu': {
@@ -104,9 +106,10 @@ def start(game):
         },
     }
     game.currentState = game.states['menu']
-    game.currentState['background'] = ImageHandler('Images/background.jpg', pygame.Vector2(0,0), game)
+    
+    Background(game=game)
     game.currentState['MenuOptions'] = [
-        ClickableText(game, pygame.Vector2(100, 100), click_play, (game), 'Play', game.fonts['medium']),
+        ClickableText(game, pygame.Vector2(100, 100), click_play, [game], 'Play', game.fonts['medium']),
         ClickableText(game, pygame.Vector2(100, 150), change_to_deck_builder, (game), 'Build Deck', game.fonts['medium']),
     ]
 
@@ -126,7 +129,7 @@ def update(game):
 def draw(game):
     if game.currentState['stateName'] == 'play':
         if game.currentState['selectedCard'] != NULL:
-            draw_outline_text(game,'X', game.currentState['selectedCard'].position.x + 100, game.currentState['selectedCard'].position.y +100)
+            draw_outline_text(game,'X', game.currentState['selectedCard'].transform_component.position.x + 100, game.currentState['selectedCard'].transform_component.position.y +100)
         pygame.draw.rect(game.screen, Colors.BLACK, game.currentState['turnRectangle'], 3)
 
 Game(start, update, draw)
