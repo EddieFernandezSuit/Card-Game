@@ -18,17 +18,20 @@ class DeckBuilderCard(Entity):
         self.rect = pygame.Rect(self.transform_component.position.x, self.transform_component.position.y, self.imageHandler.image.get_rect().width, self.imageHandler.image.get_rect().height)
         self.statsText = {}
         ncount = 0
-        smallFont = game.fonts['small']
-        textHeight = smallFont.size('A')[1]
-        self.statsText['Name'] = TextHandler(game, self.cardName, self.transform_component.position, pygame.Vector2(5,5 + textHeight * ncount), smallFont)
         for key in self.stats:
-            if self.stats[key] != 0 and key != 'Growth Type':
+            if key != 'Growth Type':
+                self.statsText[key] = TextHandler(game, key + ' ' +  str(self.stats[key]), (0,0), game.fonts['small'])
                 ncount += 1
-                self.statsText[key] = TextHandler(game, key + ' ' +  str(self.stats[key]), self.transform_component.position, pygame.Vector2(5,5 + textHeight * ncount), smallFont)
+
         self.statsText[self.stats['Growth Type']].color = Colors.LIGHTCYAN
         self.clickHandler = ClickComponent((), self)
     
     def on_click(self):
-        # deckCount = len(game.currentState['deckList'].cards)
-        # position = entities.DeckList.calculateCardPosition(self.game, deckCount)
         self.game.currentState['deckBox'].addCard(self.cardName)
+
+    def update(self):
+        ncount = 0
+        textHeight = self.game.fonts['small'].size('A')[1]
+        for key in self.statsText:
+            self.statsText[key].transform_component.position = self.transform_component.position + pygame.Vector2(5,5 + textHeight * ncount)
+            ncount += 1

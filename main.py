@@ -3,13 +3,12 @@ import sys
 import Colors
 import json
 from asyncio.windows_events import NULL
-from components.image_component import ImageComponent
-from components.transform_component import TransformComponent
 from entities.PassTurnButton import PassTurnButton
 from entities.Player import Player
 from entities.ClickableText import ClickableText
 from entities.DeckBuilderCard import DeckBuilderCard
 from entities.DeckBox import DeckBox
+from entities.TextHandler import TextHandler
 from entities.background import Background
 from Game import Game
 
@@ -36,7 +35,8 @@ def click_play(game):
         'turnRectangle': pygame.Rect(150, 0, 1150, 450),
         'selectedCard': NULL,
         'players': [Player(game,0), Player(game,1)],
-        'arrowFlies': 0
+        'arrowFlies': 0,
+        'select_text': TextHandler(game, 'X', pygame.Vector2(100, 100), game.fonts['big'])
     }
 
     game.currentState.update(state)
@@ -69,7 +69,7 @@ def create_deck_builder_state(game):
             game.currentState['cardsToAdd'].append(DeckBuilderCard(game, cards_in_matrix[i][j], (400 + j * (card_size + card_spacing), card_spacing + i * (card_size + card_spacing))))
 
     for key in deck_box_data:
-        deckList = game.currentState['deckBox'].addDeck(key)
+        deckList = game.currentState['deckBox'].addDeck()
         for card in deck_box_data[key]:
             deckList.cards.append(card)
 
@@ -110,7 +110,7 @@ def start(game):
     Background(game=game)
     game.currentState['MenuOptions'] = [
         ClickableText(game, pygame.Vector2(100, 100), click_play, [game], 'Play', game.fonts['medium']),
-        ClickableText(game, pygame.Vector2(100, 150), change_to_deck_builder, (game), 'Build Deck', game.fonts['medium']),
+        ClickableText(game, pygame.Vector2(100, 150), change_to_deck_builder, [game], 'Build Deck', game.fonts['medium']),
     ]
 
     create_deck_builder_state(game)
@@ -129,7 +129,9 @@ def update(game):
 def draw(game):
     if game.currentState['stateName'] == 'play':
         if game.currentState['selectedCard'] != NULL:
-            draw_outline_text(game,'X', game.currentState['selectedCard'].transform_component.position.x + 100, game.currentState['selectedCard'].transform_component.position.y +100)
+            game.currentState['select_text'].transform_component.position = game.currentState['selectedCard'].transform_component.position + (100,100)
+
+        game.currentState['select_text'].visible = game.currentState['selectedCard'] != NULL
         pygame.draw.rect(game.screen, Colors.BLACK, game.currentState['turnRectangle'], 3)
 
 Game(start, update, draw)

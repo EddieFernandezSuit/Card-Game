@@ -1,72 +1,79 @@
 {
     "Jungle Delver": {
-        "Growth Type":"Health",
-        "Mana":1,
-        "Damage":1,
-        "Health":1,
-        "Splash":0,
-        "Armor":0,
-        "Drain":0,
-        "Devour":0
+        "Name": "Jungle Delver",
+        "Growth Type": "Health",
+        "Mana": 1,
+        "Health": 1,
+        "Damage": 1,
+        "Splash": 0,
+        "Armor": 0,
+        "Drain": 0,
+        "Devour": 0
     },
     "Bird": {
-        "Growth Type":"Damage",
-        "Mana":2,
-        "Damage":1,
-        "Health":3,
-        "Splash":0,
-        "Armor":0,
-        "Drain":0,
-        "Devour":0
+        "Name": "Bird",
+        "Growth Type": "Damage",
+        "Mana": 2,
+        "Health": 3,
+        "Damage": 1,
+        "Splash": 0,
+        "Armor": 0,
+        "Drain": 0,
+        "Devour": 0
     },
-    "Turtle":{
-        "Growth Type":"Splash",
-        "Mana":3,
-        "Damage":2,
-        "Health":4,
-        "Splash":1,
-        "Armor":0,
-        "Drain":0,
-        "Devour":0
+    "Turtle": {
+        "Name": "Turtle",
+        "Growth Type": "Splash",
+        "Mana": 3,
+        "Health": 4,
+        "Damage": 2,
+        "Splash": 1,
+        "Armor": 0,
+        "Drain": 0,
+        "Devour": 0
     },
-    "Armadilo": {
-        "Growth Type":"Armor",
-        "Mana":4,
-        "Damage":1,
-        "Health":5,
-        "Splash":0,
-        "Armor":1,
-        "Drain":0,
-        "Devour":0
+    "Armadillo": {
+        "Name": "Armadillo",
+        "Growth Type": "Armor",
+        "Mana": 4,
+        "Health": 5,
+        "Damage": 1,
+        "Splash": 0,
+        "Armor": 1,
+        "Drain": 0,
+        "Devour": 0
     },
-    "Bats":{
-        "Growth Type":"Drain",
-        "Mana":5,
-        "Damage":4,
-        "Health":3,
-        "Splash":0,
-        "Armor":0,
-        "Drain":1,
-        "Devour":0
+    "Bats": {
+        "Name": "Bats",
+        "Growth Type": "Drain",
+        "Mana": 5,
+        "Health": 3,
+        "Damage": 4,
+        "Splash": 0,
+        "Armor": 0,
+        "Drain": 1,
+        "Devour": 0
     },
-    "Shark":{
-        "Growth Type":"Devour",
-        "Mana":6,
-        "Damage":3,
-        "Health":7,
-        "Splash":0,
-        "Armor":0,
-        "Drain":0,
-        "Devour":1
+    "Shark": {
+        "Name": "Shark",
+        "Growth Type": "Devour",
+        "Mana": 6,
+        "Health": 7,
+        "Damage": 3,
+        "Splash": 0,
+        "Armor": 0,
+        "Drain": 0,
+        "Devour": 1
     },
-    "TheOneTheSunTheGunTheOne":{
+    "TheOneTheSunTheGunTheOne": {
+        "Name": "TheOneTheSunTheGunTheOne",
         "Growth Type": "Health",
-        "Mana":7,
-        "Damage":2,
-        "Health":2,
-        "Splash":2,
-        "Armor":2,
-        "Drain":2,
-        "Devour":2
+        "Mana": 7,
+        "Health": 2,
+        "Damage": 2,
+        "Splash": 2,
+        "Armor": 2,
+        "Drain": 2,
+        "Devour": 2
     }
 }

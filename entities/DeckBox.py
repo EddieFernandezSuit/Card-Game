@@ -11,13 +11,10 @@ class DeckBox(Entity):
         super().__init__(game)
         self.deckLists = []
         self.textCardsInSelectedDeck = []
-        self.AddDeckButton = ClickableText(game, pygame.Vector2(10, 10), self.addDeck, ('deck'), 'Add Deck', game.fonts['medium'])
-        position = pygame.Vector2(deckUi['offset'], deckUi['offset'] + 4 * deckUi['yGap'])
-        self.selectedDeckText = TextHandler(game, 'Deck 0', position, pygame.Vector2(0,0), game.fonts['medium'])
+        self.AddDeckButton = ClickableText(game, pygame.Vector2(10, 10), self.addDeck, [], 'Add Deck', game.fonts['medium'])
+        position = pygame.Vector2(deckUi['offset'], deckUi['offset'] + 5 * deckUi['yGap'])
+        self.selectedDeckText = TextHandler(game, 'Deck 0', position, game.fonts['medium'])
         self.selectedDeckList = {}
-
-    def placeHolder():
-        pass
     
     def changeDeck(self, deckList):
         for text in self.textCardsInSelectedDeck:
@@ -26,18 +23,18 @@ class DeckBox(Entity):
         self.textCardsInSelectedDeck = []
         self.selectedDeckText.str = deckList.deckName
         self.selectedDeckList = deckList
-        i = 1
-        for card in deckList.cards:
-            self.textCardsInSelectedDeck.append(ClickableText(self.game, calculateCardPosition(self.game, i), self.removeOneCard, (card['name']), str(card['quantity']) + ' ' + card['name'], self.game.fonts['medium']))
-            i += 1
+
+        for j, card in enumerate(deckList.cards):
+            i = j + 2
+            self.textCardsInSelectedDeck.append(ClickableText(self.game, calculateCardPosition(self.game, i), self.removeOneCard, [card['name']], str(card['quantity']) + ' ' + card['name'], self.game.fonts['medium']))
         
-    def addDeck(self, game):
+    def addDeck(self):
         deckName = 'Deck ' + str(len(self.deckLists))
         deckList = DeckList(self.game, deckName)
         self.changeDeck(deckList)
         self.deckLists.append(self.selectedDeckList)
-        self.AddDeckButton.transform_component.position.y = 10 + len(self.deckLists) * 30
-        self.selectedDeckText.basePosition.y = 10 + (len(self.deckLists) + 2) * 30
+        self.AddDeckButton.textHandler.transform_component.position.y = 10 + len(self.deckLists) * 30
+        self.selectedDeckText.transform_component.position.y = 10 + (len(self.deckLists) + 3) * 30
         self.updateCardUiPosition()
         return deckList
     
@@ -51,7 +48,7 @@ class DeckBox(Entity):
         index = self.findIndexDictionary('name', cardName)
         if index == -1:
             self.selectedDeckList.cards.append({'quantity': 1, 'name': cardName})
-            self.textCardsInSelectedDeck.append(ClickableText(self.game, calculateCardPosition(self.game, len(self.selectedDeckList.cards)), self.removeOneCard, (cardName), '1 ' + cardName, self.game.fonts['medium']))
+            self.textCardsInSelectedDeck.append(ClickableText(self.game, calculateCardPosition(self.game, len(self.selectedDeckList.cards) + 1), self.removeOneCard, [cardName], '1 ' + cardName, self.game.fonts['medium']))
         else:
             self.selectedDeckList.cards[index]['quantity'] += 1
             self.textCardsInSelectedDeck[index].textHandler.str = str(self.selectedDeckList.cards[index]['quantity']) + ' ' + cardName
@@ -61,13 +58,11 @@ class DeckBox(Entity):
         self.textCardsInSelectedDeck[index].textHandler.str = str(self.selectedDeckList.cards[index]['quantity'] - 1) + ' ' + cardName
         self.selectedDeckList.cards[index]['quantity'] -= 1
         if self.selectedDeckList.cards[index]['quantity'] <= 0:
-            self.textCardsInSelectedDeck[index].delete()
-            del self.textCardsInSelectedDeck[index]
             del self.selectedDeckList.cards[index]
+            self.textCardsInSelectedDeck[index].delete()
+            self.textCardsInSelectedDeck.remove(self.textCardsInSelectedDeck[index])
             self.updateCardUiPosition()
 
     def updateCardUiPosition(self):
         for i, text in enumerate(self.textCardsInSelectedDeck):
-            newPos = calculateCardPosition(self.game, i + 1)
-            text.transformHandler.position.x = newPos.x
-            text.transformHandler.position.y = newPos.y
+            text.textHandler.transform_component.position = calculateCardPosition(self.game, i + 2)

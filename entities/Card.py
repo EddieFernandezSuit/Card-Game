@@ -29,13 +29,11 @@ class Card(Entity):
         self.imageHandler = ImageComponent(filename, self)
 
         self.statsText = {}
-        ncount = 0
-        font_height = game.fonts["medium"].size('A')[1]
-        self.statsText['Name'] = TextHandler(game, self.name, self.transform_component.position, pygame.Vector2(5,5 + font_height * ncount), self.game.fonts["medium"])
+        # self.statsText['Name'] = TextHandler(game, self.name, self.transform_component.position, pygame.Vector2(5,5 + font_height * ncount), self.game.fonts["medium"])
         for key, value in self.stats.items():
-            if value != 0 and key != 'Growth Type':
-                ncount += 1
-                self.statsText[key] = TextHandler(game, f'{key} {value}', self.transform_component.position, pygame.Vector2(5,5 + font_height * ncount), self.game.fonts["medium"])
+            if key != 'Growth Type' and value != 0:
+                self.statsText[key] = TextHandler(game, f'{key} {value}', (0,0), self.game.fonts["medium"])
+                # self.statsText[key] = TextHandler(game, f'{key} {value}', self.transform_component.position, pygame.Vector2(5,5 + font_height * ncount), self.game.fonts["medium"])
 
         self.statsText[self.stats['Growth Type']].color = Colors.LIGHTCYAN
 
@@ -95,8 +93,12 @@ class Card(Entity):
         self.game.currentState["gameObjects"].remove(self)
 
     def update(self):
-        # self.transform_component.position.x = self.transform_component.position.x
-        # self.transform_component.position.y = self.transform_component.position.y
+        font_height = self.game.fonts["medium"].size('A')[1]
+        ncount = 0
+        for key, value in self.statsText.items():
+            self.statsText[key].transform_component.position = self.transform_component.position + pygame.Vector2(5,5 + font_height * ncount)
+            ncount += 1
+
         if self.game.currentState['turn'] == self.playerNum and ((self.place == 'hand' and self.stats['Mana'] <= self.game.currentState['players'][self.playerNum].mana) or (self.place == 'field' and self.attackUsed == 0)):
             outline_thickness = 5
             self.canPlayRectangle.x = self.transform_component.position.x - outline_thickness
@@ -113,7 +115,7 @@ class Card(Entity):
         if target.stats['Health'] <= 0:
             i = 0
             for stat in self.stats:
-                if stat != 'Growth Type' and stat != 'Mana':
+                if stat != 'Growth Type' and stat != 'Mana' and stat != 'Name':
                     if self.stats['Devour'] > i:
                         found = False
                         for statText in self.statsText:
@@ -121,7 +123,6 @@ class Card(Entity):
                                 found = True
                         if found == False:
                             pass
-                            # self.statsText[stat] = TextHandler(self.game, stat + ' ' +  str(self.stats[stat]), self.position, pygame.Vector2(5,5 + self.game.fonts['medium'].size('A')[1] * (i+3)), self.game.fonts['medium'])
                         if stat == 'Health':
                             self.setStat(stat, self.stats[stat] + targetHealthBeforeDeath)
                         else:

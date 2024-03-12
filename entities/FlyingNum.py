@@ -8,7 +8,7 @@ class FlyingNum(Entity):
     def __init__(self, game, str, position, color) -> None:
         super().__init__(game)
         pos = pygame.Vector2(position.x, position.y)
-        self.textHandler = TextHandler(game, str, pos, pygame.Vector2(0,100), self.game.fonts["small"])
+        self.textHandler = TextHandler(game, str, pos + pygame.Vector2(0,100), self.game.fonts["small"])
         self.textHandler.color = color
         self.transform = TransformComponent(game, pos)
         self.transform.speed = 2
