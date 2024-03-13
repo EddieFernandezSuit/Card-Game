@@ -1,9 +1,9 @@
 from entities.entity import Entity
-from entities.DeckList import DeckList
-from entities.ClickableText import ClickableText
-from entities.DeckList import calculateCardPosition
-from entities.DeckList import deckUi
-from entities.TextHandler import TextHandler
+from entities.deck_list import DeckList
+from entities.clickable_text import ClickableText
+from entities.deck_list import calculateCardPosition
+from entities.deck_list import deckUi
+from entities.text import TextHandler
 import pygame
 
 class DeckBox(Entity):

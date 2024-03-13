@@ -2,38 +2,24 @@ import pygame
 import sys
 import Colors
 import json
-from asyncio.windows_events import NULL
-from entities.PassTurnButton import PassTurnButton
-from entities.Player import Player
-from entities.ClickableText import ClickableText
-from entities.DeckBuilderCard import DeckBuilderCard
-from entities.DeckBox import DeckBox
-from entities.TextHandler import TextHandler
+from entities.pass_turn_button import PassTurnButton
+from entities.deck_builder_card import DeckBuilderCard
+from entities.player import Player
+from entities.clickable_text import ClickableText
+from entities.deck_box import DeckBox
+from entities.text import TextHandler
 from entities.background import Background
 from Game import Game
 
-
-def draw_outline_text(game, str, x, y):
-    text_outline_surface = game.fonts["medium"].render(str, 1, Colors.BLACK)
-    text_surface = game.fonts["medium"].render(str, 1, Colors.WHITE)
-
-    offsets = [(1, 1), (-1, 1), (1, -1), (-1, -1)]
-
-    for offset_x, offset_y in offsets:
-        game.screen.blit(text_outline_surface, (x + offset_x, y + offset_y))
-    
-    game.screen.blit(text_surface, (x, y))
-
 def click_play(game):
     game.currentState = game.states['play']
-
     Background(game=game)
 
     state = {
         'passTurnButton': PassTurnButton(game),
         'turn': 0,
         'turnRectangle': pygame.Rect(150, 0, 1150, 450),
-        'selectedCard': NULL,
+        'selectedCard': None,
         'players': [Player(game,0), Player(game,1)],
         'arrowFlies': 0,
         'select_text': TextHandler(game, 'X', pygame.Vector2(100, 100), game.fonts['big'])
@@ -128,10 +114,10 @@ def update(game):
 
 def draw(game):
     if game.currentState['stateName'] == 'play':
-        if game.currentState['selectedCard'] != NULL:
+        if game.currentState['selectedCard'] != None:
             game.currentState['select_text'].transform_component.position = game.currentState['selectedCard'].transform_component.position + (100,100)
 
-        game.currentState['select_text'].visible = game.currentState['selectedCard'] != NULL
+        game.currentState['select_text'].visible = game.currentState['selectedCard'] != None
         pygame.draw.rect(game.screen, Colors.BLACK, game.currentState['turnRectangle'], 3)
 
 Game(start, update, draw)

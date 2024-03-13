@@ -1,11 +1,11 @@
 import csv
 import pygame
-from entities.Card import Card
+from entities.card import Card
 from Game import Game
-from entities.Zone import Zone
+from entities.zone import Zone
 from entities.entity import Entity
-from entities.TextHandler import TextHandler
-from entities.FlyingNum import FlyingNum
+from entities.text import TextHandler
+from entities.flying_num import FlyingNum
 import random
 import Colors
 import json
@@ -77,15 +77,12 @@ class Player(Entity):
     
     def setStat(self, statName, newStat):
         statChange = newStat - self.stats[statName]
-        if statChange != 0:
-            color = ''
-            if statChange < 0: color = Colors.RED
-            elif statChange > 0: color = Colors.GREEN
-            
-            damageNumberSpawnPosition = pygame.Vector2(self.healthText.transform_component.position.x, self.healthText.transform_component.position.y - 100)
-            FlyingNum(self.game, str(statChange ) + ' ' + statName, damageNumberSpawnPosition, color)
-            self.stats[statName] = newStat
-            self.healthText.str = statName + ' ' + str(self.stats[statName])
+
+        color = Colors.LIGHT_GREEN if statChange > 0 else Colors.LIGHT_RED
+
+        FlyingNum(self.game, str(statChange ) + ' ' + statName, self.healthText.transform_component.position, color)
+        self.stats[statName] = newStat
+        self.healthText.str = statName + ' ' + str(self.stats[statName])
 
     def setMana(self, value):
         statChange = value - self.mana

@@ -12,9 +12,9 @@ class TransformComponent(Entity):
         self.rect = pygame.Rect(self.position.x, self.position.y, width, height)
 
     def update(self):
+        self.vSpeed += self.gravity
+        self.position.y += self.vSpeed
         self.position += self.direction * self.speed
         self.rect.x = self.position.x
         self.rect.y = self.position.y
-        self.vSpeed += self.gravity
-        self.position.y += self.vSpeed
         

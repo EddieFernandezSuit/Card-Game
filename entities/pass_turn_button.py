@@ -1,4 +1,3 @@
-from asyncio.windows_events import NULL
 from entities.entity import Entity
 import pygame
 from components.image_component import ImageComponent
@@ -16,7 +15,7 @@ class PassTurnButton(Entity):
         self.turnRectangleY = [0, 450]
 
     def on_click(self):
-        self.game.currentState['selectedCard'] = NULL
+        self.game.currentState['selectedCard'] = None
         for player in self.game.currentState['players']:
             for card in player.field:
                 card.attackUsed = 0

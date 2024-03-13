@@ -1,7 +1,7 @@
 from entities.entity import Entity
 from components.transform_component import TransformComponent
 from components.image_component import ImageComponent
-from entities.TextHandler import TextHandler
+from entities.text import TextHandler
 from components.click_component import ClickComponent
 import json
 import pygame

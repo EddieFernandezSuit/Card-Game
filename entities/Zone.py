@@ -1,4 +1,3 @@
-from asyncio.windows_events import NULL
 from entities.entity import Entity
 from components.click_component import ClickComponent
 from components.transform_component import TransformComponent
@@ -12,7 +11,7 @@ class Zone(Entity):
         self.clicker = ClickComponent((), self)
 
     def on_click(self):
-        if self.isFull == 0 and self.game.currentState['selectedCard'] != NULL and self.playerNum == self.game.currentState['selectedCard'].playerNum and self.game.currentState['selectedCard'].place == 'hand':
+        if self.isFull == 0 and self.game.currentState['selectedCard'] != None and self.playerNum == self.game.currentState['selectedCard'].playerNum and self.game.currentState['selectedCard'].place == 'hand':
             self.game.currentState['selectedCard'].place = 'field'
             self.game.currentState['players'][self.game.currentState['selectedCard'].playerNum].field.append(self.game.currentState['selectedCard'])
             self.game.currentState['selectedCard'].transform_component.position.x = self.transform_component.position.x
@@ -24,4 +23,4 @@ class Zone(Entity):
                     self.game.currentState['players'][self.game.currentState['selectedCard'].playerNum].hand.pop(k)
                     break
             self.game.currentState['selectedCard'].emptyZone = self
-            self.game.currentState['selectedCard'] = NULL
+            self.game.currentState['selectedCard'] = None

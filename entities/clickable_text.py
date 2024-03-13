@@ -1,8 +1,7 @@
 
 import pygame
 from entities.entity import Entity
-from components.transform_component import TransformComponent
-from entities.TextHandler import TextHandler
+from entities.text import TextHandler
 from components.click_component import ClickComponent
 import Colors
 

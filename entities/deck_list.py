@@ -1,5 +1,5 @@
 from entities.entity import Entity
-from entities.ClickableText import ClickableText
+from entities.clickable_text import ClickableText
 import pygame
 
 deckUi = {
