@@ -2,7 +2,7 @@ import pygame
 from entities.entity import Entity
 
 class ClickComponent(Entity):
-    def __init__(self, args, entity=None):
+    def __init__(self, args=[], entity=None):
         super().__init__(entity.game)
         self.lastClick = 0
         self.args = args

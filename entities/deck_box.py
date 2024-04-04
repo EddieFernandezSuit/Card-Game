@@ -1,9 +1,9 @@
 from entities.entity import Entity
 from entities.deck_list import DeckList
 from entities.clickable_text import ClickableText
-from entities.deck_list import calculateCardPosition
+from entities.deck_list import calc_card_position
 from entities.deck_list import deckUi
-from entities.text import TextHandler
+from entities.text import Text
 import pygame
 
 class DeckBox(Entity):
@@ -11,9 +11,9 @@ class DeckBox(Entity):
         super().__init__(game)
         self.deckLists = []
         self.textCardsInSelectedDeck = []
-        self.AddDeckButton = ClickableText(game, pygame.Vector2(10, 10), self.addDeck, [], 'Add Deck', game.fonts['medium'])
+        self.AddDeckButton = ClickableText(game, pygame.Vector2(10, 10), self.addDeck, [], 'Add Deck')
         position = pygame.Vector2(deckUi['offset'], deckUi['offset'] + 5 * deckUi['yGap'])
-        self.selectedDeckText = TextHandler(game, 'Deck 0', position, game.fonts['medium'])
+        self.selectedDeckText = Text(game, 'Deck 0', position)
         self.selectedDeckList = {}
     
     def changeDeck(self, deckList):
@@ -26,14 +26,14 @@ class DeckBox(Entity):
 
         for j, card in enumerate(deckList.cards):
             i = j + 2
-            self.textCardsInSelectedDeck.append(ClickableText(self.game, calculateCardPosition(self.game, i), self.removeOneCard, [card['name']], str(card['quantity']) + ' ' + card['name'], self.game.fonts['medium']))
+            self.textCardsInSelectedDeck.append(ClickableText(self.game, calc_card_position(self.game, i), self.removeOneCard, [card['name']], str(card['quantity']) + ' ' + card['name']))
         
     def addDeck(self):
         deckName = 'Deck ' + str(len(self.deckLists))
         deckList = DeckList(self.game, deckName)
         self.changeDeck(deckList)
         self.deckLists.append(self.selectedDeckList)
-        self.AddDeckButton.textHandler.transform_component.position.y = 10 + len(self.deckLists) * 30
+        self.AddDeckButton.text.transform_component.position.y = 10 + len(self.deckLists) * 30
         self.selectedDeckText.transform_component.position.y = 10 + (len(self.deckLists) + 3) * 30
         self.updateCardUiPosition()
         return deckList
@@ -48,14 +48,14 @@ class DeckBox(Entity):
         index = self.findIndexDictionary('name', cardName)
         if index == -1:
             self.selectedDeckList.cards.append({'quantity': 1, 'name': cardName})
-            self.textCardsInSelectedDeck.append(ClickableText(self.game, calculateCardPosition(self.game, len(self.selectedDeckList.cards) + 1), self.removeOneCard, [cardName], '1 ' + cardName, self.game.fonts['medium']))
+            self.textCardsInSelectedDeck.append(ClickableText(self.game, calc_card_position(self.game, len(self.selectedDeckList.cards) + 1), self.removeOneCard, [cardName], '1 ' + cardName))
         else:
             self.selectedDeckList.cards[index]['quantity'] += 1
-            self.textCardsInSelectedDeck[index].textHandler.str = str(self.selectedDeckList.cards[index]['quantity']) + ' ' + cardName
+            self.textCardsInSelectedDeck[index].text.str = str(self.selectedDeckList.cards[index]['quantity']) + ' ' + cardName
     
     def removeOneCard(self, cardName):
         index = self.findIndexDictionary('name', cardName)
-        self.textCardsInSelectedDeck[index].textHandler.str = str(self.selectedDeckList.cards[index]['quantity'] - 1) + ' ' + cardName
+        self.textCardsInSelectedDeck[index].text.str = str(self.selectedDeckList.cards[index]['quantity'] - 1) + ' ' + cardName
         self.selectedDeckList.cards[index]['quantity'] -= 1
         if self.selectedDeckList.cards[index]['quantity'] <= 0:
             del self.selectedDeckList.cards[index]
@@ -65,4 +65,4 @@ class DeckBox(Entity):
 
     def updateCardUiPosition(self):
         for i, text in enumerate(self.textCardsInSelectedDeck):
-            text.textHandler.transform_component.position = calculateCardPosition(self.game, i + 2)
+            text.text.transform_component.position = calc_card_position(self.game, i + 2)

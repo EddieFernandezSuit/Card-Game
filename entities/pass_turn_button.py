@@ -10,23 +10,31 @@ class PassTurnButton(Entity):
         self.handlers = []
         size = 100
         self.transform_component = TransformComponent(game, pygame.Vector2(game.SCREEN_WIDTH - 200, game.SCREEN_HEIGHT/2 - 50), width=size, height=size)
-        self.imageHandler = ImageComponent('images/PassTurn.png', self)
-        self.clicker = ClickComponent((), self)
-        self.turnRectangleY = [0, 450]
+        self.image_component = ImageComponent(filePath='images/PassTurn.png', entity=self)
+        self.click_component = ClickComponent((), self)
+        self.y_position_turn_rectangle = [0, 450]
+        self.sound = pygame.mixer.Sound('sounds/metal_card_shuffle.wav')
 
     def on_click(self):
         self.game.currentState['selectedCard'] = None
+        self.sound.play()
         for player in self.game.currentState['players']:
             for card in player.field:
                 card.attackUsed = 0
         
         self.game.currentState['turn'] = int(self.game.currentState['turn'] == 0)
-        self.game.currentState['players'][self.game.currentState['turn']].totalMana += 1
-        self.game.currentState['players'][self.game.currentState['turn']].setMana(self.game.currentState['players'][self.game.currentState['turn']].totalMana)
+        turn = self.game.currentState['turn']
+        turn_player = self.game.currentState['players'][turn]
+        turn_player.totalMana += 1
+        turn_player.stats_component.set_stat('Mana', turn_player.totalMana)
 
-        if len(self.game.currentState['players'][self.game.currentState['turn']].hand) < 5 and len(self.game.currentState['players'][self.game.currentState['turn']].deck) > 0:
-            self.game.currentState['players'][self.game.currentState['turn']].drawCard()
-        self.game.currentState['turnRectangle'].y = self.turnRectangleY[self.game.currentState['turn']]
+        if len(turn_player.hand) < 5 and turn_player.deck:
+            turn_player.draw_card()
+        
+        self.game.currentState['turnRectangle'].y = self.y_position_turn_rectangle[turn]
 
-
+    def on_delete(self):
+        self.transform_component.delete()
+        self.image_component.delete()
+        self.click_component.delete()
 

@@ -13,7 +13,7 @@ class DeckList(Entity):
         self.cards = []
         self.deckName = deckName
         deckNumber = len(game.currentState['deckBox'].deckLists)
-        self.nameText = ClickableText(self.game, pygame.Vector2(deckUi['offset'], deckUi['offset'] + deckNumber * deckUi['yGap']), self.onClickDeckName, [game], deckName, self.game.fonts['medium'])
+        self.nameText = ClickableText(self.game, pygame.Vector2(deckUi['offset'], deckUi['offset'] + deckNumber * deckUi['yGap']), self.onClickDeckName, [game], deckName)
     
     def onClickDeckName(self, game):
         self.game.currentState['deckBox'].changeDeck(self)
@@ -23,5 +23,5 @@ class DeckList(Entity):
         super().delete()
         del self.nameText
     
-def calculateCardPosition(game, index):
+def calc_card_position(game, index):
     return pygame.Vector2(deckUi['offset'], (len(game.currentState['deckBox'].deckLists) + 2) * deckUi['yGap'] + deckUi['offset'] + index * deckUi['yGap'])

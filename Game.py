@@ -1,5 +1,6 @@
 import pygame
 import Colors
+import sys
 
 class Game:
     def __init__(self, start, update, draw):
@@ -9,11 +10,7 @@ class Game:
         self.draw = draw
         self.SCREEN_WIDTH = 1600
         self.SCREEN_HEIGHT = 900
-        self.fonts = {
-            'small': pygame.font.SysFont("freesansbold", 25),
-            'medium': pygame.font.SysFont("freesansbold", 40),
-            "big": pygame.font.SysFont("freesansbold", 60)
-        }
+        self.fonts = {name: pygame.font.SysFont("freesansbold", size) for name, size in {'small': 25, 'medium': 40, 'large': 60}.items()}
         self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
         FPS = 60
         fpsClock = pygame.time.Clock()
@@ -24,3 +21,11 @@ class Game:
             draw(self)
             pygame.display.update()
             fpsClock.tick(FPS)
+
+    def handle_events(self, key_actions):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key in key_actions:
+                    key_actions[event.key]()

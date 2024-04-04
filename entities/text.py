@@ -1,33 +1,29 @@
-from requests import delete
-import Colors
 from Colors import *
 import pygame
-
 from entities.entity import Entity
 from components.transform_component import TransformComponent
+from components.image_component import ImageComponent
 
-
-class TextHandler(Entity):
-    def __init__(self, game, str, position, font) -> None:
-        super().__init__(game)
+class Text(Entity):
+    def on_init(self, str='', position=(0,0), font_size='medium') -> None:
         self.str = str
-        self.font = font
+        self.font = self.game.fonts[font_size]
         width, height = self.font.size(self.str)
-        self.transform_component = TransformComponent(game, position, width=width, height=height)
         self.color = WHITE
-        self.text_surface = self.font.render(self.str, 1 , self.color)
         self.visible = True
+        font_surface = self.font.render(self.str, 1, self.color)
+        self.add_components([TransformComponent(self.game, position, width=width, height=height)], list_of_components=[ImageComponent(image=font_surface, entity=self) for _ in range(5)])
 
     def update(self):
         if self.visible:
-            for i in range(4):
-                outlineSize = 1
-                outline_peice_surface = self.font.render(self.str, 1, Colors.BLACK)
-                position = pygame.Vector2(self.transform_component.position.x + (i % 2 * 2 - 1) * outlineSize, self.transform_component.position.y + (i // 2 * 2 - 1) * outlineSize)
-                self.game.screen.blit(outline_peice_surface, position)
-            
-            self.text_surface = self.font.render(self.str, 1 , self.color)
-            self.game.screen.blit(self.text_surface, self.transform_component.position)
+            positions = [pygame.Vector2(x, y) for (x, y) in [(-1, -1), (-1, 1), (1, -1), (1, 1), (0, 0)]]
 
-    def delete(self):
-        self.game.currentState['gameObjects'].remove(self)
+            for index, position in enumerate(positions):
+                color = self.color if index == 4 else BLACK
+                self.image_components[index].position_offset = position
+                self.image_components[index].image = self.font.render(self.str, 1, color)
+                  
+            self.transform_component.rect.size = self.font.size(self.str)
+        else:
+            for image_component in self.image_components:
+                image_component.visible = False
