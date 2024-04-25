@@ -1,9 +1,15 @@
+import inspect
 
 class Entity:
     def __init__(self, game, *args, **kwargs) -> None:
         self.game = game
+        self.__dict__.update(kwargs)
         self.game.currentState['gameObjects'].append(self)
         self.components = []
+        # frame = inspect.currentframe()
+        # args, _, _, values = inspect.getargvalues(frame)
+        # self.__dict__.update(values)
+        # print(values)
         self.on_init(*args, **kwargs)
     
     def on_init(self, *args, **kwargs):pass

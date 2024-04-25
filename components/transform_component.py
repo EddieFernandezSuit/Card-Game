@@ -3,14 +3,11 @@ import pygame
 
 class TransformComponent(Entity):
     def on_init(self, position=(0,0), width = 0, height = 0, size=None, uniform_size=None, speed = 0, rotation=0, direction=pygame.Vector2(0,0)):
+        self.__dict__.update(locals())
         self.position = pygame.Vector2(position)
         if size: width, height = size
         if uniform_size: width, height = uniform_size, uniform_size
-
         self.rect = pygame.Rect(self.position.x, self.position.y, width, height)
-        self.direction = direction
-        self.rotation = rotation
-        self.speed = speed
         self.gravity = 0
         self.dy = 0
 

@@ -1,26 +1,30 @@
 import pygame
-import Colors
+from constants import *
 import sys
+from entities.text import Text
 
 class Game:
     def __init__(self, start, update, draw):
+        self.__dict__.update(locals())
         pygame.init()
-        self.start = start
-        self.update = update
-        self.draw = draw
-        self.SCREEN_WIDTH = 1600
-        self.SCREEN_HEIGHT = 900
+        self.SCREEN_WIDTH = 1500
+        self.SCREEN_HEIGHT = 700
         self.fonts = {name: pygame.font.SysFont("freesansbold", size) for name, size in {'small': 25, 'medium': 40, 'large': 60}.items()}
         self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
-        FPS = 60
-        fpsClock = pygame.time.Clock()
+        FPS = 120
+        clock = pygame.time.Clock()
         start(self)
+        fps_text = Text(self, 'FPS: 0', (self.SCREEN_WIDTH - 100, 10), 'small', WHITE)
         while True:
-            self.screen.fill(Colors.GREY)
+            self.screen.fill(GREY)
+            fps_text.str = f'FPS: {int(clock.get_fps())}'
             update(self)
             draw(self)
+
             pygame.display.update()
-            fpsClock.tick(FPS)
+            clock.tick(FPS)
+
+
 
     def handle_events(self, key_actions):
         for event in pygame.event.get():

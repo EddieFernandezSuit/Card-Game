@@ -7,8 +7,8 @@ from entities.entity import Entity
 from entities.flying_num import FlyingNum
 from entities.arow import Arrow
 from entities.play_card_rectangle import PlayCardRectangle
+from constants import *
 import pygame
-import Colors
 import json
 
 class Card(Entity):
@@ -36,7 +36,7 @@ class Card(Entity):
             for key, value in self.stats.items() 
             if key != 'Growth Type' and value != 0 and key != 'base_health'}
 
-        self.statsText[self.stats['Growth Type']].color = Colors.LIGHTCYAN
+        self.statsText[self.stats['Growth Type']].color = LIGHTCYAN
 
         self.play_rectangle = PlayCardRectangle(self.game, self)
 

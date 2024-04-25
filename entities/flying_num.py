@@ -6,8 +6,7 @@ import random
 
 class FlyingNum(Entity):
     def on_init(self, str, position, color) -> None:
-        self.text = Text(self.game, str, position)
-        self.text.color = color
+        self.text = Text(self.game, str, position, color=color)
         x_range =.5
         self.transform_component = self.text.transform_component
         self.transform_component.set_attributes(speed=2, gravity=0.05, direction=pygame.Vector2(random.uniform(-x_range, x_range), -1).normalize())

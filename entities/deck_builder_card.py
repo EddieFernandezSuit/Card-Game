@@ -3,9 +3,9 @@ from components.transform_component import TransformComponent
 from components.image_component import ImageComponent
 from entities.text import Text
 from components.click_component import ClickComponent
+from constants import *
 import json
 import pygame
-import Colors
 
 class DeckBuilderCard(Entity):
     def on_init(self, cardName, position: tuple) -> None:
@@ -26,7 +26,7 @@ class DeckBuilderCard(Entity):
                 self.statsText[key] = Text(self.game, key + ' ' +  str(self.stats[key]),font_size= 'small')
                 ncount += 1
 
-        self.statsText[self.stats['Growth Type']].color = Colors.LIGHTCYAN
+        self.statsText[self.stats['Growth Type']].color = LIGHTCYAN
 
     def on_click(self):
         self.game.currentState['deckBox'].addCard(self.cardName)
@@ -37,3 +37,6 @@ class DeckBuilderCard(Entity):
         for key in self.statsText:
             self.statsText[key].transform_component.position = self.transform_component.position + pygame.Vector2(5,5 + textHeight * ncount)
             ncount += 1
+            
+    on_init.__annotations__ = {'cardName': str, 'position': 'Tuple[int, int]', 'return': None}
+    

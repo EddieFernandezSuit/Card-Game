@@ -1,7 +1,7 @@
 from entities.entity import Entity
 from components.transform_component import TransformComponent
 import pygame
-from Colors import *
+from constants import *
 
 class PlayCardRectangle(Entity):
     def on_init(self, card) -> None:

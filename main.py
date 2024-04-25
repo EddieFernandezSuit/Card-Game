@@ -1,7 +1,6 @@
 import pygame
-import Colors
 import json
-from constants import FONTS
+from constants import *
 from entities.pass_turn_button import PassTurnButton
 from entities.deck_builder_card import DeckBuilderCard
 from entities.player import Player
@@ -52,24 +51,24 @@ def create_deck_builder_state(game):
 
     card_size = 200
     card_spacing = 10
-    
     card_offset = card_size + card_spacing
-    for i, row in enumerate(cards_in_matrix):
-        for j, card in enumerate(row):
-            game.currentState['cardsToAdd'].append(DeckBuilderCard(game, card, (400 + j * card_offset, card_spacing + i * card_offset)))
+
+    # for i, row in enumerate(cards_in_matrix):
+    #     for j, card in enumerate(row):
+    #         game.currentState['cardsToAdd'].append(DeckBuilderCard(game, card, (400 + j * card_offset, card_spacing + i * card_offset)))
+
+    game.currentState['cardsToAdd'].extend([DeckBuilderCard(game, card, (400 + j * card_offset, card_spacing + i * card_offset)) for i, row in enumerate(cards_in_matrix) for j, card in enumerate(row)])
+    
             
-    for key in deck_box_data:
-        deckList = game.currentState['deckBox'].addDeck()
-        for card in deck_box_data[key]:
-            deckList.cards.append(card)
+    for key, deck_cards in deck_box_data.items():
+        deck_list = game.currentState['deckBox'].addDeck()
+        deck_list.cards.extend(deck_cards)
 
     game.currentState['save and exit'] = ClickableText(game, pygame.Vector2(10, game.SCREEN_HEIGHT - FONTS['large'].size('A')[1] - 10), save_and_exit, [game], 'Save and Exit')
     game.currentState = game.states['menu']
 
 def save_and_exit(game):
-    deckBox = {}
-    for deckList in game.currentState['deckBox'].deckLists:
-        deckBox[deckList.deckName] = deckList.cards
+    deckBox = {deckList.deckName: deckList.cards for deckList in game.currentState['deckBox'].deckLists}
     
     with open('DeckBox.json', 'w') as db:
         json.dump(deckBox, db) 
@@ -117,13 +116,10 @@ def update(game):
 
 def draw(game):
     if game.currentState['stateName'] == 'play':
-        is_card_selected = game.currentState['selectedCard'] != None
-        if is_card_selected:
+        if game.currentState['selectedCard']:
             game.currentState['select_text'].transform_component.position = pygame.Vector2(game.currentState['selectedCard'].transform_component.rect.center)
 
-        game.currentState['select_text'].visible = is_card_selected
-        pygame.draw.rect(game.screen, Colors.BLACK, game.currentState['turnRectangle'], 3)
+        game.currentState['select_text'].visible = game.currentState['selectedCard'] is not None
+        pygame.draw.rect(game.screen, BLACK, game.currentState['turnRectangle'], 3)
 
 GAME = Game(start, update, draw)
-
-

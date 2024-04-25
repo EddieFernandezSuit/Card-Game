@@ -1,6 +1,6 @@
 from entities.entity import Entity
 from entities.flying_num import FlyingNum
-from Colors import *
+from constants import *
 from entities.text import Text
 
 

@@ -1,10 +1,9 @@
 
 import pygame
-from constants import FONTS
+from constants import *
 from entities.entity import Entity
 from entities.text import Text
 from components.click_component import ClickComponent
-import Colors
 
 class ClickableText(Entity):
     """
@@ -33,7 +32,7 @@ class ClickableText(Entity):
 
     def update(self):
         mouse_position = pygame.mouse.get_pos()
-        self.text.color = Colors.CYAN if self.transform_component.rect.collidepoint(pygame.Vector2(mouse_position)) else Colors.WHITE
+        self.text.color = CYAN if self.transform_component.rect.collidepoint(pygame.Vector2(mouse_position)) else WHITE
 
     def on_delete(self):
         self.text.delete()
