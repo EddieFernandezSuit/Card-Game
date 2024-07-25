@@ -8,7 +8,6 @@ class PlayCardRectangle(Entity):
         self.card = card
         self.outline_thickness = 5
         self.transform_component = TransformComponent(self.game, self.card.transform_component.position - (self.outline_thickness, self.outline_thickness), uniform_size=card.size + self.outline_thickness * 2)
-
         self.color = LIGHTCYAN
 
     def draw(self):

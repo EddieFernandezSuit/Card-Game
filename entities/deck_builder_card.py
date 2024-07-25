@@ -13,11 +13,9 @@ class DeckBuilderCard(Entity):
         self.stats = cardData[cardName]
         self.cardName = cardName
         self.add_components(
-            [
-                TransformComponent(self.game, position),
-                ImageComponent(filePath='images/' + self.cardName.lower() + '.jpg', entity=self),
-                ClickComponent(entity=self)
-            ]
+            TransformComponent(self.game, position),
+            ImageComponent(self.game, filePath='images/' + self.cardName.lower() + '.jpg', entity=self),
+            ClickComponent(entity=self)
         )
         self.statsText = {}
         ncount = 0

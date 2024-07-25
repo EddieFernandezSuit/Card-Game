@@ -10,7 +10,7 @@ import random
 import json
 
 class Player(Entity):
-    def __init__(self, game, num) -> None:
+    def __init__(self, game, num, cards_in_deck=[]) -> None:
         super().__init__(game)
 
         self.impaledArrows = []
@@ -28,7 +28,9 @@ class Player(Entity):
         self.zones = []
         self.num = num
 
-        ManaUI = [(game.SCREEN_WIDTH - 250, 50), (game.SCREEN_WIDTH - 250, game.SCREEN_HEIGHT-100)]
+        mana_ui_x_offset = 250
+        mana_ui_x = game.SCREEN_WIDTH - mana_ui_x_offset
+        ManaUI = [(mana_ui_x, 50), (mana_ui_x, game.SCREEN_HEIGHT - 100)]
 
         self.statsText = {
             'Health': Text(game, position=ManaUI[self.num], font_size='large'),
@@ -39,24 +41,42 @@ class Player(Entity):
 
         self.zones = [Zone((card_position(self.game, y, num, 'field')), num, game) for y in range(5)]
 
-        with open('DeckBox.json') as deckboxFile:
-            deckBoxData = json.load(deckboxFile)
-            deck = deckBoxData[list(deckBoxData.keys())[num]]
-            for card in deck:
-                quantity = card['quantity']
-                card_name = card['name']
-                for x in range(int(quantity)):
-                    self.deck.append(Card(self.game, self.num, card_name))
-
-        random.shuffle(self.deck)
+        if cards_in_deck:
+            self.create_deck_using_names(cards_in_deck)
+        else:
+            self.create_deck_using_json('DeckBox.json')
+        
+        self.send_deck()
 
         for x in range(4):
             self.draw_card()
+
+
+    def send_deck(self):
+        card_names_deck = self.convert_deck_to_card_names()
+        self.game.currentState['client'].send({'deck': card_names_deck})
     
+    def create_deck_using_names(self, list_of_card_names):
+        for card_name in list_of_card_names:
+            self.deck.append(Card(self.game, self.num, card_name))
+
+    def create_deck_using_json(self, file_name):
+        with open(file_name) as deckboxFile:
+            deckBoxData = json.load(deckboxFile)
+            if self.num < len(deckBoxData):
+                deck = deckBoxData[list(deckBoxData.keys())[self.num]]
+                for card in deck:
+                    quantity = card['quantity']
+                    card_name = card['name']
+                    for x in range(int(quantity)):
+                        self.deck.append(Card(self.game, self.num, card_name))
+        random.shuffle(self.deck)
+
     def draw_card(self):
-        self.hand.append(self.deck[-1])
-        self.deck.pop(-1)
-        self.hand[-1].transform_component.position = card_position(self.game, (len(self.hand)-1), self.num)
+        if self.deck:
+            self.hand.append(self.deck[-1])
+            self.deck.pop(-1)
+            self.hand[-1].transform_component.position = card_position(self.game, (len(self.hand)-1), self.num)
         
     def update(self):
         self.statsText['Health'].str = f'Health: {self.stats["Health"]}'
@@ -66,7 +86,12 @@ class Player(Entity):
 
     def delete(self):
         print(f'Player {self.num + 1} wins')
+        self.game.currentState['background_music'].stop()
         self.game = Game(self.game.start, self.game.update, self.game.draw)
+    
+    def convert_deck_to_card_names(self):
+        list_of_card_names = [card.name for card in self.deck]
+        return list_of_card_names
 
 def card_position(game, x_index, player_num, place = 'hand'):
     """

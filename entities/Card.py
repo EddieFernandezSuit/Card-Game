@@ -4,7 +4,6 @@ from entities.text import Text
 from components.transform_component import TransformComponent
 from components.click_component import ClickComponent
 from entities.entity import Entity
-from entities.flying_num import FlyingNum
 from entities.arow import Arrow
 from entities.play_card_rectangle import PlayCardRectangle
 from constants import *
@@ -14,6 +13,7 @@ import json
 class Card(Entity):
     def on_init(self, playerNum, name) -> None:
         card_data = json.load(open('cardData.json'))
+        self.name = name
         self.stats = card_data[name]
         self.stats['base_health'] = self.stats['Health']
         self.playerNum = playerNum
@@ -25,18 +25,20 @@ class Card(Entity):
         self.impaledArrows = []
         filename = 'images/' + name.lower() + '.jpg'
 
-        self.add_components([
+        self.add_components(
             TransformComponent(self.game, (self.game.SCREEN_WIDTH + 100,0), width=self.size, height=self.size),
-            ImageComponent(filePath=filename, entity=self),
+            ImageComponent(self.game, filePath=filename, entity=self),
             ClickComponent(entity=self),
             StatsComponent(self, self.stats)
-        ])
+        )
 
         self.statsText = {key: Text(self.game, f'{value}' if key == 'Name' else f'{key} {value}')
             for key, value in self.stats.items() 
             if key != 'Growth Type' and value != 0 and key != 'base_health'}
 
         self.statsText[self.stats['Growth Type']].color = LIGHTCYAN
+        # self.statsText['Health'].color = GREEN
+        # self.statsText['Damage'].color = RED
 
         self.play_rectangle = PlayCardRectangle(self.game, self)
 
@@ -98,9 +100,13 @@ class Card(Entity):
     def update(self):
         font_height = self.game.fonts["medium"].size('A')[1]
         ncount = 0
-        for key, value in self.statsText.items():
-            self.statsText[key].transform_component.position = self.transform_component.position + pygame.Vector2(5,5 + font_height * ncount)
-            ncount += 1
+        try:
+            for key, value in self.statsText.items():
+                self.statsText[key].transform_component.position = self.transform_component.position + pygame.Vector2(5,5 + font_height * ncount)
+                ncount += 1
+        except Exception as e:
+            print(e)
+            print(self)
 
     def deal_damage(self, target):
         true_damage = max(0, self.stats["Damage"] - target.stats['Armor'])
@@ -112,8 +118,10 @@ class Card(Entity):
         
         if target.stats['Health'] <= 0:
             devourable_stats = [stat for stat in list(self.stats) if stat not in ['Growth Type', 'Mana', 'Name', 'base_health'] and self.stats[stat] > 0][:self.stats['Devour']]
+            # print(target.stats)
             for stat in devourable_stats:
-                self.stats_component.set_stat(stat, self.stats[stat] + (target.stats['base_health'] if stat == 'Health' else target.stats[stat]))
+                if 'base_health' in target.stats:
+                    self.stats_component.set_stat(stat, self.stats[stat] + (target.stats['base_health'] if stat == 'Health' else target.stats[stat]))
             
             self.stats_component.set_stat(self.stats['Growth Type'], self.stats[self.stats['Growth Type']] + 1)
             

@@ -11,7 +11,7 @@ class Text(Entity):
         self.font = self.game.fonts[font_size]
         font_surface = self.font.render(self.str, 1, self.color)
         width, height = self.font.size(self.str)
-        self.add_components([TransformComponent(self.game, position, width=width, height=height)], list_of_components=[ImageComponent(image=font_surface, entity=self) for _ in range(5)])
+        self.add_components(TransformComponent(self.game, position, width=width, height=height), [ImageComponent(self.game, image=font_surface, entity=self) for _ in range(5)])
 
     def update(self):
         if self.visible:
@@ -23,6 +23,6 @@ class Text(Entity):
                 self.image_components[index].image = self.font.render(self.str, 1, color)
                   
             self.transform_component.rect.size = self.font.size(self.str)
-        else:
-            for image_component in self.image_components:
-                image_component.visible = False
+            
+        for image_component in self.image_components:
+            image_component.visible = self.visible

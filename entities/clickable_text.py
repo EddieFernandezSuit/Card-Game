@@ -23,7 +23,7 @@ class ClickableText(Entity):
         transform_component (TransformComponent): The transform component of the text entity.
         click_component (ClickComponent): The click component of the text entity.
     """
-    def on_init(self, position, on_click, args, str, font_size='medium'):
+    def on_init(self, position=(0,0), on_click=lambda : (), args = [], str ='', font_size='medium'):
         self.on_click = on_click
         self.text = Text(self.game, str, position, font_size)
         self.transform_component = self.text.transform_component

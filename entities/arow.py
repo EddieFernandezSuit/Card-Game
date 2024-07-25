@@ -12,8 +12,8 @@ class Arrow(Entity):
 
         self.arrow_sound = pygame.mixer.Sound('sounds/arrow-impact.mp3')
         self.add_components(
-            [TransformComponent(self.game, self.origin_object.transform_component.rect.center, speed=50),
-            ImageComponent(filePath='Images/arrow.jpg', entity=self)]
+            TransformComponent(self.game, self.origin_object.transform_component.rect.center, speed=50),
+            ImageComponent(self.game, filePath='Images/arrow.jpg', entity=self)
         )
 
         self.transform_component.direction = (pygame.Vector2(self.target_object.transform_component.rect.center) - self.transform_component.rect.center).normalize()

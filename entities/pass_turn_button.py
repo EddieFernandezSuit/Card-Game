@@ -10,7 +10,7 @@ class PassTurnButton(Entity):
         self.handlers = []
         size = 100
         self.transform_component = TransformComponent(game, pygame.Vector2(game.SCREEN_WIDTH - 200, game.SCREEN_HEIGHT/2 - 50), width=size, height=size)
-        self.image_component = ImageComponent(filePath='images/PassTurn.png', entity=self)
+        self.image_component = ImageComponent(game, filePath='images/PassTurn.png', entity=self)
         self.click_component = ClickComponent((), self)
         self.y_position_turn_rectangle = [0, 450]
         self.sound = pygame.mixer.Sound('sounds/metal_card_shuffle.wav')

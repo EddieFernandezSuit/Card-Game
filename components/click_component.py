@@ -9,6 +9,7 @@ class ClickComponent(Entity):
         self.entity = entity
     
     def update(self):
-        if pygame.mouse.get_pressed()[0] and self.lastClick == 0 and self.entity.transform_component.rect.collidepoint(pygame.mouse.get_pos()):
-            self.entity.on_click(*self.args)
-        self.lastClick = pygame.mouse.get_pressed()[0]
+        for event in self.game.events:
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # 1 is the left mouse button
+                if self.entity.transform_component.rect.collidepoint(event.pos):
+                    self.entity.on_click(*self.args)

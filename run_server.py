@@ -1,0 +1,3 @@
+import network
+
+network.Server()

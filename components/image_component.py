@@ -11,11 +11,9 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 class ImageComponent(Entity):
-    def __init__(self, filePath=None, image=None, entity=None, visible=True) -> None:
-        super().__init__(entity.game)
-        self.entity = entity
-        self.image = pygame.image.load(resource_path(filePath)).convert_alpha() if filePath else image
-        self.visible = visible
+    def on_init(self, filePath=None, image=None, entity=None, visible=True) -> None:
+        self.set_attributes(locals())
+        if filePath: self.image = pygame.image.load(resource_path(filePath)).convert_alpha()
         self.position_offset = pygame.Vector2(0,0)
 
     def update(self):
