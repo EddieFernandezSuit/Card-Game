@@ -3,7 +3,6 @@ import threading
 import json
 import time
 
-data_size = 512
 
 def start_thread(target, args=()):
     threading.Thread(target=target, args=args).start()
@@ -25,13 +24,15 @@ def send(client_obj, data):
     send_raw(client, json.dumps({**data, 'timestamp': time.time()}).encode() + b'\n')
 
 def receive_raw(socket_obj):
-    return socket_obj.recv(data_size)
+    DATA_SIZE = 512
+    return socket_obj.recv(DATA_SIZE)
 
 def send_raw(socket_obj, data):
     socket_obj.sendall(data)
 
-HOST = '10.0.0.237'
-PORT = 55555
+HOST = ''
+# HOST = '10.0.0.237'
+PORT = 7777
 
 class Server:
     def __init__(self):
@@ -50,23 +51,16 @@ class Server:
 
 
     def client_thread(self, client, id):
-        self.setup_client_id(client, id)
+        self.setup_client_id(client)
         while True:
             data = receive_raw(client)
             print(data)
             if data:
                 [send_raw(c, data) for c in self.clients if c != client]
     
-
-    def setup_client_id(self, client, id):
-        is_setup_complete = False
-        while is_setup_complete == False:
-            print('setting up')
-            data = receive(client)
-            if 'is_setup_complete' in data:
-                is_setup_complete = data['is_setup_complete']
-            send(client, {'client_id': id})
-        print('setup_complete')
+    def setup_client_id(self, client):
+        client_id = len(self.clients) - 1
+        send(client, {'client_id': client_id})
 
 
 class Client:
@@ -84,19 +78,11 @@ class Client:
             print(2, client_state)
             if client_state:
                 self.update_game_state(client_state)
-    
-    def setup_client_id(self):
-        self.send({})
-        is_setup_complete = False
-        while is_setup_complete == False:
-            print('setting up')
-            setup = receive(self.client)
-            if 'client_id' in setup:
-                self.client_id = setup['client_id']
-                is_setup_complete = True
-                comfirm_data = {'is_setup_complete': is_setup_complete}
-                send(self.client, comfirm_data)
-        print('setup complete')
+
+    def setup_client_id(self):      
+        data = receive(self.client)
+        self.client_id = data.get('client_id')
+        print(f'Client ID: {self.client_id}')
 
     def send(self, data):
         send(self.client, data)
