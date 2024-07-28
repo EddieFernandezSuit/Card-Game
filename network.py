@@ -38,7 +38,7 @@ HOST = ''
 # HOST = '44.226.145.213'
 # HOST = '10.0.0.237'
 # HOST = ''
-PORT = 7777
+PORT = 5555
 
 
 class Server:
