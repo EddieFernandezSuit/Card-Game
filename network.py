@@ -34,7 +34,8 @@ def send_raw(socket_obj, data):
 
 # HOST = '172.232.161.132'
 # HOST = '67.185.216.120'
-HOST = '44.226.145.213'
+HOST = ''
+# HOST = '44.226.145.213'
 # HOST = '10.0.0.237'
 # HOST = ''
 PORT = 7777
