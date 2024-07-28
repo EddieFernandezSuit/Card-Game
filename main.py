@@ -12,27 +12,21 @@ from network import send
 from Game import Game
 import pygame
 import json
-import time
-
 def click_play(game):
     game.currentState = game.states['play']
     Background(game=game)
 
     def update_game_state(client_state):
         if 'deck' in client_state:
-            if 'players' in game.currentState:
-                print('players', len(game.currentState['players']))
+            # if 'players' not in game.currentState or len(game.currentState['players']) == 1:
             if 'players' not in game.currentState or len(game.currentState['players']) == 1:
-                print('here yes')
-                game.currentState['new_player_deck'] = client_state['deck']
-                game.currentState['create_new_player'] = True
-                print(game.currentState['new_player_deck'])
-                print(game.currentState['create_new_player'])
+                game.currentState['players'].append(Player(game, game.currentState['client'].client_id == 0, deck=client_state['deck']))
+                # game.currentState['new_player_deck'] = client_state['deck']
+                # game.currentState['create_new_player'] = True
 
     game.currentState['client'] = Client(update_game_state)
-    game.currentState['client'].send({})
 
-    while game.currentState['client'].is_setup_complete() == False:
+    while not game.currentState['client'].is_all_clients_connected:
         pass
 
     state = {
@@ -40,12 +34,10 @@ def click_play(game):
         'turn': 0,
         'turnRectangle': pygame.Rect(150, 0, 1150, 450),
         'selectedCard': None,
-        'players': [Player(game,0)],
+        'players': [Player(game,game.currentState['client'].client_id)],
         'arrowFlies': 0,
         'select_text': TextSelector(game),
         'background_music': pygame.mixer.Sound('sounds/background_music.mp3').play(-1),
-        # 'create_new_player': False,
-        # 'new_player_deck': None
     }
     game.currentState.update(state)
 
@@ -139,7 +131,7 @@ def update(game):
     if 'create_new_player' in game.currentState:
         print(game.currentState['create_new_player'])
     if 'create_new_player' in game.currentState and game.currentState['create_new_player']:
-        game.currentState['players'].append(Player(game, 1, game.currentState['new_player_deck']))
+        game.currentState['players'].append(Player(game, game.currentState['client'].client_id == 0, game.currentState['new_player_deck']))
         del game.currentState['create_new_player']
         del game.currentState['new_player_deck']
 

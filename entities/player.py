@@ -10,7 +10,7 @@ import random
 import json
 
 class Player(Entity):
-    def __init__(self, game, num, cards_in_deck=[]) -> None:
+    def __init__(self, game, num, cards_in_deck=[], deck=[]) -> None:
         super().__init__(game)
 
         self.impaledArrows = []
@@ -46,7 +46,8 @@ class Player(Entity):
         else:
             self.create_deck_using_json('DeckBox.json')
         
-        self.send_deck()
+        # self.send_deck()
+        self.game.currentState['client'].send({'deck': self.deck})
 
         for x in range(4):
             self.draw_card()
