@@ -33,8 +33,7 @@ def send_raw(socket_obj, data):
     socket_obj.sendall(data)
 
 # HOST = '172.232.161.132'
-# HOST = '44.226.145.213'
-HOST = ''
+HOST = '10.0.0.237'
 PORT = 7777
 
 
@@ -57,7 +56,6 @@ class Server:
         self.setup_client_id(client)
         while True:
             data = receive_raw(client)
-            print(pickle.loads(data))
             if data:
                 [send_raw(c, data) for c in self.clients if c != client]
     
