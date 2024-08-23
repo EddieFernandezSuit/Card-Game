@@ -34,20 +34,26 @@ def send_raw(socket_obj, data):
 
 # HOST = '172.232.161.132'
 # HOST = '67.185.216.120'
-HOST = ''
+# HOST = '54.196.161.61'
 # HOST = '44.226.145.213'
-# HOST = '10.0.0.237'
+HOST = '10.0.0.237'
 # HOST = ''
-PORT = 5555
-
+PORT = 7777
 
 class Server:
-    def __init__(self):
+    def __init__(self, port):
         self.server = create_socket()
-        self.server.bind((HOST, PORT))
+        self.server.bind((HOST, port))
         self.server.listen(5)
         print("Server is listening...")
         self.clients = []
+        self.server_ports = []
+        self.servers = []
+        self.current_port = port
+        self.total_clients = 1
+        start_thread(self.server_thread)
+
+    def server_thread(self):
         while True:
             client, address = self.server.accept()
             self.clients.append(client)
@@ -59,17 +65,31 @@ class Server:
     def client_thread(self, client, id):
         self.setup_client_id(client)
         while True:
-            data = receive_raw(client)
+            data = receive(client)
             if data:
-                [send_raw(c, data) for c in self.clients if c != client]
+                if 'port' in data:
+                    self.current_port += 1
+                    self.server_ports.append(self.current_port)
+                    self.servers.append(Server(self.current_port))
+                    [send(c, {'port': self.current_port}) for c in self.clients]
+                    continue
+                # if 'create_server' in data:
+                    # self.other_servers.append(Server(self.current_port))
+                    # continue
+                # if 'port' not in data and 'create_server' not in data:
+                [send(c, data) for c in self.clients if c != client]
     
     def setup_client_id(self, client):
+        print('here')
         client_id = len(self.clients) - 1
         send(client, {'client_id': client_id})
+        print(self.server_ports)
+        if self.server_ports:
+            send(client, {'ports': self.server_ports})
+            
 
     def check_all_clients_connected(self):
-        TOTAL_NUM_CLIENTS = 2
-        if len(self.clients) == TOTAL_NUM_CLIENTS:
+        if len(self.clients) == self.total_clients:
             return True
         return False
 
@@ -78,14 +98,15 @@ class Server:
             send(client, {'all_clients_connected': True})
 
 class Client:
-    def __init__(self, update_game_state, on_client_connect = lambda : 0):
+    def __init__(self, update_game_state, on_client_connect = lambda : 0, port = PORT, wait_for_clients=True):
         self.update_game_state = update_game_state
         self.client_id = 100
         self.is_all_clients_connected = False
         self.on_client_connected = self.all_clients_connected
         self.on_client_connect = on_client_connect
         self.client = create_socket()
-        self.client.connect((HOST, PORT))
+        self.client.connect((HOST, port))
+        self.wait_for_clients = wait_for_clients
         start_thread(self.client_thread)
 
     def client_thread(self):
@@ -101,9 +122,11 @@ class Client:
         if 'client_id' in data:
             self.client_id = data['client_id']
             print(f'Client ID: {self.client_id}')
-        data = receive(self.client)
-        if 'all_clients_connected' in data:
-            self.all_clients_connected()
+        
+        if self.wait_for_clients:
+            data = receive(self.client)
+            if 'all_clients_connected' in data:
+                self.all_clients_connected()
 
     def send(self, data):
         send(self.client, data)

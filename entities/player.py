@@ -4,10 +4,11 @@ from entities.entity import Entity
 from entities.card import Card
 from entities.zone import Zone
 from entities.text import Text
-from constants import FONTS
+from constants import *
 from Game import Game
 import random
 import json
+
 
 class Player(Entity):
     def __init__(self, game, num, cards_in_deck=[], deck=[]) -> None:
@@ -46,10 +47,10 @@ class Player(Entity):
         else:
             self.create_deck_using_json('DeckBox.json')
         
-        # self.send_deck()
-        self.game.currentState['client'].send({'deck': self.deck})
+        if not deck:
+            self.send_deck()
 
-        for x in range(4):
+        for _ in range(4):
             self.draw_card()
 
 
@@ -93,6 +94,11 @@ class Player(Entity):
     def convert_deck_to_card_names(self):
         list_of_card_names = [card.name for card in self.deck]
         return list_of_card_names
+    
+    def get_card_in_hand(self, name):
+        for card in self.hand:
+            if card.name == name:
+                return card
 
 def card_position(game, x_index, player_num, place = 'hand'):
     """
@@ -110,11 +116,9 @@ def card_position(game, x_index, player_num, place = 'hand'):
     ValueError: If the index is not a non-negative integer.
     """
 
-    card_size = 200
-    padding = 10
+    card_size = CARD_SIZE
+    PADDING = 10
     y_grid = 2 if place == 'field' else 1
-    y_position = [card_size * (y_grid - 1) + padding, game.SCREEN_HEIGHT - card_size * y_grid + padding]
-
-    return pygame.Vector2((padding + card_size) * (x_index + 1), y_position[player_num])
-
-
+    
+    y_position = [(card_size + PADDING) * (y_grid - 1) + PADDING, game.SCREEN_HEIGHT - (card_size + PADDING) * y_grid - PADDING]
+    return pygame.Vector2((PADDING + card_size) * (x_index + 1), y_position[player_num])

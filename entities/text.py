@@ -5,12 +5,17 @@ from components.transform_component import TransformComponent
 from components.image_component import ImageComponent
 
 class Text(Entity):
+    """
+    def on_init(self, str='', position=(0,0), font_size='medium', color=WHITE) -> None:
+    """
     def on_init(self, str='', position=(0,0), font_size='medium', color=WHITE) -> None:
         self.__dict__.update(locals())
         self.visible = True
         self.font = self.game.fonts[font_size]
         font_surface = self.font.render(self.str, 1, self.color)
         width, height = self.font.size(self.str)
+        self.width = width
+        self.height = height
         self.add_components(TransformComponent(self.game, position, width=width, height=height), [ImageComponent(self.game, image=font_surface, entity=self) for _ in range(5)])
 
     def update(self):
@@ -26,3 +31,4 @@ class Text(Entity):
             
         for image_component in self.image_components:
             image_component.visible = self.visible
+    

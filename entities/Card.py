@@ -19,7 +19,7 @@ class Card(Entity):
         self.playerNum = playerNum
         self.place = 'hand'
         self.attackUsed = 0
-        self.size = 200
+        self.size = CARD_SIZE
         self.arrow_woosh_sound = pygame.mixer.Sound('sounds/arrow_woosh.mp3')
         self.emptyZone = 0
         self.impaledArrows = []
@@ -27,12 +27,12 @@ class Card(Entity):
 
         self.add_components(
             TransformComponent(self.game, (self.game.SCREEN_WIDTH + 100,0), width=self.size, height=self.size),
-            ImageComponent(self.game, filePath=filename, entity=self),
+            ImageComponent(self.game, filePath=filename, entity=self, scaled_size=self.size),
             ClickComponent(entity=self),
             StatsComponent(self, self.stats)
         )
 
-        self.statsText = {key: Text(self.game, f'{value}' if key == 'Name' else f'{key} {value}')
+        self.statsText = {key: Text(self.game, f'{value}' if key == 'Name' else f'{value} {key}', font_size='small')
             for key, value in self.stats.items() 
             if key != 'Growth Type' and value != 0 and key != 'base_health'}
 
@@ -42,49 +42,87 @@ class Card(Entity):
 
         self.play_rectangle = PlayCardRectangle(self.game, self)
 
-    def on_click(self):
-        def attack(attacker, defender):
-            attacker.attackUsed = 1
-            self.game.currentState['arrowFlies'] = 1
-            self.arrow_woosh_sound.play()
-            if self.stats['Name'] == 'Bird':
-                pygame.mixer.Sound('sounds/bird.mp3').play()
-            Arrow(self.game, attacker, defender)
-        
+    def on_click(self):        
         if self.game.currentState['arrowFlies']:
             return
 
         if self.game.currentState['selectedCard'] == self:
             self.game.currentState['selectedCard'] = None
         elif self.game.currentState['selectedCard'] == None:
-            if self.game.currentState['turn'] == self.playerNum:
+            turn = self.game.currentState['turn'] 
+            if turn == self.playerNum and turn == self.game.currentState['client'].client_id:
                 player = self.game.currentState['players'][self.playerNum]
                 if self.place == 'field' and self.attackUsed == 0:
-                    opponent = self.game.currentState['players'][self.playerNum == 0]
+                    opponent = self.game.get_opponent(self.game)
                     number_of_cards_on_opponents_field = len(opponent.field)
                     targets = []
 
                     if self.stats['Splash'] > 0: targets = [card for count, card in enumerate(opponent.field) if count <= self.stats['Splash']]
                     if number_of_cards_on_opponents_field == 0: targets = [opponent]
                     if number_of_cards_on_opponents_field == 1: targets = [opponent.field[0]]
-                    if not targets:self.game.currentState['selectedCard'] = self
+                    if not targets: self.game.currentState['selectedCard'] = self
 
                     for target in targets:
-                        attack(self, target)
+                        self.send_attacker_message(self, target, self.playerNum)
+                        self.attack(target)
 
                 elif self.place == 'hand' and player.stats['Mana'] >= self.stats['Mana']:
-                    pygame.mixer.Sound('sounds/flip_card.mp3').play()
-                    if self.stats['Name'] == 'Bird':
-                        pygame.mixer.Sound('sounds/bird.mp3').play()
-                    zone = next((zone for zone in player.zones if not zone.isFull), None)
-                    if zone:
-                        self.game.currentState['selectedCard'] = self
-                        zone.on_click()
+                    self.play()
+                    play_message = {'play': self.name}
+                    self.game.send(play_message)
 
         elif self.place == 'field' and self.game.currentState['selectedCard'].place == 'field':
-            attack(self.game.currentState['selectedCard'], self)
-            self.game.currentState['selectedCard'] = None
+            self.send_attacker_message(self.game.currentState['selectedCard'], self, self.playerNum==0)
+            self.game.currentState['selectedCard'].attack(self)
+
+    def send_attacker_message(self, attacker, defender, attacking_player_num):
+        print(attacker, defender, attacking_player_num)
+        attacker_field_id = attacker.get_field_id(attacking_player_num)
+        defender_field_id = 'player'
+        defending_player_num = attacking_player_num == 0
+
+        if type(defender).__name__ == 'Card':
+            defender_field_id = defender.get_field_id(defending_player_num)
         
+        attack_message = {'attacker': {'player_num': attacking_player_num, 'field_id': attacker_field_id}, 'defender': {'player_num': defending_player_num, 'field_id': defender_field_id}}
+        self.game.send(attack_message)
+    
+    def send_multi_target_attack(self, targets):
+        attack_message = {
+            'attacker': {
+                'player_num': self.playerNum,
+                'field_id': self.get_field_id()
+            },
+            'multiple_targets': []
+        }
+        for target in targets:
+           if isinstance(target, Card):
+                attack_message['multiple_targets'].append({'player_num': target.playerNum == 0, 'field_id': target.get_field_id()})
+           else:
+                attack_message['multiple_targets'].append({'player_num': target.playerNum == 0, 'field_id': 'player'})
+        
+        self.game.send(attack_message) 
+
+    def get_field_id(self, player_num):
+        id = 0
+        for index, card in enumerate(self.game.currentState['players'][player_num].field):
+            if self == card:
+                return index
+        return id
+
+    def play(self):
+        player = self.game.currentState['players'][self.playerNum]
+        pygame.mixer.Sound('sounds/flip_card.mp3').play()
+        self.handle_bird_sound()
+        zone = next((zone for zone in player.zones if not zone.isFull), None)
+        if zone:
+            self.game.currentState['selectedCard'] = self
+            zone.on_click()
+
+    def handle_bird_sound(self):
+        BIRD_SOUND_FILE = 'sounds/bird.mp3'
+        if self.stats['Name'] == 'Bird':
+            pygame.mixer.Sound(BIRD_SOUND_FILE).play()
 
     def on_delete(self):
         for statsText in self.statsText:
@@ -98,7 +136,7 @@ class Card(Entity):
         self.play_rectangle.delete()
 
     def update(self):
-        font_height = self.game.fonts["medium"].size('A')[1]
+        font_height = self.statsText['Name'].height
         ncount = 0
         try:
             for key, value in self.statsText.items():
@@ -110,7 +148,6 @@ class Card(Entity):
 
     def deal_damage(self, target):
         true_damage = max(0, self.stats["Damage"] - target.stats['Armor'])
-        
         target.stats_component.set_stat('Health', target.stats['Health'] - true_damage)
 
         if self.stats['Drain'] > 0:
@@ -118,11 +155,17 @@ class Card(Entity):
         
         if target.stats['Health'] <= 0:
             devourable_stats = [stat for stat in list(self.stats) if stat not in ['Growth Type', 'Mana', 'Name', 'base_health'] and self.stats[stat] > 0][:self.stats['Devour']]
-            # print(target.stats)
             for stat in devourable_stats:
                 if 'base_health' in target.stats:
                     self.stats_component.set_stat(stat, self.stats[stat] + (target.stats['base_health'] if stat == 'Health' else target.stats[stat]))
             
             self.stats_component.set_stat(self.stats['Growth Type'], self.stats[self.stats['Growth Type']] + 1)
-            
             target.delete()
+
+    def attack(self, target):
+        self.attackUsed = 1
+        self.game.currentState['arrowFlies'] = 1
+        self.game.currentState['selectedCard'] = None
+        self.arrow_woosh_sound.play()
+        self.handle_bird_sound()
+        Arrow(self.game, self, target)

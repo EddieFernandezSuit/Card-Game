@@ -2,10 +2,9 @@ import pygame
 
 pygame.init()
 
-FONT_SIZE_SMALL = 25
+FONT_SIZE_SMALL = 30
 FONT_SIZE_MEDIUM = 40
 FONT_SIZE_LARGE = 60
-
 FONT_NAME_SERIF = "freesansbold"
 
 FONTS = {
@@ -28,3 +27,5 @@ PURPLE = (138, 43, 226)
 ORANGE = (255, 165, 0)
 WHITE = (255, 255, 255)
 LIGHTCYAN = (180,255,255)
+
+CARD_SIZE = 160

@@ -2,6 +2,10 @@
 class Entity:
     def __init__(self, game, *args, **kwargs) -> None:
         self.game = game
+        # print(game_objs)
+        # if game_objs != None:
+        #     game_objs.append(self)
+        # else:
         self.game.currentState['gameObjects'].append(self)
         self.components = []
         self.on_init(*args, **kwargs)

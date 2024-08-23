@@ -22,4 +22,4 @@ class StatsComponent(Entity):
         if stat_name not in self.entity.statsText:
             self.entity.statsText[stat_name] = Text(self.game)
         
-        self.entity.statsText[stat_name].str = f'{stat_name} {self.stats[stat_name]}'
+        self.entity.statsText[stat_name].str = f'{self.stats[stat_name]} {stat_name}'
