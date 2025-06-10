@@ -12,5 +12,6 @@ class Particle(Entity):
         self.timer = Timer(30, self.delete)
 
     def update(self):
+        # print('timer', self.timer, self)
         self.timer.update()
         pygame.draw.circle(self.game.screen, CYAN, self.transformHandler.position, self.transformHandler.rect.width)

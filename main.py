@@ -15,8 +15,8 @@ from network import Client
 from Game import Game
 import pygame
 import json
+import numpy as np
 
-UI_POSITION=(200,200)
 
 def get_opponent_player_num(game):
     return game.currentState['client'].client_id == 0
@@ -27,18 +27,18 @@ def get_opponent(game):
 
 def click_play(game):
     game.currentState = game.states['play']
-    Background(game=game)
+    if 'client' in game.states['connect']:
+        game.currentState['client'] = game.states['connect'].client
     game.get_opponent = get_opponent
-    game.currentState['create_player_tm'] = ThreadManager()
-    game.currentState['attack_tm'] = ThreadManager()
 
     def update_game_state(msg_obj):
+        print('msg', msg_obj)
         if 'deck' in msg_obj and ('players' not in game.currentState ):
                 def create_player(deck):
                     game.currentState['players'].append(Player(game, game.currentState['client'].client_id == 0, deck))
                     if game.currentState['client'].client_id == 1:
                         game.currentState['players'].reverse()
-                game.currentState['create_player_tm'].do(create_player, msg_obj['deck'])
+                game.thread_manager.do(create_player, msg_obj['deck'])
         
         if 'pass' in msg_obj:
             game.currentState['passTurnButton'].pass_turn()
@@ -55,31 +55,36 @@ def click_play(game):
 
             attacking_card_field_id = msg_obj['attacker']['field_id']
             defending_card_field_id = msg_obj['defender']['field_id']
+            print(defending_card_field_id, 'defending card field id')
 
             attacker = game.currentState['players'][attacking_player_num].field[attacking_card_field_id]
+            # if not attacking player
             if defending_card_field_id != 'player':
                 target = game.currentState['players'][defending_player_num].field[defending_card_field_id]
             else:
                 target = game.currentState['players'][defending_player_num]
             
-            game.currentState['attack_tm'].do(lambda attacker, target: attacker.attack(target), attacker, target)
-        
-    game.currentState['client'] = Client(update_game_state)
-
-    while not game.currentState['client'].is_all_clients_connected:
-        pass
-
+            game.thread_manager.do(lambda attacker, target: attacker.attack(target), attacker, target)
+    
+    if 'client' in game.states['connect']:
+        game.currentState['client'].update_game_state = update_game_state
+    
     state = {
+        'background': Background(game=game),
         'turn': 0,
         'passTurnButton': PassTurnButton(game),
         'selectedCard': None,
         'players': [Player(game,game.currentState['client'].client_id)],
         'arrowFlies': 0,
         'select_text': TextSelector(game),
-        'background_music': pygame.mixer.Sound('sounds/background_music.mp3').play(-1),
+        'background_music': pygame.mixer.Sound('sounds/background_music.mp3'),
         'pm': ParticleManager(game),
         'fps_text': Text(game, 'FPS: 0', (10,10), 'small', WHITE)
     }
+
+    state['background_music'].set_volume(game.volume)
+    state['background_music'].play(-1)
+
     game.currentState.update(state)
 
 def to_matrix(l, n):
@@ -128,49 +133,65 @@ def save_and_exit(game):
     game.currentState = game.states['menu']
 
 def create_room(game):
-    game.currentState.client.send({'port': 'new port'})
+    game.currentState.client.send({'create_room': 'new_room'})
 
 
-def click_on_room(game, port):
-    # game.state.client.send({'create_server': port})
-    pass
+def click_on_room(game, room_id):
+    game.state.client.send({'join_room': room_id})
+    Text(game=game, str=f'You are now in room {room_id}', position=(500,300),font_size='medium')
 
 def create_connect_state(game):
-    def update_client(msg_obj):
-        def create_ctext(port):
-            game.currentState.ui_container.add_element(ClickableText(game, click_on_room, args=[game,port], str=str(port)))
+    def update_client(msg):
+        def create_ctext(room_id):
+            CTEXT = ClickableText(game, on_click= click_on_room, args=[game,room_id], str=str(room_id))
+            print(game.currentState.ui_container)
+            game.currentState.ui_container.add_element(CTEXT)
 
-        if 'port' in msg_obj:
-            game.thread_manager.do(create_ctext, msg_obj['port'])
+        if 'room_id' in msg:
+            game.thread_manager.do(create_ctext, msg['room_id'])
         
-        if 'ports' in msg_obj:
-            for port in msg_obj['ports']:
-                game.thread_manager.do(create_ctext, port)
-            
-            
+        if 'room_ids' in msg:
+            for room_id in msg['room_ids']:
+                game.thread_manager.do(create_ctext, room_id)
+        
+        if 'all_clients_connected' in msg:
+            game.thread_manager.do(click_play, game)
+
+
     game.states['connect'].set(
-        background=Background(game=game), 
-        ui_container=UIContainer(game,UI_POSITION, elements=[
-            ClickableText(game, on_click=create_room, args=[game], str='Create Room'),
-            Text(game, str='Rooms:')
-        ]),
+        background=Background(game=game),
+        
     )
+    ROOMS_BUTTON = ClickableText(game, on_click=create_room, args=[game], str='Create Room')
+    ROOMS_TEXT = Text(game, str='Rooms:')
+    UI_POS = tuple(np.array(game.screen.get_size())/2)
+    game.currentState.ui_container=UIContainer(game, UI_POS, elements=[ROOMS_BUTTON, ROOMS_TEXT], isCenter=True)
+    
+    try:
+        game.currentState.client=Client(update_client, on_client_connect=lambda :click_play(game), wait_for_clients=False)
+        game.currentState.client.send({'get_rooms':''})
+    except Exception as e:
+        print(e)
 
-    game.currentState.client=Client(update_client, wait_for_clients=False)
-
-
+def click_connect_text(game):
+    MENU_CLICK_FILENAME = 'sounds/menu_click.wav'
+    MENU_CLICK_SOUND = pygame.mixer.Sound(MENU_CLICK_FILENAME)
+    MENU_CLICK_SOUND.play()
+    game.set_state('connect')
 
 def create_menu_state(game):
     Background(game=game)
+    MENU_UI_POSITION = list(map(lambda x: x/2, game.screen.get_size()))
 
-    game.ui_container = UIContainer(game, UI_POSITION, elements=[
-        ClickableText(game, on_click=click_play, args=[game], str='Play'),
-        ClickableText(game, on_click=game.set_state, args=['buildDeck'], str='Edit Deck'),
-        ClickableText(game, on_click=game.set_state, args=['connect'], str='Connect'),
-    ])
+    PLAY_TEXT = ClickableText(game, on_click=click_play, args=[game], str='Play')
+    EDIT_DECK_TEXT = ClickableText(game, on_click=game.set_state, args=['buildDeck'], str='Edit Deck')
+    CONNECT_TEXT = ClickableText(game, on_click=click_connect_text, args=[game], str='Connect')
+
+    game.ui_container = UIContainer(game, MENU_UI_POSITION, elements=[PLAY_TEXT, EDIT_DECK_TEXT, CONNECT_TEXT],isCenter=True)
     
 def start(game):
     game.thread_manager = ThreadManager()
+    game.volume = .2 #from 0 to 1.0
     game.key_actions = {
         pygame.K_SPACE: lambda: game.currentState.get('passTurnButton', None) and game.currentState['passTurnButton'].on_click()
     }
@@ -188,18 +209,11 @@ def update(game):
 
     if game.currentState['pm']:
         game.currentState['pm'].update()
-    
-    if game.currentState['create_player_tm']:
-        game.currentState['create_player_tm'].update()
-    
-    if game.currentState['attack_tm']:
-        game.currentState['attack_tm'].update()
 
     if game.currentState['fps_text']:
         game.currentState['fps_text'].str = f'FPS: {int(game.clock.get_fps())}'
 
 GAME = Game(start, update)
-
 
 def get_attack_message(self, msg_obj):
     attacking_player_num = msg_obj['attacker']['player_num']

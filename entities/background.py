@@ -6,5 +6,5 @@ class Background(Entity):
     def on_init(self) -> None:
         self.add_components(
             TransformComponent(self.game), 
-            ImageComponent(self.game, 'Images/background.jpg', entity=self)
+            ImageComponent(self.game, 'Images/background.png', entity=self)
         )

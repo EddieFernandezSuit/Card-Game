@@ -6,6 +6,7 @@ import random
 
 class FlyingNum(Entity):
     def on_init(self, str, position, color) -> None:
+        self.timer = None
         self.text = Text(self.game, str, position, color=color)
         x_range =.5
         self.transform_component = self.text.transform_component
@@ -13,7 +14,9 @@ class FlyingNum(Entity):
         self.timer = Timer(80, self.delete)
 
     def update(self):
-        self.timer.update()
+        if self.timer:
+            self.timer.update()
 
     def on_delete(self):
+        self.timer = None
         self.text.delete()

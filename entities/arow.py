@@ -27,4 +27,5 @@ class Arrow(Entity):
                 self.used = 1
                 self.transform_component.speed = 0
                 self.game.currentState['arrowFlies'] = 0
+                self.arrow_sound.set_volume(self.game.volume)
                 self.arrow_sound.play()

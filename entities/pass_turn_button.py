@@ -16,6 +16,7 @@ class PassTurnButton(Entity):
         self.click_component = ClickComponent((), self)
         self.y_position_turn_rectangle = [0, 450]
         self.sound = pygame.mixer.Sound('sounds/metal_card_shuffle.wav')
+        
 
     def on_click(self):
         if self.game.currentState['client'].client_id == self.game.currentState['turn']:
@@ -30,6 +31,7 @@ class PassTurnButton(Entity):
     
     def pass_turn(self):
         self.game.currentState['selectedCard'] = None
+        self.sound.set_volume(self.game.volume)
         self.sound.play()
         for player in self.game.currentState['players']:
             for card in player.field:

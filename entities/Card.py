@@ -7,8 +7,10 @@ from entities.entity import Entity
 from entities.arow import Arrow
 from entities.play_card_rectangle import PlayCardRectangle
 from constants import *
+import Timer
 import pygame
 import json
+import datetime
 
 class Card(Entity):
     def on_init(self, playerNum, name) -> None:
@@ -19,6 +21,7 @@ class Card(Entity):
         self.playerNum = playerNum
         self.place = 'hand'
         self.attackUsed = 0
+        self.recoil_timer = None
         self.size = CARD_SIZE
         self.arrow_woosh_sound = pygame.mixer.Sound('sounds/arrow_woosh.mp3')
         self.emptyZone = 0
@@ -112,7 +115,10 @@ class Card(Entity):
 
     def play(self):
         player = self.game.currentState['players'][self.playerNum]
-        pygame.mixer.Sound('sounds/flip_card.mp3').play()
+        flip_card_sound = pygame.mixer.Sound('sounds/flip_card.mp3')
+        flip_card_sound.set_volume(self.game.volume)
+        flip_card_sound.play()
+
         self.handle_bird_sound()
         zone = next((zone for zone in player.zones if not zone.isFull), None)
         if zone:
@@ -122,7 +128,10 @@ class Card(Entity):
     def handle_bird_sound(self):
         BIRD_SOUND_FILE = 'sounds/bird.mp3'
         if self.stats['Name'] == 'Bird':
-            pygame.mixer.Sound(BIRD_SOUND_FILE).play()
+            bird_sound = pygame.mixer.Sound(BIRD_SOUND_FILE)
+            bird_sound.set_volume(self.game.volume)
+            bird_sound.play()
+            # pygame.mixer.Sound(BIRD_SOUND_FILE).play()
 
     def on_delete(self):
         for statsText in self.statsText:
@@ -145,6 +154,8 @@ class Card(Entity):
         except Exception as e:
             print(e)
             print(self)
+        if self.recoil_timer:
+            self.recoil_timer.update()
 
     def deal_damage(self, target):
         true_damage = max(0, self.stats["Damage"] - target.stats['Armor'])
@@ -168,4 +179,19 @@ class Card(Entity):
         self.game.currentState['selectedCard'] = None
         self.arrow_woosh_sound.play()
         self.handle_bird_sound()
-        Arrow(self.game, self, target)
+        arrow = Arrow(self.game, self, target)
+        self.before_position = self.transform_component.position
+        self.transform_component.direction = -arrow.transform_component.direction
+        self.transform_component.speed = 2
+
+        def stop():
+            self.transform_component.speed = 0
+            self.recoil_timer = None
+            self.transform_component.position = self.before_position
+
+        def go_back():
+            self.transform_component.direction = arrow.transform_component.direction
+            self.recoil_timer = Timer.Timer(5,stop)
+
+        self.recoil_timer = Timer.Timer(5,go_back)
+        
