@@ -1,8 +1,8 @@
 import pygame
 from components.stats_component import StatsComponent
 from entities.entity import Entity
-from entities.card import Card
-from entities.zone import Zone
+from entities.Card import Card
+from entities.Zone import Zone
 from entities.text import Text
 from constants import *
 from Game import Game

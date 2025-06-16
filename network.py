@@ -72,16 +72,14 @@ def get_ip():
     print("Your Computer Name is:" + hostname)
     print("Your Computer IP Address is:" + IPAddr)
 
-# HOST = '172.232.161.132'
-# HOST = '67.185.216.120'
-# HOST = '54.196.161.61'
-# HOST = '44.226.145.213'
-# HOST = '172.20.20.20'
 EDDIE_IP = '10.0.0.237'
 RACHEL_IP = '10.5.0.2'
+RACHEL_IP = '24.17.185.236'
+HOME_IP = '127.0.0.1'
 HOST = EDDIE_IP
-PORT = 7777
-
+HOST = RACHEL_IP
+HOST = HOME_IP
+PORT = 8000
 
 class Server:
     def __init__(self, port):

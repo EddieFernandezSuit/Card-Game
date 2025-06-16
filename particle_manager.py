@@ -1,5 +1,5 @@
 import random
-from entities.particle import Particle
+from entities.Particle import Particle
 
 class ParticleManager:
     def __init__(self, game) -> None:
