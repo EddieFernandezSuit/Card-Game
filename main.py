@@ -174,9 +174,6 @@ def create_connect_state(game):
         print(e)
 
 def click_connect_text(game):
-    MENU_CLICK_FILENAME = 'sounds/menu_click.wav'
-    MENU_CLICK_SOUND = pygame.mixer.Sound(MENU_CLICK_FILENAME)
-    MENU_CLICK_SOUND.play()
     game.set_state('connect')
 
 def create_menu_state(game):

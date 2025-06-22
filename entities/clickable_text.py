@@ -27,7 +27,9 @@ class ClickableText(Entity):
         self.on_click = on_click
         self.text = Text(self.game, str, position, font_size)
         self.transform_component = self.text.transform_component
-        self.click_component = ClickComponent(args, self)
+        MENU_CLICK_FILENAME = 'sounds/menu_click.wav'
+        MENU_CLICK_SOUND = pygame.mixer.Sound(MENU_CLICK_FILENAME)
+        self.click_component = ClickComponent(args, self, sound=MENU_CLICK_SOUND)
         self.update()
 
     def update(self):
@@ -37,4 +39,3 @@ class ClickableText(Entity):
     def on_delete(self):
         self.text.delete()
         self.click_component.delete()
-
