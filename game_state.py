@@ -18,7 +18,6 @@ class GameState:
         self.create_state(self.game)
     
     def set(self, **kwargs):
-        print(kwargs)
         self.__dict__.update(kwargs)
         # self.game.set_state('menu')
     

@@ -122,7 +122,7 @@ def create_deck_builder_state(game):
         deck_list.cards.extend(deck_cards)
 
     game.currentState['save and exit'] = ClickableText(game, pygame.Vector2(10, game.SCREEN_HEIGHT - FONTS['large'].size('A')[1] - 10), save_and_exit, [game], 'Save and Exit')
-    game.currentState = game.states['menu']
+    # game.currentState = game.states['menu']
 
 def save_and_exit(game):
     deckBox = {deckList.deckName: deckList.cards for deckList in game.currentState['deckBox'].deckLists}
@@ -134,7 +134,6 @@ def save_and_exit(game):
 
 def create_room(game):
     game.currentState.client.send({'create_room': 'new_room'})
-
 
 def click_on_room(game, room_id):
     game.state.client.send({'join_room': room_id})
@@ -160,7 +159,6 @@ def create_connect_state(game):
 
     game.states['connect'].set(
         background=Background(game=game),
-        
     )
     ROOMS_BUTTON = ClickableText(game, on_click=create_room, args=[game], str='Create Room')
     ROOMS_TEXT = Text(game, str='Rooms:')
@@ -173,6 +171,9 @@ def create_connect_state(game):
     except Exception as e:
         print(e)
 
+def click_edit_deck_text(game):
+    game.set_state('buildDeck')
+
 def click_connect_text(game):
     game.set_state('connect')
 
@@ -181,7 +182,8 @@ def create_menu_state(game):
     MENU_UI_POSITION = list(map(lambda x: x/2, game.screen.get_size()))
 
     PLAY_TEXT = ClickableText(game, on_click=click_play, args=[game], str='Play')
-    EDIT_DECK_TEXT = ClickableText(game, on_click=game.set_state, args=['buildDeck'], str='Edit Deck')
+    EDIT_DECK_TEXT = ClickableText(game, on_click=click_edit_deck_text, args=[game], str='Edit Deck')
+    # EDIT_DECK_TEXT = ClickableText(game, on_click=game.set_state, args=['buildDeck'], str='Edit Deck')
     CONNECT_TEXT = ClickableText(game, on_click=click_connect_text, args=[game], str='Connect')
 
     game.ui_container = UIContainer(game, MENU_UI_POSITION, elements=[PLAY_TEXT, EDIT_DECK_TEXT, CONNECT_TEXT],isCenter=True)
