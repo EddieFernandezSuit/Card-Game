@@ -18,7 +18,6 @@ class DeckList(Entity):
 
     def onClickDeckName(self, game):
         self.game.currentState['deckBox'].changeDeck(self)
-        pass
 
     def deleteDeck(self, game):
         game.currentState['deckBox'].deleteDeck(self)

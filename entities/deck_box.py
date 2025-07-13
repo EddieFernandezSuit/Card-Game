@@ -32,9 +32,11 @@ class DeckBox(Entity):
             self.selectedDeckText.str = ''
             self.selectedDeckList = None
 
-    def addDeck(self):
+    def addDeck(self, cards=None):
         deckName = 'Deck ' + str(len(self.deckLists))
         deckList = DeckList(self.game, deckName)
+        if cards:
+            deckList.cards.extend(cards)
         self.changeDeck(deckList)
         self.deckLists.append(self.selectedDeckList)
         self.updateDeckUiPosition()

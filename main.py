@@ -118,8 +118,8 @@ def create_deck_builder_state(game):
             game.currentState['cardsToAdd'].append(deck_builder_card)
             
     for key, deck_cards in deck_box_data.items():
-        deck_list = game.currentState['deckBox'].addDeck()
-        deck_list.cards.extend(deck_cards)
+        deck_list = game.currentState['deckBox'].addDeck(deck_cards)
+        # deck_list.cards.extend(deck_cards)
 
     game.currentState['save and exit'] = ClickableText(game, pygame.Vector2(10, game.SCREEN_HEIGHT - FONTS['large'].size('A')[1] - 10), save_and_exit, [game], 'Save and Exit')
     # game.currentState = game.states['menu']
@@ -183,7 +183,6 @@ def create_menu_state(game):
 
     PLAY_TEXT = ClickableText(game, on_click=click_play, args=[game], str='Play')
     EDIT_DECK_TEXT = ClickableText(game, on_click=click_edit_deck_text, args=[game], str='Edit Deck')
-    # EDIT_DECK_TEXT = ClickableText(game, on_click=game.set_state, args=['buildDeck'], str='Edit Deck')
     CONNECT_TEXT = ClickableText(game, on_click=click_connect_text, args=[game], str='Connect')
 
     game.ui_container = UIContainer(game, MENU_UI_POSITION, elements=[PLAY_TEXT, EDIT_DECK_TEXT, CONNECT_TEXT],isCenter=True)
