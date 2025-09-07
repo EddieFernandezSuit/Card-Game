@@ -136,8 +136,10 @@ def create_room(game):
     game.currentState.client.send({'create_room': 'new_room'})
 
 def click_on_room(game, room_id):
-    game.state.client.send({'join_room': room_id})
-    Text(game=game, str=f'You are now in room {room_id}', position=(500,300),font_size='medium')
+    game.currentState.client.send({'join_room': room_id})
+    # Position the text below the UI container to avoid overlap
+    ui_y_offset = game.SCREEN_HEIGHT // 2 + 100  # Below center UI
+    Text(game=game, str=f'You are now in room {room_id}', position=(game.SCREEN_WIDTH//2 - 100, ui_y_offset), font_size='medium')
 
 def create_connect_state(game):
     def update_client(msg):
@@ -160,10 +162,11 @@ def create_connect_state(game):
     game.states['connect'].set(
         background=Background(game=game),
     )
+    BACK_BUTTON = ClickableText(game, on_click=click_back_to_menu, args=[game], str='Back')
     ROOMS_BUTTON = ClickableText(game, on_click=create_room, args=[game], str='Create Room')
     ROOMS_TEXT = Text(game, str='Rooms:')
     UI_POS = tuple(np.array(game.screen.get_size())/2)
-    game.currentState.ui_container=UIContainer(game, UI_POS, elements=[ROOMS_BUTTON, ROOMS_TEXT], isCenter=True)
+    game.currentState.ui_container=UIContainer(game, UI_POS, elements=[BACK_BUTTON, ROOMS_BUTTON, ROOMS_TEXT], isCenter=True)
     
     try:
         game.currentState.client=Client(update_client, on_client_connect=lambda :click_play(game), wait_for_clients=False)
@@ -176,6 +179,9 @@ def click_edit_deck_text(game):
 
 def click_connect_text(game):
     game.set_state('connect')
+
+def click_back_to_menu(game):
+    game.set_state('menu')
 
 def create_menu_state(game):
     Background(game=game)

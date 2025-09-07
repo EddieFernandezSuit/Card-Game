@@ -48,7 +48,6 @@ class Game:
     
     def set_state(self, state_name):
         self.currentState = self.states[state_name]
-        self.state = self.states[state_name]
         if not self.currentState.is_state_created:
             self.currentState.is_state_created = True
             self.currentState.create()
