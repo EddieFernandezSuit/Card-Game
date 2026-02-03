@@ -134,12 +134,16 @@ def save_and_exit(game):
 
 def create_room(game):
     game.currentState.client.send({'create_room': 'new_room'})
+    # click_on_room(game, len(game.currentState.ui_container.elements) - 3)
 
 def click_on_room(game, room_id):
+    if 'YOU_ARE_IN_ROOM_TEXT' not in game.currentState:
+        game.currentState.YOU_ARE_IN_ROOM_TEXT = Text(game=game, str=f'You are now in room {room_id}', font_size='medium')
+        game.currentState.ui_container.insert_element(0, game.currentState.YOU_ARE_IN_ROOM_TEXT)
+    else:
+        game.currentState.YOU_ARE_IN_ROOM_TEXT.str = f'You are now in room {room_id}'
     game.currentState.client.send({'join_room': room_id})
-    # Position the text below the UI container to avoid overlap
-    ui_y_offset = game.SCREEN_HEIGHT // 2 + 100  # Below center UI
-    Text(game=game, str=f'You are now in room {room_id}', position=(game.SCREEN_WIDTH//2 - 100, ui_y_offset), font_size='medium')
+    
 
 def create_connect_state(game):
     def update_client(msg):

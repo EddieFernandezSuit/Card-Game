@@ -40,23 +40,20 @@ def create_socket():
     return socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 def receive(socket_obj):
-    # try: return pickle.loads(receive_raw(socket_obj).decode().split('\n')[0])
     try: return pickle.loads(receive_raw(socket_obj))
     except Exception as e:
         print(e)
         return None
 
 def send(client_obj, data):
-    client = client_obj
+    client = None
     if isinstance(client_obj, Client):
         client = client_obj.client
+    else:
+        client = client_obj
     
-    # try:
-    # print(data,client)
     if data:
         send_raw(client, pickle.dumps({**data, 'timestamp': time.time()}))
-    # except:
-    #     print(f"Unable to reach client with socket {client}")
 
 def receive_raw(socket_obj):
     DATA_SIZE = 512
@@ -87,7 +84,7 @@ class Server:
         self.server.bind((HOST, port))
         self.server.listen(5)
         print("Server is listening...")
-        self.clients = []
+        self.clients: list[socket.socket] = []
         self.rooms = []
         self.current_port = port
         start_thread(self.server_thread)
@@ -102,14 +99,7 @@ class Server:
             client_id += 1
     
     def send(self, client, msg):
-        # try:
         send(client, msg)
-        # except:
-        #     print(f"Unable to reach client with socket {client}")
-        #     input('asdfa')
-            
-        #     if client in self.clients:
-        #         self.clients.remove(client)
 
     def send_all(self, msg_obj):
         [self.send(c, msg_obj) for c in self.clients]
@@ -118,12 +108,15 @@ class Server:
         self.send(client, {'client_id': id})
         this_clients_room = None
 
+
         def send_room(msg_obj):
             [self.send(c, msg_obj) for c in this_clients_room['clients'] if c != client]
 
         while True:
             try:
+                # msg_obj has this format: {'action': 'data', 'timestamp': 1234567890.123}
                 msg_obj = receive(client)
+                print('msg_obj:', msg_obj)
                 if not msg_obj: break
             except ConnectionError:
                 print(f"Connection from client {id} has been lost.")
@@ -131,25 +124,23 @@ class Server:
                     self.clients.remove(client)
                 break
             try:
-                if this_clients_room:
+                if 'create_room' in msg_obj:
+                    room_id = len(self.rooms)
+                    self.rooms.append({'room_id': room_id, 'clients': []})
+                    msg = {'room_id': room_id}
+                    self.send_all(msg)
+                elif 'get_rooms' in msg_obj:
+                    room_ids = [room['room_id'] for room in self.rooms]
+                    self.send(client, {'room_ids': room_ids})
+                elif 'join_room' in msg_obj:
+                    room_id = msg_obj['join_room']
+                    this_clients_room = self.rooms[room_id]
+                    this_clients_room['clients'].append(client)
+                    if len(this_clients_room['clients']) == 2:
+                        for c in this_clients_room['clients']:
+                            self.send(c, {'all_clients_connected': ''})
+                elif this_clients_room:
                     send_room(msg_obj)
-                else:
-                    if msg_obj:
-                        if 'get_rooms' in msg_obj:
-                            room_ids = [room['room_id'] for room in self.rooms]
-                            self.send(client, {'room_ids': room_ids})
-                        if 'create_room' in msg_obj:
-                            room_id = len(self.rooms)
-                            self.rooms.append({'room_id': room_id, 'clients': []})
-                            msg = {'room_id': room_id}
-                            self.send_all(msg)
-                        if 'join_room' in msg_obj:
-                            room_id = msg_obj['join_room']
-                            this_clients_room = self.rooms[room_id]
-                            this_clients_room['clients'].append(client)
-                            if len(this_clients_room['clients']) == 2:
-                                for c in this_clients_room['clients']:
-                                    self.send(c, {'all_clients_connected': ''})
             except ConnectionError:
                 print(f"Unable to reach client with socket {client}")
                 

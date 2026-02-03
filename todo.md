@@ -1,11 +1,32 @@
 # Unresolved
+add a leave game button
+---------------------------------------------------
+# Resolved
+
+new room does not appear if you click create room twice
+
+if you are already in a room then it will create a new you are in a room if join one
+
+if you create a room instantly join it
+
 task
-add a + to when you gain health or any stat
+when two stats are added at the same time they are stacked over eachother. we want to be able to clearly see both
+
+task
+stat changes should stay on the screen for longer
+
+task 
+if board is full then cards on field dont have highlight for attackability
+
+task
+if board is full then cards in hand should not be highlighted
 
 task
 fix alignment on connect state
----------------------------------------------------
-# Resolved
+
+task
+add a + to when you gain health or any stat
+
 bug <br>
 actual: you are now in room 0 appears over connect menu text<br>
 expected: you are now in room 0 should not appear over the connect menu text

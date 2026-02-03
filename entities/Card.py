@@ -166,9 +166,12 @@ class Card(Entity):
         
         if target.stats['Health'] <= 0:
             devourable_stats = [stat for stat in list(self.stats) if stat not in ['Growth Type', 'Mana', 'Name', 'base_health'] and self.stats[stat] > 0][:self.stats['Devour']]
+            i = 0
             for stat in devourable_stats:
                 if 'base_health' in target.stats:
-                    self.stats_component.set_stat(stat, self.stats[stat] + (target.stats['base_health'] if stat == 'Health' else target.stats[stat]))
+                    i += 1
+
+                    self.stats_component.set_stat(stat, self.stats[stat] + (target.stats['base_health'] if stat == 'Health' else target.stats[stat]), delay=i * 1000)
             
             self.stats_component.set_stat(self.stats['Growth Type'], self.stats[self.stats['Growth Type']] + 1)
             target.delete()

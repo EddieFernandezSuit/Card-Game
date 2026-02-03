@@ -14,6 +14,11 @@ class UIContainer(Entity):
         if elements:
             self.add_elements(elements)
 
+    def insert_element(self, index, element):
+        self.size = (max(element.transform_component.width, self.size[0]), self.size[1] + element.transform_component.height + (self.padding if len(self.elements) > 0 else 0))
+        self.elements.insert(index, element)
+        self.update_positions()
+
     def add_element(self, element):
         self.size = (max(element.transform_component.width, self.size[0]), self.size[1] + element.transform_component.height + (self.padding if len(self.elements) > 0 else 0))
         self.elements.append(element)
