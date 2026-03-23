@@ -25,6 +25,10 @@ def get_opponent(game):
     opponent_num = get_opponent_player_num(game)
     return game.currentState['players'][opponent_num]
 
+def on_click_leave_game(game: Game):
+    game.send({'leave_game':''})
+    game.set_state('menu')
+
 def click_play(game):
     game.currentState = game.states['play']
     if 'client' in game.states['connect']:
@@ -33,7 +37,7 @@ def click_play(game):
 
     def update_game_state(msg_obj):
         print('msg', msg_obj)
-        if 'deck' in msg_obj and ('players' not in game.currentState ):
+        if 'deck' in msg_obj and ('players' not in game.currentState):
                 def create_player(deck):
                     game.currentState['players'].append(Player(game, game.currentState['client'].client_id == 0, deck))
                     if game.currentState['client'].client_id == 1:
@@ -58,7 +62,6 @@ def click_play(game):
             print(defending_card_field_id, 'defending card field id')
 
             attacker = game.currentState['players'][attacking_player_num].field[attacking_card_field_id]
-            # if not attacking player
             if defending_card_field_id != 'player':
                 target = game.currentState['players'][defending_player_num].field[defending_card_field_id]
             else:
@@ -79,7 +82,8 @@ def click_play(game):
         'select_text': TextSelector(game),
         'background_music': pygame.mixer.Sound('sounds/background_music.mp3'),
         'pm': ParticleManager(game),
-        'fps_text': Text(game, 'FPS: 0', (10,10), 'small', WHITE)
+        'fps_text': Text(game, 'FPS: 0', (10,10), 'small', WHITE),
+        'leave_game_button': ClickableText(game, position=(game.SCREEN_WIDTH - 100, 10), str='Exit', on_click=on_click_leave_game, args=[game])
     }
 
     state['background_music'].set_volume(game.volume)
@@ -221,7 +225,6 @@ def update(game):
     if game.currentState['fps_text']:
         game.currentState['fps_text'].str = f'FPS: {int(game.clock.get_fps())}'
 
-GAME = Game(start, update)
 
 def get_attack_message(self, msg_obj):
     attacking_player_num = msg_obj['attacker']['player_num']
@@ -238,3 +241,5 @@ def get_attack_message(self, msg_obj):
         defenders.append(defender)
     
     return attacker, defenders
+
+GAME = Game(start, update)

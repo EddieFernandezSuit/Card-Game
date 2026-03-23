@@ -1,5 +1,9 @@
 # Unresolved
 add a leave game button
+
+handle what happens when the other client disconnects
+
+game slows down dramaticlaly after some time
 ---------------------------------------------------
 # Resolved
 
