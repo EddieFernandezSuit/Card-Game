@@ -3,64 +3,7 @@ import threading
 import time
 import pickle
 
-# class Connection():
-#     def start_thread(target, args=()):
-#         threading.Thread(target=target, args=args).start()
-    
-#     def create_socket():
-#         return socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    
-#     def receive(socket_obj):
-#         # try: return pickle.loads(receive_raw(socket_obj).decode().split('\n')[0])
-#         try: return pickle.loads(receive_raw(socket_obj))
-#         except Exception as e:
-#             print(e)
-#             return None
 
-#     def send(client_obj, data):
-#         client = client_obj
-#         if isinstance(client_obj, Client):
-#             client = client_obj.client
-        
-#         # send_raw(client, pickle.dumps({**data, 'timestamp': time.time()}) + b'\n')
-#         send_raw(client, pickle.dumps({**data, 'timestamp': time.time()}))
-
-#     def receive_raw(socket_obj):
-#         DATA_SIZE = 512
-#         return socket_obj.recv(DATA_SIZE)
-
-#     def send_raw(socket_obj, data):
-#         socket_obj.sendall(data)
-
-
-def start_thread(target, args=()):
-    threading.Thread(target=target, args=args).start()
-
-def create_socket():
-    return socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-def receive(socket_obj):
-    try: return pickle.loads(receive_raw(socket_obj))
-    except Exception as e:
-        print(e)
-        return None
-
-def send(client_obj, data):
-    client = None
-    if isinstance(client_obj, Client):
-        client = client_obj.client
-    else:
-        client = client_obj
-    
-    if data:
-        send_raw(client, pickle.dumps({**data, 'timestamp': time.time()}))
-
-def receive_raw(socket_obj):
-    DATA_SIZE = 512
-    return socket_obj.recv(DATA_SIZE)
-
-def send_raw(socket_obj, data):
-    socket_obj.sendall(data)
 
 def get_ip():
     import socket
@@ -73,21 +16,41 @@ EDDIE_IP = '10.0.0.237'
 RACHEL_IP = '10.5.0.2'
 RACHEL_IP = '24.17.185.236'
 HOME_IP = '127.0.0.1'
-HOST = EDDIE_IP
-HOST = RACHEL_IP
 HOST = HOME_IP
 PORT = 8000
 
-class Server:
+class NetworkObject:
+    def create_socket(self) -> socket.socket:
+        return socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    
+    def start_thread(self, target, args=()):
+        threading.Thread(target=target, args=args).start()
+
+    def receive(self, socket_obj: socket.socket):
+        try: 
+            DATA_SIZE = 512
+            raw_data = socket_obj.recv(DATA_SIZE)
+            obj = pickle.loads(raw_data)
+            return obj
+        except Exception as e:
+            print(e)
+            return None
+    
+    def send(self, socket_obj: socket.socket, data: dict):
+        if data:
+            pickled_data = pickle.dumps({**data, 'timestamp': time.time()})
+            socket_obj.sendall(pickled_data)
+    
+class Server(NetworkObject):
     def __init__(self, port):
-        self.server = create_socket()
+        self.server = self.create_socket()
         self.server.bind((HOST, port))
         self.server.listen(5)
         print("Server is listening...")
         self.clients: list[socket.socket] = []
         self.rooms = []
         self.current_port = port
-        start_thread(self.server_thread)
+        self.start_thread(self.server_thread)
 
     def server_thread(self):
         client_id = 0
@@ -95,19 +58,15 @@ class Server:
             client, address = self.server.accept()
             self.clients.append(client)
             print("Connection established with", address)
-            start_thread(self.client_thread, (client, client_id))
+            self.start_thread(self.client_thread, (client, client_id))
             client_id += 1
-    
-    def send(self, client, msg):
-        send(client, msg)
 
     def send_all(self, msg_obj):
         [self.send(c, msg_obj) for c in self.clients]
 
-    def client_thread(self, client, id):
+    def client_thread(self, client: socket.socket, id):
         self.send(client, {'client_id': id})
         this_clients_room = None
-
 
         def send_room(msg_obj):
             [self.send(c, msg_obj) for c in this_clients_room['clients'] if c != client]
@@ -115,7 +74,7 @@ class Server:
         while True:
             try:
                 # msg_obj has this format: {'action': 'data', 'timestamp': 1234567890.123}
-                msg_obj = receive(client)
+                msg_obj = self.receive(client)
                 print('msg_obj:', msg_obj)
                 if not msg_obj: break
             except ConnectionError:
@@ -149,20 +108,20 @@ class Server:
                     print('this return')
                 return
 
-class Client:
+class Client(NetworkObject):
     def __init__(self, update_game_state, on_client_connect = lambda : 0, port = PORT, wait_for_clients=True):
         self.update_game_state = update_game_state
         self.client_id = 100
         self.on_client_connect = on_client_connect
-        self.client = create_socket()
+        self.client = self.create_socket()
         self.client.connect((HOST, port))
         self.room = None
-        start_thread(self.client_thread)
+        self.start_thread(self.client_thread)
 
     def client_thread(self):
         while True:
             try:
-                msg = receive(self.client)
+                msg = self.receive(self.client)
                 if not msg: break
                 print('client thread:', msg)
                 
@@ -175,4 +134,4 @@ class Client:
                 return
 
     def send(self, data):
-        send(self.client, data)
+        super().send(self.client, data)
