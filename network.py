@@ -2,60 +2,96 @@ import socket
 import threading
 import time
 import pickle
-
-
+import struct
 
 def get_ip():
-    import socket
     hostname = socket.gethostname()
     IPAddr = socket.gethostbyname(hostname)
     print("Your Computer Name is:" + hostname)
     print("Your Computer IP Address is:" + IPAddr)
 
 EDDIE_IP = '10.0.0.237'
-RACHEL_IP = '10.5.0.2'
 RACHEL_IP = '24.17.185.236'
 HOME_IP = '127.0.0.1'
 HOST = HOME_IP
 PORT = 8000
 
+
 class NetworkObject:
+    # TCP is a byte stream; we must frame messages.
+    # Protocol: [4-byte big-endian unsigned length][payload bytes]
+    HEADER_SIZE = 4
+
+    def __init__(self, port=PORT):
+        self.client = self.create_socket()
+        if isinstance(self, Server):
+            self.client.bind((HOST, port))
+            self.client.listen(5)
+            print("Server is listening...")
+
+        elif isinstance(self, Client):
+            self.client.connect((HOST, port))
+
+        self.start_thread(self.on_thread)
+
     def create_socket(self) -> socket.socket:
-        return socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        return client_socket
+
     def start_thread(self, target, args=()):
         threading.Thread(target=target, args=args).start()
 
+    def _recv_exact(self, socket_obj: socket.socket, nbytes: int) -> bytes | None:
+        """Read exactly nbytes from the socket, or return None if the peer closed."""
+        chunks: list[bytes] = []
+        bytes_recd = 0
+        while bytes_recd < nbytes:
+            chunk = socket_obj.recv(nbytes - bytes_recd)
+            if not chunk:
+                return None
+            chunks.append(chunk)
+            bytes_recd += len(chunk)
+        return b''.join(chunks)
+
     def receive(self, socket_obj: socket.socket):
-        try: 
-            DATA_SIZE = 512
-            raw_data = socket_obj.recv(DATA_SIZE)
-            obj = pickle.loads(raw_data)
-            return obj
+        try:
+            header = self._recv_exact(socket_obj, self.HEADER_SIZE)
+            if header is None:
+                return None
+
+            (payload_len,) = struct.unpack('!I', header)
+            if payload_len == 0:
+                return None
+
+            payload = self._recv_exact(socket_obj, payload_len)
+            if payload is None:
+                return None
+
+            return pickle.loads(payload)
         except Exception as e:
             print(e)
             return None
-    
+
     def send(self, socket_obj: socket.socket, data: dict):
-        if data:
-            pickled_data = pickle.dumps({**data, 'timestamp': time.time()})
-            socket_obj.sendall(pickled_data)
-    
+        if not data:
+            return
+
+        payload = pickle.dumps({**data, 'timestamp': time.time()})
+        header = struct.pack('!I', len(payload))
+        socket_obj.sendall(header + payload)
+
+
 class Server(NetworkObject):
-    def __init__(self, port):
-        self.server = self.create_socket()
-        self.server.bind((HOST, port))
-        self.server.listen(5)
-        print("Server is listening...")
+    def __init__(self, port=PORT):
         self.clients: list[socket.socket] = []
         self.rooms = []
         self.current_port = port
-        self.start_thread(self.server_thread)
+        super().__init__(port=PORT)
 
-    def server_thread(self):
+    def on_thread(self):
         client_id = 0
         while True:
-            client, address = self.server.accept()
+            client, address = self.client.accept()
             self.clients.append(client)
             print("Connection established with", address)
             self.start_thread(self.client_thread, (client, client_id))
@@ -76,7 +112,8 @@ class Server(NetworkObject):
                 # msg_obj has this format: {'action': 'data', 'timestamp': 1234567890.123}
                 msg_obj = self.receive(client)
                 print('msg_obj:', msg_obj)
-                if not msg_obj: break
+                if not msg_obj:
+                    break
             except ConnectionError:
                 print(f"Connection from client {id} has been lost.")
                 if client in self.clients:
@@ -102,29 +139,29 @@ class Server(NetworkObject):
                     send_room(msg_obj)
             except ConnectionError:
                 print(f"Unable to reach client with socket {client}")
-                
+
                 if client in self.clients:
                     self.clients.remove(client)
                     print('this return')
                 return
 
+
 class Client(NetworkObject):
-    def __init__(self, update_game_state, on_client_connect = lambda : 0, port = PORT, wait_for_clients=True):
-        self.update_game_state = update_game_state
+    def __init__(self, port=PORT, update_game_state=lambda x: 0, on_client_connect=lambda: 0, wait_for_clients=True):
         self.client_id = 100
         self.on_client_connect = on_client_connect
-        self.client = self.create_socket()
-        self.client.connect((HOST, port))
+        self.update_game_state = update_game_state
         self.room = None
-        self.start_thread(self.client_thread)
+        super().__init__(port=PORT)
 
-    def client_thread(self):
+    def on_thread(self):
         while True:
             try:
                 msg = self.receive(self.client)
-                if not msg: break
+                if not msg:
+                    break
                 print('client thread:', msg)
-                
+
                 if 'client_id' in msg:
                     self.client_id = msg['client_id']
 
@@ -135,3 +172,4 @@ class Client(NetworkObject):
 
     def send(self, data):
         super().send(self.client, data)
+
