@@ -41,44 +41,20 @@ class NetworkObject:
     def start_thread(self, target, args=()):
         threading.Thread(target=target, args=args).start()
 
-    def _recv_exact(self, socket_obj: socket.socket, nbytes: int) -> bytes | None:
-        """Read exactly nbytes from the socket, or return None if the peer closed."""
-        chunks: list[bytes] = []
-        bytes_recd = 0
-        while bytes_recd < nbytes:
-            chunk = socket_obj.recv(nbytes - bytes_recd)
-            if not chunk:
-                return None
-            chunks.append(chunk)
-            bytes_recd += len(chunk)
-        return b''.join(chunks)
-
     def receive(self, socket_obj: socket.socket):
         try:
-            header = self._recv_exact(socket_obj, self.HEADER_SIZE)
-            if header is None:
-                return None
-
-            (payload_len,) = struct.unpack('!I', header)
-            if payload_len == 0:
-                return None
-
-            payload = self._recv_exact(socket_obj, payload_len)
-            if payload is None:
-                return None
-
-            return pickle.loads(payload)
+            DATA_SIZE = 512
+            raw_data = socket_obj.recv(DATA_SIZE)
+            obj = pickle.loads(raw_data)
+            return obj
         except Exception as e:
             print(e)
             return None
 
     def send(self, socket_obj: socket.socket, data: dict):
-        if not data:
-            return
-
-        payload = pickle.dumps({**data, 'timestamp': time.time()})
-        header = struct.pack('!I', len(payload))
-        socket_obj.sendall(header + payload)
+        if data:
+            pickled_data = pickle.dumps({**data, 'timestamp': time.time()})
+            socket_obj.sendall(pickled_data)
 
 
 class Server(NetworkObject):
