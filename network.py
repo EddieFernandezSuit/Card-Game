@@ -18,10 +18,6 @@ PORT = 8000
 
 
 class NetworkObject:
-    # TCP is a byte stream; we must frame messages.
-    # Protocol: [4-byte big-endian unsigned length][payload bytes]
-    HEADER_SIZE = 4
-
     def __init__(self, port=PORT):
         self.client = self.create_socket()
         if isinstance(self, Server):

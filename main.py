@@ -177,7 +177,7 @@ def create_connect_state(game):
     game.currentState.ui_container=UIContainer(game, UI_POS, elements=[BACK_BUTTON, ROOMS_BUTTON, ROOMS_TEXT], isCenter=True)
     
     try:
-        game.currentState.client=Client(update_client, on_client_connect=lambda :click_play(game), wait_for_clients=False)
+        game.currentState.client=Client(update_game_state=update_client, on_client_connect=lambda :click_play(game), wait_for_clients=False)
         game.currentState.client.send({'get_rooms':''})
     except Exception as e:
         print(e)
