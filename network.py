@@ -1,8 +1,8 @@
 import socket
 import threading
 import time
-import pickle
-import struct
+import json
+
 
 def get_ip():
     hostname = socket.gethostname()
@@ -38,19 +38,45 @@ class NetworkObject:
         threading.Thread(target=target, args=args).start()
 
     def receive(self, socket_obj: socket.socket):
+        """Receive exactly one newline-delimited JSON message.
+
+        TCP is a stream, so we keep a per-socket buffer and extract complete
+        messages delimited by '\n'.
+        """
         try:
-            DATA_SIZE = 512
-            raw_data = socket_obj.recv(DATA_SIZE)
-            obj = pickle.loads(raw_data)
-            return obj
+            if not hasattr(self, "_buffers"):
+                self._buffers = {}
+            buf = self._buffers.get(socket_obj, b"")
+
+            while True:
+                chunk = socket_obj.recv(4096)
+                if not chunk:
+                    # Socket closed
+                    self._buffers[socket_obj] = b""
+                    return None
+
+                buf += chunk
+                while b"\n" in buf:
+                    line, buf = buf.split(b"\n", 1)
+                    if not line:
+                        continue
+                    payload = line.decode("utf-8")
+                    obj = json.loads(payload)
+                    self._buffers[socket_obj] = buf
+                    return obj
+
+                self._buffers[socket_obj] = buf
+
         except Exception as e:
             print(e)
             return None
 
     def send(self, socket_obj: socket.socket, data: dict):
         if data:
-            pickled_data = pickle.dumps({**data, 'timestamp': time.time()})
-            socket_obj.sendall(pickled_data)
+            msg = {**data, 'timestamp': time.time()}
+            raw = (json.dumps(msg) + "\n").encode("utf-8")
+            socket_obj.sendall(raw)
+
 
 
 class Server(NetworkObject):
