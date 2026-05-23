@@ -84,26 +84,55 @@ class Server(NetworkObject):
         self.clients: list[socket.socket] = []
         self.rooms = []
         self.current_port = port
+
+        self._clients_lock = threading.Lock()
+        self._rooms_lock = threading.Lock()
+
         super().__init__(port=PORT)
 
+    def remove_client_everywhere(self, client: socket.socket):
+        # Remove from global client list
+        with self._clients_lock:
+            if client in self.clients:
+                self.clients.remove(client)
+
+        # Remove from any room
+        with self._rooms_lock:
+            for room in self.rooms:
+                if client in room['clients']:
+                    room['clients'] = [c for c in room['clients'] if c != client]
+
     def on_thread(self):
+
         client_id = 0
         while True:
             client, address = self.client.accept()
-            self.clients.append(client)
+            with self._clients_lock:
+                self.clients.append(client)
             print("Connection established with", address)
             self.start_thread(self.client_thread, (client, client_id))
             client_id += 1
 
+
     def send_all(self, msg_obj):
-        [self.send(c, msg_obj) for c in self.clients]
+        with self._clients_lock:
+            clients_snapshot = list(self.clients)
+        for c in clients_snapshot:
+            self.send(c, msg_obj)
+
 
     def client_thread(self, client: socket.socket, id):
         self.send(client, {'client_id': id})
         this_clients_room = None
 
         def send_room(msg_obj):
-            [self.send(c, msg_obj) for c in this_clients_room['clients'] if c != client]
+            # Snapshot room clients to avoid concurrent mutation
+            with self._rooms_lock:
+                room_clients_snapshot = list(this_clients_room['clients'])
+            for c in room_clients_snapshot:
+                if c != client:
+                    self.send(c, msg_obj)
+
 
         while True:
             try:
@@ -112,17 +141,10 @@ class Server(NetworkObject):
                 print('msg_obj:', msg_obj)
                 if not msg_obj:
                     break
-            except ConnectionError:
-                print(f"Connection from client {id} has been lost.")
-                if client in self.clients:
-                    self.clients.remove(client)
-                break
-            try:
                 if 'create_room' in msg_obj:
                     room_id = len(self.rooms)
                     self.rooms.append({'room_id': room_id, 'clients': []})
-                    msg = {'room_id': room_id}
-                    self.send_all(msg)
+                    self.send_all({'room_id': room_id})
                 elif 'get_rooms' in msg_obj:
                     room_ids = [room['room_id'] for room in self.rooms]
                     self.send(client, {'room_ids': room_ids})
@@ -136,12 +158,12 @@ class Server(NetworkObject):
                 elif this_clients_room:
                     send_room(msg_obj)
             except ConnectionError:
-                print(f"Unable to reach client with socket {client}")
-
-                if client in self.clients:
-                    self.clients.remove(client)
-                    print('this return')
+                # Any socket failure: drop the client + stop this thread
+                print(f"Connection issue with client {id}")
+                self.remove_client_everywhere(client)
                 return
+
+
 
 
 class Client(NetworkObject):
