@@ -195,11 +195,13 @@ def create_menu_state(game):
     Background(game=game)
     MENU_UI_POSITION = list(map(lambda x: x/2, game.screen.get_size()))
 
-    PLAY_TEXT = ClickableText(game, on_click=click_play, args=[game], str='Play')
+    # PLAY_TEXT = ClickableText(game, on_click=click_play, args=[game], str='Play')
     EDIT_DECK_TEXT = ClickableText(game, on_click=click_edit_deck_text, args=[game], str='Edit Deck')
     CONNECT_TEXT = ClickableText(game, on_click=click_connect_text, args=[game], str='Connect')
 
-    game.ui_container = UIContainer(game, MENU_UI_POSITION, elements=[PLAY_TEXT, EDIT_DECK_TEXT, CONNECT_TEXT],isCenter=True)
+    game.ui_container = UIContainer(game, MENU_UI_POSITION, elements=[EDIT_DECK_TEXT, CONNECT_TEXT],isCenter=True)
+
+
     
 def start(game):
     game.thread_manager = ThreadManager()
