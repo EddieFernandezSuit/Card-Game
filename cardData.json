@@ -65,7 +65,7 @@
         "Drain": 0,
         "Devour": 1
     },
-    "TheOneTheSunTheGunTheOne": {
+    "_TheOneTheSunTheGunTheOne": {
         "Name": "TheOneTheSunTheGunTheOne",
         "Growth Type": "Health",
         "Mana": 7,

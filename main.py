@@ -20,7 +20,7 @@ import numpy as np
 
 def get_opponent_player_num(game):
     return game.currentState['client'].client_id == 0
-    
+
 def get_opponent(game):
     opponent_num = get_opponent_player_num(game)
     return game.currentState['players'][opponent_num]
@@ -43,10 +43,10 @@ def click_play(game):
                     if game.currentState['client'].client_id == 1:
                         game.currentState['players'].reverse()
                 game.thread_manager.do(create_player, msg_obj['deck'])
-        
+
         if 'pass' in msg_obj:
             game.currentState['passTurnButton'].pass_turn()
-        
+
         if 'play' in msg_obj:
             card_name = msg_obj['play']
             opponent = get_opponent(game)
@@ -66,12 +66,12 @@ def click_play(game):
                 target = game.currentState['players'][defending_player_num].field[defending_card_field_id]
             else:
                 target = game.currentState['players'][defending_player_num]
-            
+
             game.thread_manager.do(lambda attacker, target: attacker.attack(target), attacker, target)
-    
+
     if 'client' in game.states['connect']:
         game.currentState['client'].update_game_state = update_game_state
-    
+
     state = {
         'background': Background(game=game),
         'turn': 0,
@@ -102,15 +102,15 @@ def json_to_dictionary(json_filename):
 
 def create_deck_builder_state(game):
     game.currentState = game.states['buildDeck']
-    
+
     Background(game)
     game.currentState['deckBox'] = DeckBox(game)
-    
+
     card_data = json_to_dictionary('cardData.json')
     deck_box_data = json_to_dictionary('DeckBox.json')
 
     collumns = 3
-    cards_in_matrix = to_matrix(list(card_data.keys()), collumns)
+    cards_in_matrix = to_matrix([k for k in card_data.keys() if not k.startswith('_')], collumns)
 
     card_size = 200
     card_spacing = 10
@@ -120,7 +120,7 @@ def create_deck_builder_state(game):
         for j, card in enumerate(row):
             deck_builder_card = DeckBuilderCard(game, card, (400 + j * card_offset, card_spacing + i * card_offset))
             game.currentState['cardsToAdd'].append(deck_builder_card)
-            
+
     for key, deck_cards in deck_box_data.items():
         deck_list = game.currentState['deckBox'].addDeck(deck_cards)
         # deck_list.cards.extend(deck_cards)
@@ -130,10 +130,10 @@ def create_deck_builder_state(game):
 
 def save_and_exit(game):
     deckBox = {deckList.deckName: deckList.cards for deckList in game.currentState['deckBox'].deckLists}
-    
+
     with open('DeckBox.json', 'w') as db:
-        json.dump(deckBox, db) 
-            
+        json.dump(deckBox, db)
+
     game.currentState = game.states['menu']
 
 def create_room(game):
@@ -147,7 +147,7 @@ def click_on_room(game, room_id):
     else:
         game.currentState.YOU_ARE_IN_ROOM_TEXT.str = f'You are now in room {room_id}'
     game.currentState.client.send({'join_room': room_id})
-    
+
 
 def create_connect_state(game):
     def update_client(msg):
@@ -158,11 +158,11 @@ def create_connect_state(game):
 
         if 'room_id' in msg:
             game.thread_manager.do(create_ctext, msg['room_id'])
-        
+
         if 'room_ids' in msg:
             for room_id in msg['room_ids']:
                 game.thread_manager.do(create_ctext, room_id)
-        
+
         if 'all_clients_connected' in msg:
             game.thread_manager.do(click_play, game)
 
@@ -175,7 +175,7 @@ def create_connect_state(game):
     ROOMS_TEXT = Text(game, str='Rooms:')
     UI_POS = tuple(np.array(game.screen.get_size())/2)
     game.currentState.ui_container=UIContainer(game, UI_POS, elements=[BACK_BUTTON, ROOMS_BUTTON, ROOMS_TEXT], isCenter=True)
-    
+
     try:
         game.currentState.client=Client(update_game_state=update_client, on_client_connect=lambda :click_play(game), wait_for_clients=False)
         game.currentState.client.send({'get_rooms':''})
@@ -202,7 +202,7 @@ def create_menu_state(game):
     game.ui_container = UIContainer(game, MENU_UI_POSITION, elements=[EDIT_DECK_TEXT, CONNECT_TEXT],isCenter=True)
 
 
-    
+
 def start(game):
     game.thread_manager = ThreadManager()
     game.volume = .2 #from 0 to 1.0
@@ -231,7 +231,7 @@ def update(game):
 def get_attack_message(self, msg_obj):
     attacking_player_num = msg_obj['attacker']['player_num']
     defending_player_num = 1 - attacking_player_num  # Assuming 2 players only
-    
+
     attacker = self.game.currentState['players'][attacking_player_num].field[msg_obj['attacker']['field_id']]
     defenders = []
     for defender_info in msg_obj['defenders']:
@@ -241,7 +241,7 @@ def get_attack_message(self, msg_obj):
         else:
             defender = self.game.currentState['players'][defending_player_num].field[defender_field_id]
         defenders.append(defender)
-    
+
     return attacker, defenders
 
 GAME = Game(start, update)
