@@ -5,7 +5,6 @@ handle what happens when the other client disconnects
 
 game slows down dramaticlaly after some time
 
-remove the ability to join the same room twice
 ---------------------------------------------------
 # Resolved
 

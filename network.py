@@ -151,6 +151,10 @@ class Server(NetworkObject):
                 elif 'join_room' in msg_obj:
                     room_id = msg_obj['join_room']
                     this_clients_room = self.rooms[room_id]
+
+                    if client in this_clients_room['clients']:
+                        continue
+
                     this_clients_room['clients'].append(client)
                     if len(this_clients_room['clients']) == 2:
                         for c in this_clients_room['clients']:
