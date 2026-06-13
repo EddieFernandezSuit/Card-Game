@@ -23,11 +23,14 @@ class Game:
             self.screen.fill(GREY)
             fps_text.str = f'FPS: {int(self.clock.get_fps())}'
 
+            # Update all objects first, then update/draw state-level logic.
             for gameObject in self.currentState['gameObjects']:
                 gameObject.update()
-           
+
+            # Avoid adding extra CPU load each frame.
             update(self)
             draw(self)
+
 
             pygame.display.update()
             self.clock.tick(FPS)
