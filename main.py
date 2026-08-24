@@ -25,24 +25,50 @@ def get_opponent(game):
     opponent_num = get_opponent_player_num(game)
     return game.currentState['players'][opponent_num]
 
+def place_player_at_num(game, player):
+    players = game.currentState['players']
+    while len(players) <= player.num:
+        players.append(None)
+    players[player.num] = player
+
+def create_opponent_player(game, deck):
+    if 'players' not in game.currentState:
+        return
+    players = game.currentState['players']
+    opponent_num = 1 - game.currentState['client'].client_id
+    while len(players) <= opponent_num:
+        players.append(None)
+    if players[opponent_num] is None:
+        place_player_at_num(game, Player(game, opponent_num, deck))
+
 def on_click_leave_game(game: Game):
-    game.send({'leave_game':''})
+    if 'background_music' in game.currentState:
+        game.currentState['background_music'].stop()
+    if 'client' in game.currentState:
+        game.currentState['client'].update_game_state = lambda _: None
+        game.currentState['client'].send({'leave_game': ''})
+        game.currentState['client'].client.close()
     game.set_state('menu')
 
 def click_play(game):
     game.currentState = game.states['play']
     if 'client' in game.states['connect']:
         game.currentState['client'] = game.states['connect'].client
+    game.currentState['players'] = []
     game.get_opponent = get_opponent
 
     def update_game_state(msg_obj):
         print('msg', msg_obj)
-        if 'deck' in msg_obj and ('players' not in game.currentState):
-                def create_player(deck):
-                    game.currentState['players'].append(Player(game, game.currentState['client'].client_id == 0, deck))
-                    if game.currentState['client'].client_id == 1:
-                        game.currentState['players'].reverse()
-                game.thread_manager.do(create_player, msg_obj['deck'])
+        if 'player_left' in msg_obj:
+            if 'background_music' in game.currentState:
+                game.currentState['background_music'].stop()
+            if 'client' in game.currentState:
+                game.currentState['client'].update_game_state = lambda _: None
+                game.currentState['client'].client.close()
+            game.set_state('menu')
+            return
+        if 'deck' in msg_obj:
+            game.thread_manager.do(create_opponent_player, game, msg_obj['deck'])
 
         if 'pass' in msg_obj:
             game.currentState['passTurnButton'].pass_turn()
@@ -77,7 +103,7 @@ def click_play(game):
         'turn': 0,
         'passTurnButton': PassTurnButton(game),
         'selectedCard': None,
-        'players': [Player(game,game.currentState['client'].client_id)],
+        'players': game.currentState['players'],
         'arrowFlies': 0,
         'select_text': TextSelector(game),
         'background_music': pygame.mixer.Sound('sounds/background_music.mp3'),
@@ -90,6 +116,10 @@ def click_play(game):
     state['background_music'].play(-1)
 
     game.currentState.update(state)
+
+    # Created after the background so the local player's cards are not
+    # blitted over by it (draw order = gameObjects insertion order)
+    place_player_at_num(game, Player(game, game.currentState['client'].client_id))
 
 def to_matrix(l, n):
     return [l[i:i+n] for i in range(0, len(l), n)]
@@ -165,6 +195,9 @@ def create_connect_state(game):
 
         if 'all_clients_connected' in msg:
             game.thread_manager.do(click_play, game)
+
+        if 'deck' in msg:
+            game.thread_manager.do(create_opponent_player, game, msg['deck'])
 
 
     game.states['connect'].set(

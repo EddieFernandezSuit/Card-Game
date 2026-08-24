@@ -17,9 +17,10 @@ class PlayCardRectangle(Entity):
         turn = self.game.currentState['turn'] 
         MAX_FIELD_SIZE = 5
         board_full = False
-        if len(self.game.currentState['players']) > self.card.playerNum and self.game.currentState['players'][self.card.playerNum]:
-            board_full = len(self.game.currentState['players'][self.card.playerNum].field) >= MAX_FIELD_SIZE
+        players = self.game.currentState['players']
+        if players and len(players) > self.card.playerNum and players[self.card.playerNum]:
+            board_full = len(players[self.card.playerNum].field) >= MAX_FIELD_SIZE
         # if turn == self.card.playerNum and turn == self.game.currentState['client'].client_id and not BOARD_IS_FULL and ((self.card.place == 'hand' and self.card.stats['Mana'] <= self.game.currentState['players'][self.card.playerNum].stats['Mana']) or (self.card.place == 'field' and self.card.attackUsed == 0)):
-        if turn == self.card.playerNum and turn == self.game.currentState['client'].client_id and (not board_full or self.card.place != 'hand' )and ((self.card.place == 'hand' and self.card.stats['Mana'] <= self.game.currentState['players'][self.card.playerNum].stats['Mana']) or (self.card.place == 'field' and self.card.attackUsed == 0)):
+        if players and turn == self.card.playerNum and turn == self.game.currentState['client'].client_id and (not board_full or self.card.place != 'hand' )and ((self.card.place == 'hand' and self.card.stats['Mana'] <= players[self.card.playerNum].stats['Mana']) or (self.card.place == 'field' and self.card.attackUsed == 0)):
             self.transform_component.position = self.card.transform_component.position - (self.outline_thickness, self.outline_thickness)
             self.draw()

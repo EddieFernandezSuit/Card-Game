@@ -34,6 +34,8 @@ class PassTurnButton(Entity):
         self.sound.set_volume(self.game.volume)
         self.sound.play()
         for player in self.game.currentState['players']:
+            if not player:
+                continue
             for card in player.field:
                 card.attackUsed = 0
 
@@ -43,7 +45,10 @@ class PassTurnButton(Entity):
         self.image_component.set_image(file_path)
 
         turn = self.game.currentState['turn']
-        turn_player = self.game.currentState['players'][turn]
+        players = self.game.currentState['players']
+        if len(players) <= turn or not players[turn]:
+            return
+        turn_player = players[turn]
         turn_player.totalMana += 1
         turn_player.stats_component.set_stat('Mana', turn_player.totalMana)
 
