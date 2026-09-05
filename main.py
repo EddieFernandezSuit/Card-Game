@@ -41,13 +41,21 @@ def create_opponent_player(game, deck):
     if players[opponent_num] is None:
         place_player_at_num(game, Player(game, opponent_num, deck))
 
+def disconnect_client(client):
+    # The opponent leaving at the same time can close this socket from
+    # the receive thread mid-teardown, so tolerate socket failures here
+    try:
+        client.update_game_state = lambda _: None
+        client.send({'leave_game': ''})
+        client.client.close()
+    except OSError:
+        pass
+
 def on_click_leave_game(game: Game):
     if 'background_music' in game.currentState:
         game.currentState['background_music'].stop()
     if 'client' in game.currentState:
-        game.currentState['client'].update_game_state = lambda _: None
-        game.currentState['client'].send({'leave_game': ''})
-        game.currentState['client'].client.close()
+        disconnect_client(game.currentState['client'])
     game.set_state('menu')
 
 def click_play(game):
@@ -63,8 +71,7 @@ def click_play(game):
             if 'background_music' in game.currentState:
                 game.currentState['background_music'].stop()
             if 'client' in game.currentState:
-                game.currentState['client'].update_game_state = lambda _: None
-                game.currentState['client'].client.close()
+                disconnect_client(game.currentState['client'])
             game.set_state('menu')
             return
         if 'deck' in msg_obj:
@@ -180,6 +187,14 @@ def click_on_room(game, room_id):
 
 
 def create_connect_state(game):
+    # This state rebuilds on every visit: drop leftover entities and any
+    # connection from the previous session so the room list starts fresh
+    game.currentState.gameObjects.clear()
+    if hasattr(game.currentState, 'YOU_ARE_IN_ROOM_TEXT'):
+        delattr(game.currentState, 'YOU_ARE_IN_ROOM_TEXT')
+    if 'client' in game.currentState:
+        disconnect_client(game.currentState['client'])
+
     def update_client(msg):
         def create_ctext(room_id):
             CTEXT = ClickableText(game, on_click= click_on_room, args=[game,room_id], str=str(room_id))
@@ -219,9 +234,13 @@ def click_edit_deck_text(game):
     game.set_state('buildDeck')
 
 def click_connect_text(game):
+    # Rebuild the connect state on every visit so the room list is fresh
+    game.states['connect'].is_state_created = False
     game.set_state('connect')
 
 def click_back_to_menu(game):
+    if 'client' in game.currentState:
+        disconnect_client(game.currentState['client'])
     game.set_state('menu')
 
 def create_menu_state(game):
