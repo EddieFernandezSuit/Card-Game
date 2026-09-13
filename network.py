@@ -49,13 +49,6 @@ class NetworkObject:
             buf = self._buffers.get(socket_obj, b"")
 
             while True:
-                chunk = socket_obj.recv(4096)
-                if not chunk:
-                    # Socket closed
-                    self._buffers[socket_obj] = b""
-                    return None
-
-                buf += chunk
                 while b"\n" in buf:
                     line, buf = buf.split(b"\n", 1)
                     if not line:
@@ -65,6 +58,13 @@ class NetworkObject:
                     self._buffers[socket_obj] = buf
                     return obj
 
+                chunk = socket_obj.recv(4096)
+                if not chunk:
+                    # Socket closed
+                    self._buffers[socket_obj] = b""
+                    return None
+
+                buf += chunk
                 self._buffers[socket_obj] = buf
 
         except Exception as e:

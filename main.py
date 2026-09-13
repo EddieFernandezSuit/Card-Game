@@ -162,7 +162,7 @@ def create_deck_builder_state(game):
         deck_list = game.currentState['deckBox'].addDeck(deck_cards)
         # deck_list.cards.extend(deck_cards)
 
-    game.currentState['save and exit'] = ClickableText(game, pygame.Vector2(10, game.SCREEN_HEIGHT - FONTS['large'].size('A')[1] - 10), save_and_exit, [game], 'Save and Exit')
+    game.currentState['save and exit'] = ClickableText(game, pygame.Vector2(10, game.SCREEN_HEIGHT - game.fonts['large'].size('A')[1] - 10), save_and_exit, [game], 'Save and Exit')
     # game.currentState = game.states['menu']
 
 def save_and_exit(game):

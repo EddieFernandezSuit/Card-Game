@@ -3,7 +3,7 @@ from components.click_component import ClickComponent
 from components.transform_component import TransformComponent
 
 class Zone(Entity):
-    def __init__(self, position, playerNum, game):
+    def __init__(self, position=(0,0), playerNum=0, game=None):
         super().__init__(game)
         zone_size = 200
         self.transform_component = TransformComponent(game, position, zone_size, zone_size)

@@ -35,7 +35,7 @@ class Player(Entity):
 
         self.statsText = {
             'Health': Text(game, position=ManaUI[self.num], font_size='large'),
-            'Mana': Text(game, position=(ManaUI[self.num][0], ManaUI[self.num][1] + FONTS['large'].size('1')[1]), font_size='large'),
+            'Mana': Text(game, position=(ManaUI[self.num][0], ManaUI[self.num][1] + game.fonts['large'].size('1')[1]), font_size='large'),
         }
 
         self.transform_component = self.statsText['Health'].transform_component
