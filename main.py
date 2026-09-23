@@ -7,7 +7,6 @@ from entities.background import Background
 from entities.deck_box import DeckBox
 from entities.player import Player
 from particle_manager import ParticleManager
-from thread_manager import ThreadManager
 from entities.text import Text
 from game_state import GameState
 from constants import *
@@ -16,6 +15,7 @@ from Game import Game
 import pygame
 import json
 import numpy as np
+import queue
 
 
 def get_opponent_player_num(game):
@@ -75,7 +75,7 @@ def click_play(game):
             game.set_state('menu')
             return
         if 'deck' in msg_obj:
-            game.thread_manager.do(create_opponent_player, game, msg_obj['deck'])
+            create_opponent_player(game, msg_obj['deck'])
 
         if 'pass' in msg_obj:
             game.currentState['passTurnButton'].pass_turn()
@@ -100,7 +100,7 @@ def click_play(game):
             else:
                 target = game.currentState['players'][defending_player_num]
 
-            game.thread_manager.do(lambda attacker, target: attacker.attack(target), attacker, target)
+            attacker.attack(target)
 
     if 'client' in game.states['connect']:
         game.currentState['client'].update_game_state = update_game_state
@@ -204,20 +204,20 @@ def create_connect_state(game):
             game.currentState.ui_container.add_element(CTEXT)
 
         if 'room_id' in msg:
-            game.thread_manager.do(create_ctext, msg['room_id'])
+            create_ctext(msg['room_id'])
 
         if 'room_ids' in msg:
             for room_id in msg['room_ids']:
-                game.thread_manager.do(create_ctext, room_id)
+                create_ctext(room_id)
                 
         if 'all_clients_connected' in msg:
-            game.thread_manager.do(click_play, game)
+            click_play(game)
 
         if 'deck' in msg:
-            game.thread_manager.do(create_opponent_player, game, msg['deck'])
+            create_opponent_player(game, msg['deck'])
         
         if 'joined_room' in msg:
-            game.thread_manager.do(show_in_room, game, msg['joined_room'])
+            show_in_room(game, msg['joined_room'])
 
     game.states['connect'].set(
         background=Background(game=game),
@@ -258,7 +258,6 @@ def create_menu_state(game):
     game.ui_container = UIContainer(game, MENU_UI_POSITION, elements=[EDIT_DECK_TEXT, CONNECT_TEXT],isCenter=True)
 
 def start(game):
-    game.thread_manager = ThreadManager()
     game.volume = .2 #from 0 to 1.0
     game.key_actions = {
         pygame.K_SPACE: lambda: game.currentState.get('passTurnButton', None) and game.currentState['passTurnButton'].on_click()
@@ -273,7 +272,14 @@ def start(game):
     game.set_state('menu')
 
 def update(game):
-    game.thread_manager.update()
+    if 'client' in game.currentState:
+        client = game.currentState['client']
+        while True:
+            try:
+                msg = client.messages.get_nowait()
+            except queue.Empty:
+                break
+            client.update_game_state(msg)
 
     if game.currentState['pm']:
         game.currentState['pm'].update()

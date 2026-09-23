@@ -2,6 +2,7 @@ import socket
 import threading
 import time
 import json
+import queue
 
 
 def get_ip():
@@ -226,6 +227,7 @@ class Client(NetworkObject):
         self.client_id = 100
         self.on_client_connect = on_client_connect
         self.update_game_state = update_game_state
+        self.messages = queue.Queue()
         self.room = None
         super().__init__(port=PORT)
 
@@ -240,7 +242,7 @@ class Client(NetworkObject):
                 if 'client_id' in msg:
                     self.client_id = msg['client_id']
 
-                self.update_game_state(msg)
+                self.messages.put(msg)
             except ConnectionError as e:
                 print('Connection Error', e)
                 return
