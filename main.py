@@ -177,14 +177,16 @@ def create_room(game):
     game.currentState.client.send({'create_room': 'new_room'})
     # click_on_room(game, len(game.currentState.ui_container.elements) - 3)
 
-def click_on_room(game, room_id):
+def show_in_room(game, room_id):
     if 'YOU_ARE_IN_ROOM_TEXT' not in game.currentState:
         game.currentState.YOU_ARE_IN_ROOM_TEXT = Text(game=game, str=f'You are now in room {room_id}', font_size='medium')
         game.currentState.ui_container.insert_element(0, game.currentState.YOU_ARE_IN_ROOM_TEXT)
     else:
         game.currentState.YOU_ARE_IN_ROOM_TEXT.str = f'You are now in room {room_id}'
-    game.currentState.client.send({'join_room': room_id})
 
+def click_on_room(game, room_id):
+    show_in_room(game, room_id)
+    game.currentState.client.send({'join_room': room_id})
 
 def create_connect_state(game):
     # This state rebuilds on every visit: drop leftover entities and any
@@ -207,13 +209,15 @@ def create_connect_state(game):
         if 'room_ids' in msg:
             for room_id in msg['room_ids']:
                 game.thread_manager.do(create_ctext, room_id)
-
+                
         if 'all_clients_connected' in msg:
             game.thread_manager.do(click_play, game)
 
         if 'deck' in msg:
             game.thread_manager.do(create_opponent_player, game, msg['deck'])
-
+        
+        if 'joined_room' in msg:
+            game.thread_manager.do(show_in_room, game, msg['joined_room'])
 
     game.states['connect'].set(
         background=Background(game=game),
@@ -252,8 +256,6 @@ def create_menu_state(game):
     CONNECT_TEXT = ClickableText(game, on_click=click_connect_text, args=[game], str='Connect')
 
     game.ui_container = UIContainer(game, MENU_UI_POSITION, elements=[EDIT_DECK_TEXT, CONNECT_TEXT],isCenter=True)
-
-
 
 def start(game):
     game.thread_manager = ThreadManager()

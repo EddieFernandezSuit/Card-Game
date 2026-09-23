@@ -85,6 +85,7 @@ class Server(NetworkObject):
         # room_id -> room dict. Dict (not list) so ids are never reused and
         # empty rooms can be deleted safely; ids come from a counter
         self.rooms = {}
+        # self.rooms["owner"] = 
         self.next_room_id = 0
         self.current_port = port
 
@@ -137,12 +138,12 @@ class Server(NetworkObject):
 
     def client_thread(self, client: socket.socket, id):
         self.send(client, {'client_id': id})
-        this_clients_room = None
+        current_room = {} #{'room_id': int, 'clients': list[socket.socket]}
 
         def send_room(msg_obj):
             # Snapshot room clients to avoid concurrent mutation
             with self._rooms_lock:
-                room_clients_snapshot = list(this_clients_room['clients'])
+                room_clients_snapshot = list(current_room['clients'])
             for c in room_clients_snapshot:
                 if c != client:
                     self.send_safe(c, msg_obj)
@@ -156,15 +157,22 @@ class Server(NetworkObject):
                 if not msg_obj:
                     # Clean disconnect: drop the client and tell the room
                     self.remove_client_everywhere(client)
-                    if this_clients_room:
+                    if current_room:
                         send_room({'player_left': ''})
                     break
                 if 'create_room' in msg_obj:
+                    # if any(room['owner'] == client for room in self.rooms.values()):
+                    #     continue
                     with self._rooms_lock:
                         room_id = self.next_room_id
                         self.next_room_id += 1
-                        self.rooms[room_id] = {'room_id': room_id, 'clients': []}
+                        new_room = {'room_id': room_id, 'clients': [client]}
+                        self.rooms[room_id] = new_room
+                    
+                    current_room = new_room
                     self.send_all({'room_id': room_id})
+                    self.send(client, {'client_id': 0})
+                    self.send(client, {'joined_room': room_id})
                 elif 'get_rooms' in msg_obj:
                     with self._rooms_lock:
                         room_ids = list(self.rooms.keys())
@@ -172,41 +180,41 @@ class Server(NetworkObject):
                 elif 'join_room' in msg_obj:
                     room_id = msg_obj['join_room']
                     # Room may have been deleted (stale id from an old lobby)
-                    this_clients_room = self.rooms.get(room_id)
-                    if not this_clients_room:
+                    current_room = self.rooms.get(room_id)
+                    if not current_room:
                         continue
 
                     seats = []
                     should_broadcast = False
                     with self._rooms_lock:
-                        if client not in this_clients_room['clients']:
-                            this_clients_room['clients'].append(client)
+                        if client not in current_room['clients']:
+                            current_room['clients'].append(client)
                             # Seat ids are positions within the room (0/1), so they
                             # stay stable across client restarts/reconnects
-                            seats = list(enumerate(this_clients_room['clients']))
-                            should_broadcast = len(this_clients_room['clients']) == 2
+                            seats = list(enumerate(current_room['clients']))
+                            should_broadcast = len(current_room['clients']) == 2
 
                     for seat, room_client in seats:
                         self.send_safe(room_client, {'client_id': seat})
 
                     if should_broadcast:
                         with self._rooms_lock:
-                            targets = list(this_clients_room['clients'])
+                            targets = list(current_room['clients'])
                         for c in targets:
                             self.send_safe(c, {'all_clients_connected': ''})
                 elif 'leave_game' in msg_obj:
                     self.remove_client_everywhere(client)
                     self.next_room_id = int(self.next_room_id - .5)
-                    if this_clients_room:
+                    if current_room:
                         send_room({'player_left': ''})
-                    this_clients_room = None
-                elif this_clients_room:
+                    current_room = None
+                elif current_room:
                     send_room(msg_obj)
             except ConnectionError:
                 # Any socket failure: drop the client + stop this thread
                 print(f"Connection issue with client {id}")
                 self.remove_client_everywhere(client)
-                if this_clients_room:
+                if current_room:
                     send_room({'player_left': ''})
                 return
 
