@@ -1,1 +1,1 @@
-card can attack its own friend
+Show Highlighter for when a card is selected that shows what cards you can attack
