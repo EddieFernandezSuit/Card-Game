@@ -6,6 +6,7 @@ from components.click_component import ClickComponent
 from entities.entity import Entity
 from entities.arow import Arrow
 from entities.play_card_rectangle import PlayCardRectangle
+from entities.selected_text import SelectedCardMarker
 from constants import *
 import Timer
 import pygame
@@ -44,6 +45,9 @@ class Card(Entity):
         # self.statsText['Damage'].color = RED
 
         self.play_rectangle = PlayCardRectangle(self.game, self)
+        # Created last so it is drawn after this card's image, otherwise the
+        # card covers the selected marker
+        self.selected_marker = SelectedCardMarker(self.game, self)
 
     def on_click(self):        
         if self.game.currentState['arrowFlies']:
@@ -74,9 +78,12 @@ class Card(Entity):
                     play_message = {'play': self.name}
                     self.game.send(play_message)
 
-        elif self.place == 'field' and self.game.currentState['selectedCard'].place == 'field':
-            self.send_attacker_message(self.game.currentState['selectedCard'], self, self.playerNum==0)
-            self.game.currentState['selectedCard'].attack(self)
+        elif (self.place == 'field'
+              and self.game.currentState['selectedCard'].place == 'field'
+              and self.playerNum != self.game.currentState['selectedCard'].playerNum):
+            attacker = self.game.currentState['selectedCard']
+            self.send_attacker_message(attacker, self, attacker.playerNum)
+            attacker.attack(self)
 
     def send_attacker_message(self, attacker, defender, attacking_player_num):
         print(attacker, defender, attacking_player_num)
@@ -143,6 +150,7 @@ class Card(Entity):
         self.emptyZone.isFull = 0
         self.game.currentState['players'][self.playerNum].field.remove(self)
         self.play_rectangle.delete()
+        self.selected_marker.delete()
 
     def update(self):
         font_height = self.statsText['Name'].height

@@ -1,7 +1,6 @@
 from entities.deck_builder_card import DeckBuilderCard
 from entities.pass_turn_button import PassTurnButton
 from entities.clickable_text import ClickableText
-from entities.selected_text import TextSelector
 from entities.ui_container import UIContainer
 from entities.background import Background
 from entities.deck_box import DeckBox
@@ -112,7 +111,6 @@ def click_play(game):
         'selectedCard': None,
         'players': game.currentState['players'],
         'arrowFlies': 0,
-        'select_text': TextSelector(game),
         'background_music': pygame.mixer.Sound('sounds/background_music.mp3'),
         'pm': ParticleManager(game),
         'fps_text': Text(game, 'FPS: 0', (10,10), 'small', WHITE),

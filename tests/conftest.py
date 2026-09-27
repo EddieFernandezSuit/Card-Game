@@ -20,6 +20,16 @@ class FakeClient:
         pass
 
 
+class RecordingScreen:
+    """Stand-in for the pygame display that records what gets blitted."""
+
+    def __init__(self):
+        self.blits = []
+
+    def blit(self, image, position):
+        self.blits.append((image, tuple(position)))
+
+
 class FakeGame:
     def __init__(self):
         self.SCREEN_WIDTH = 1500
@@ -30,11 +40,16 @@ class FakeGame:
             'medium': pygame.font.SysFont('freesansbold', FONT_SIZE_MEDIUM),
             'large': pygame.font.SysFont('freesansbold', FONT_SIZE_LARGE),
         }
+        self.screen = RecordingScreen()
         self.currentState = {
             'gameObjects': [],
             'players': [],
             'client': FakeClient(),
         }
+        self.sent_messages = []
+
+    def send(self, message):
+        self.sent_messages.append(message)
 
 
 @pytest.fixture
@@ -53,3 +68,20 @@ def deal_damage_shallow(game):
         attacker.deal_damage(defender)
         return attacker, defender
     return _attack
+
+@pytest.fixture
+def field_clash(game):
+    def _setup(attacker_player_num=0, defender_player_num=1):
+        players = [Player(game, 0), Player(game, 1)]
+        game.currentState['players'] = players
+        game.currentState['selectedCard'] = None
+        game.currentState['arrowFlies'] = 0
+
+        attacker = players[attacker_player_num].hand[0]
+        defender = next(card for card in players[defender_player_num].hand if card is not attacker)
+        for card in (attacker, defender):
+            card.place = 'field'
+
+        game.currentState['selectedCard'] = attacker
+        return attacker, defender
+    return _setup
