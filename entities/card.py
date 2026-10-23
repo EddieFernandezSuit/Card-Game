@@ -4,11 +4,11 @@ from entities.text import Text
 from components.transform_component import TransformComponent
 from components.click_component import ClickComponent
 from entities.entity import Entity
-from entities.arow import Arrow
+from entities.arrow import Arrow
 from entities.play_card_rectangle import PlayCardRectangle
 from entities.selected_text import SelectedCardMarker
 from constants import *
-import Timer
+import timer
 import pygame
 import json
 import datetime
@@ -202,7 +202,7 @@ class Card(Entity):
 
         def go_back():
             self.transform_component.direction = arrow.transform_component.direction
-            self.recoil_timer = Timer.Timer(5,stop)
+            self.recoil_timer = timer.Timer(5,stop)
 
-        self.recoil_timer = Timer.Timer(5,go_back)
+        self.recoil_timer = timer.Timer(5,go_back)
         

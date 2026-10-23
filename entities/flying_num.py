@@ -1,7 +1,7 @@
 import pygame
 from entities.entity import Entity
 from entities.text import Text
-from Timer import Timer
+from timer import Timer
 import random
 
 class FlyingNum(Entity):

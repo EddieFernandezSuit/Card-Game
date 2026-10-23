@@ -10,7 +10,7 @@ from entities.text import Text
 from game_state import GameState
 from constants import *
 from network import Client
-from Game import Game
+from game import Game
 import pygame
 import json
 import numpy as np
@@ -268,8 +268,12 @@ def start(game):
         'connect': GameState(game, 'connect', create_connect_state)
     }
     game.set_state('menu')
+    
+from collections import Counter
 
 def update(game):
+    counts = Counter(type(o).__name__ for o in game.currentState['gameObjects'])
+    print(counts)
     if 'client' in game.currentState:
         client = game.currentState['client']
         while True:

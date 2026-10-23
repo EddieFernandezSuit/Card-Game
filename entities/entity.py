@@ -2,10 +2,6 @@
 class Entity:
     def __init__(self, game, *args, **kwargs) -> None:
         self.game = game
-        # print(game_objs)
-        # if game_objs != None:
-        #     game_objs.append(self)
-        # else:
         self.game_objects = game.currentState['gameObjects']
         self.game_objects.append(self)
         self.components = []
@@ -22,9 +18,6 @@ class Entity:
         self.on_delete()
         for component in self.components:
             component.delete()
-        # The entity may outlive the state it was created in (e.g. a particle
-        # expiring after the player left and currentState switched to menu),
-        # so remove it from the list it was registered in, not the current one
         if self in self.game_objects:
             self.game_objects.remove(self)
         del(self)

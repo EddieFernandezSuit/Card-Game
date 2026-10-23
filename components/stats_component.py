@@ -2,7 +2,7 @@ from entities.entity import Entity
 from entities.flying_num import FlyingNum
 from constants import *
 from entities.text import Text
-from Timer import Timer
+from timer import Timer
 
 
 class StatsComponent(Entity):

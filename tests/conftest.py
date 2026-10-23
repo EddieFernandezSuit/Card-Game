@@ -11,7 +11,7 @@ pygame.init()
 pygame.display.set_mode((1, 1))
 
 import pytest
-from entities.Card import Card
+from entities.card import Card
 from constants import FONT_SIZE_SMALL, FONT_SIZE_MEDIUM, FONT_SIZE_LARGE
 
 

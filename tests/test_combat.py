@@ -1,6 +1,6 @@
 import pytest
 from entities.player import Player
-from entities.Card  import Card
+from entities.card import Card
 
 
 @pytest.mark.parametrize('attacker_name, defender_name, expected_health', [

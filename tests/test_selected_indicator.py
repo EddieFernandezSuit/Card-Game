@@ -1,7 +1,7 @@
 import pygame
 import pytest
 
-from entities.Card import Card
+from entities.card import Card
 from entities.player import Player
 
 
