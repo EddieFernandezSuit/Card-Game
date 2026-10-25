@@ -30,7 +30,7 @@ class DeckBuilderCard(Entity):
         self.statsText[self.stats['Growth Type']].color = LIGHTCYAN
 
     def on_click(self):
-        self.game.currentState['deckBox'].addCard(self.cardName)
+        self.game.currentState.deckBox.addCard(self.cardName)
 
     def update(self):
         ncount = 0

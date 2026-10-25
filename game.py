@@ -22,16 +22,9 @@ class Game:
             self.handle_events()
             self.screen.fill(GREY)
             fps_text.str = f'FPS: {int(self.clock.get_fps())}'
-
-            # Update all objects first, then update/draw state-level logic.
-            for gameObject in self.currentState['gameObjects']:
-                gameObject.update()
-
-            # Avoid adding extra CPU load each frame.
+            self.currentState.update_objects()
             update(self)
             draw(self)
-
-
             pygame.display.update()
             self.clock.tick(FPS)
 
@@ -45,13 +38,13 @@ class Game:
             if event.type == pygame.KEYDOWN:
                 if event.key in key_actions:
                     key_actions[event.key]()
-
-    def send(self, object):
-        self.currentState['client'].send(object)
     
     def set_state(self, state_name):
         self.currentState = self.states[state_name]
         if not self.currentState.is_state_created:
             self.currentState.is_state_created = True
             self.currentState.create()
+    
+    def send(self, obj):
+        self.currentState.send(obj)
 

@@ -6,7 +6,7 @@ class ParticleManager:
         self.game = game
     
     def update(self):
-        turn = self.game.currentState['turn']
+        turn = self.game.currentState.turn
         x = random.random() * self.game.SCREEN_WIDTH
         y = self.game.SCREEN_HEIGHT * turn
         position = (x,y)

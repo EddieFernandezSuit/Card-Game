@@ -56,7 +56,7 @@ class Player(Entity):
 
     def send_deck(self):
         card_names_deck = self.convert_deck_to_card_names()
-        self.game.currentState['client'].send({'deck': card_names_deck})
+        self.game.currentState.client.send({'deck': card_names_deck})
     
     def create_deck_using_names(self, list_of_card_names):
         for card_name in list_of_card_names:
@@ -88,7 +88,7 @@ class Player(Entity):
 
     def delete(self):
         print(f'Player {self.num + 1} wins')
-        self.game.currentState['background_music'].stop()
+        self.game.currentState.background_music.stop()
         self.game = Game(self.game.start, self.game.update, self.game.draw)
     
     def convert_deck_to_card_names(self):

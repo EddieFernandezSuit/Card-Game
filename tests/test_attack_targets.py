@@ -26,8 +26,8 @@ def test_attacking_own_card_leaves_it_selected(field_clash, game):
 
     ally.on_click()
 
-    assert game.currentState['selectedCard'] is attacker
-    assert game.currentState['arrowFlies'] == 0
+    assert game.currentState.selectedCard is attacker
+    assert game.currentState.arrowFlies == 0
 
 
 def test_cannot_attack_own_card_from_player_one(field_clash):
@@ -45,8 +45,8 @@ def test_can_attack_opponent_card(field_clash, game):
     enemy.on_click()
 
     assert attacker.attackUsed == 1
-    assert game.currentState['selectedCard'] is None
-    assert game.currentState['arrowFlies'] == 1
+    assert game.currentState.selectedCard is None
+    assert game.currentState.arrowFlies == 1
 
 
 def test_attacking_opponent_card_sends_message(field_clash, game):
@@ -77,7 +77,7 @@ def test_attacking_opponent_card_from_player_one_sends_message(field_clash, game
 
 def test_friendly_card_keeps_its_field_slot(field_clash, game):
     attacker, ally = field_clash(attacker_player_num=0, defender_player_num=0)
-    player = game.currentState['players'][0]
+    player = game.currentState.players[0]
     player.field.append(attacker)
     player.field.append(ally)
     attacker.emptyZone = player.zones[0]

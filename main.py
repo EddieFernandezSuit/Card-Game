@@ -18,23 +18,23 @@ import queue
 
 
 def get_opponent_player_num(game):
-    return game.currentState['client'].client_id == 0
+    return game.currentState.client.client_id == 0
 
 def get_opponent(game):
     opponent_num = get_opponent_player_num(game)
-    return game.currentState['players'][opponent_num]
+    return game.currentState.players[opponent_num]
 
 def place_player_at_num(game, player):
-    players = game.currentState['players']
+    players = game.currentState.players
     while len(players) <= player.num:
         players.append(None)
     players[player.num] = player
 
 def create_opponent_player(game, deck):
-    if 'players' not in game.currentState:
+    if not hasattr(game.currentState,'players'):
         return
-    players = game.currentState['players']
-    opponent_num = 1 - game.currentState['client'].client_id
+    players = game.currentState.players
+    opponent_num = 1 - game.currentState.client.client_id
     while len(players) <= opponent_num:
         players.append(None)
     if players[opponent_num] is None:
@@ -52,32 +52,33 @@ def disconnect_client(client):
 
 def on_click_leave_game(game: Game):
     if 'background_music' in game.currentState:
-        game.currentState['background_music'].stop()
+        game.currentState.background_music.stop()
     if 'client' in game.currentState:
-        disconnect_client(game.currentState['client'])
+        disconnect_client(game.currentState.client)
     game.set_state('menu')
 
 def click_play(game):
     game.currentState = game.states['play']
-    if 'client' in game.states['connect']:
-        game.currentState['client'] = game.states['connect'].client
-    game.currentState['players'] = []
+
+    if hasattr(game.states['connect'], 'client'):
+        game.currentState.client = game.states['connect'].client
+    game.currentState.players = []
     game.get_opponent = get_opponent
 
     def update_game_state(msg_obj):
         print('msg', msg_obj)
         if 'player_left' in msg_obj:
             if 'background_music' in game.currentState:
-                game.currentState['background_music'].stop()
+                game.currentState.background_music.stop()
             if 'client' in game.currentState:
-                disconnect_client(game.currentState['client'])
+                disconnect_client(game.currentState.client)
             game.set_state('menu')
             return
         if 'deck' in msg_obj:
             create_opponent_player(game, msg_obj['deck'])
 
         if 'pass' in msg_obj:
-            game.currentState['passTurnButton'].pass_turn()
+            game.currentState.passTurnButton.pass_turn()
 
         if 'play' in msg_obj:
             card_name = msg_obj['play']
@@ -93,23 +94,23 @@ def click_play(game):
             defending_card_field_id = msg_obj['defender']['field_id']
             print(defending_card_field_id, 'defending card field id')
 
-            attacker = game.currentState['players'][attacking_player_num].field[attacking_card_field_id]
+            attacker = game.currentState.players[attacking_player_num].field[attacking_card_field_id]
             if defending_card_field_id != 'player':
-                target = game.currentState['players'][defending_player_num].field[defending_card_field_id]
+                target = game.currentState.players[defending_player_num].field[defending_card_field_id]
             else:
-                target = game.currentState['players'][defending_player_num]
+                target = game.currentState.players[defending_player_num]
 
             attacker.attack(target)
 
-    if 'client' in game.states['connect']:
-        game.currentState['client'].update_game_state = update_game_state
+    if hasattr(game.states['connect'], 'client'):
+        game.currentState.client.update_game_state = update_game_state
 
     state = {
         'background': Background(game=game),
         'turn': 0,
         'passTurnButton': PassTurnButton(game),
         'selectedCard': None,
-        'players': game.currentState['players'],
+        'players': game.currentState.players,
         'arrowFlies': 0,
         'background_music': pygame.mixer.Sound('sounds/background_music.mp3'),
         'pm': ParticleManager(game),
@@ -124,7 +125,7 @@ def click_play(game):
 
     # Created after the background so the local player's cards are not
     # blitted over by it (draw order = gameObjects insertion order)
-    place_player_at_num(game, Player(game, game.currentState['client'].client_id))
+    place_player_at_num(game, Player(game, game.currentState.client.client_id))
 
 def to_matrix(l, n):
     return [l[i:i+n] for i in range(0, len(l), n)]
@@ -139,7 +140,7 @@ def create_deck_builder_state(game):
     game.currentState = game.states['buildDeck']
 
     Background(game)
-    game.currentState['deckBox'] = DeckBox(game)
+    game.currentState.deckBox = DeckBox(game)
 
     card_data = json_to_dictionary('cardData.json')
     deck_box_data = json_to_dictionary('DeckBox.json')
@@ -154,17 +155,17 @@ def create_deck_builder_state(game):
     for i, row in enumerate(cards_in_matrix):
         for j, card in enumerate(row):
             deck_builder_card = DeckBuilderCard(game, card, (400 + j * card_offset, card_spacing + i * card_offset))
-            game.currentState['cardsToAdd'].append(deck_builder_card)
+            game.currentState.cardsToAdd.append(deck_builder_card)
 
     for key, deck_cards in deck_box_data.items():
-        deck_list = game.currentState['deckBox'].addDeck(deck_cards)
+        deck_list = game.currentState.deckBox.addDeck(deck_cards)
         # deck_list.cards.extend(deck_cards)
 
-    game.currentState['save and exit'] = ClickableText(game, pygame.Vector2(10, game.SCREEN_HEIGHT - game.fonts['large'].size('A')[1] - 10), save_and_exit, [game], 'Save and Exit')
+    game.currentState.save_and_exit = ClickableText(game, pygame.Vector2(10, game.SCREEN_HEIGHT - game.fonts['large'].size('A')[1] - 10), save_and_exit, [game], 'Save and Exit')
     # game.currentState = game.states['menu']
 
 def save_and_exit(game):
-    deckBox = {deckList.deckName: deckList.cards for deckList in game.currentState['deckBox'].deckLists}
+    deckBox = {deckList.deckName: deckList.cards for deckList in game.currentState.deckBox.deckLists}
 
     with open('DeckBox.json', 'w') as db:
         json.dump(deckBox, db)
@@ -176,7 +177,8 @@ def create_room(game):
     # click_on_room(game, len(game.currentState.ui_container.elements) - 3)
 
 def show_in_room(game, room_id):
-    if 'YOU_ARE_IN_ROOM_TEXT' not in game.currentState:
+    if not hasattr(game.currentState, 'YOU_ARE_IN_ROOM_TEXT'):
+    # if 'YOU_ARE_IN_ROOM_TEXT' not in game.currentState:
         game.currentState.YOU_ARE_IN_ROOM_TEXT = Text(game=game, str=f'You are now in room {room_id}', font_size='medium')
         game.currentState.ui_container.insert_element(0, game.currentState.YOU_ARE_IN_ROOM_TEXT)
     else:
@@ -192,8 +194,10 @@ def create_connect_state(game):
     game.currentState.gameObjects.clear()
     if hasattr(game.currentState, 'YOU_ARE_IN_ROOM_TEXT'):
         delattr(game.currentState, 'YOU_ARE_IN_ROOM_TEXT')
-    if 'client' in game.currentState:
-        disconnect_client(game.currentState['client'])
+
+    if hasattr(game.currentState, 'client'):
+    # if 'client' in game.currentState:
+        disconnect_client(game.currentState.client)
 
     def update_client(msg):
         def create_ctext(room_id):
@@ -241,8 +245,8 @@ def click_connect_text(game):
     game.set_state('connect')
 
 def click_back_to_menu(game):
-    if 'client' in game.currentState:
-        disconnect_client(game.currentState['client'])
+    if hasattr(game.currentState, 'client'):
+        disconnect_client(game.currentState.client)
     game.set_state('menu')
 
 def create_menu_state(game):
@@ -258,7 +262,7 @@ def create_menu_state(game):
 def start(game):
     game.volume = .2 #from 0 to 1.0
     game.key_actions = {
-        pygame.K_SPACE: lambda: game.currentState.get('passTurnButton', None) and game.currentState['passTurnButton'].on_click()
+        pygame.K_SPACE: lambda: game.currentState.get('passTurnButton', None) and game.currentState.passTurnButton.on_click()
     }
 
     game.states = {
@@ -272,36 +276,32 @@ def start(game):
 from collections import Counter
 
 def update(game):
-    counts = Counter(type(o).__name__ for o in game.currentState['gameObjects'])
-    print(counts)
-    if 'client' in game.currentState:
-        client = game.currentState['client']
-        while True:
-            try:
-                msg = client.messages.get_nowait()
-            except queue.Empty:
-                break
-            client.update_game_state(msg)
+    # counts = Counter(type(o).__name__ for o in game.currentState.gameObjects)
+    # print(counts)
 
-    if game.currentState['pm']:
-        game.currentState['pm'].update()
+    game.currentState.process_network()
 
-    if game.currentState['fps_text']:
-        game.currentState['fps_text'].str = f'FPS: {int(game.clock.get_fps())}'
+    pm = getattr(game.currentState, 'pm', None)
+    if pm:
+        pm.update()
+
+    fps_text = getattr(game.currentState, 'fps_text', None)
+    if fps_text:
+        fps_text.str = f'FPS: {int(game.clock.get_fps())}'
 
 
 def get_attack_message(self, msg_obj):
     attacking_player_num = msg_obj['attacker']['player_num']
     defending_player_num = 1 - attacking_player_num  # Assuming 2 players only
 
-    attacker = self.game.currentState['players'][attacking_player_num].field[msg_obj['attacker']['field_id']]
+    attacker = self.game.currentState.players[attacking_player_num].field[msg_obj['attacker']['field_id']]
     defenders = []
     for defender_info in msg_obj['defenders']:
         defender_field_id = defender_info['field_id']
         if defender_field_id == 'player':
-            defender = self.game.currentState['players'][defending_player_num]
+            defender = self.game.currentState.players[defending_player_num]
         else:
-            defender = self.game.currentState['players'][defending_player_num].field[defender_field_id]
+            defender = self.game.currentState.players[defending_player_num].field[defender_field_id]
         defenders.append(defender)
 
     return attacker, defenders

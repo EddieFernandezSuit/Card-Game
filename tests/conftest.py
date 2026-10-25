@@ -41,11 +41,12 @@ class FakeGame:
             'large': pygame.font.SysFont('freesansbold', FONT_SIZE_LARGE),
         }
         self.screen = RecordingScreen()
-        self.currentState = {
-            'gameObjects': [],
-            'players': [],
-            'client': FakeClient(),
-        }
+        from game_state import GameState
+        state = GameState(self, 'test')
+        state.gameObjects = []
+        state.players = []
+        state.client = FakeClient()
+        self.currentState = state
         self.sent_messages = []
 
     def send(self, message):
@@ -73,15 +74,15 @@ def deal_damage_shallow(game):
 def field_clash(game):
     def _setup(attacker_player_num=0, defender_player_num=1):
         players = [Player(game, 0), Player(game, 1)]
-        game.currentState['players'] = players
-        game.currentState['selectedCard'] = None
-        game.currentState['arrowFlies'] = 0
+        game.currentState.players = players
+        game.currentState.selectedCard = None
+        game.currentState.arrowFlies = 0
 
         attacker = players[attacker_player_num].hand[0]
         defender = next(card for card in players[defender_player_num].hand if card is not attacker)
         for card in (attacker, defender):
             card.place = 'field'
 
-        game.currentState['selectedCard'] = attacker
+        game.currentState.selectedCard = attacker
         return attacker, defender
     return _setup

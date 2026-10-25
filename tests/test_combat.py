@@ -27,7 +27,7 @@ def test_death(game):
     defender.emptyZone = def_player.zones[0]
     def_player.field.append(defender)
 
-    game.currentState['players'] = [player,def_player]
+    game.currentState.players = [player,def_player]
     
     attacker.deal_damage(defender)
 
@@ -45,7 +45,7 @@ def test_devour(game):
     defender.emptyZone = def_player.zones[0]
     def_player.field.append(defender)
 
-    game.currentState['players'] = [player,def_player]
+    game.currentState.players = [player,def_player]
     
     attacker.deal_damage(defender)
 

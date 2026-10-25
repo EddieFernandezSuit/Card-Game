@@ -12,15 +12,15 @@ class Zone(Entity):
         self.clicker = ClickComponent((), self)
 
     def on_click(self):
-        selected_card = self.game.currentState['selectedCard']
+        selected_card = self.game.currentState.selectedCard
 
         if not self.isFull and selected_card != None and self.playerNum == selected_card.playerNum and selected_card.place == 'hand':
             self.isFull = True
             selected_card.place = 'field'
             selected_card.transform_component.position = self.transform_component.position
-            selected_card_player = self.game.currentState['players'][selected_card.playerNum]
+            selected_card_player = self.game.currentState.players[selected_card.playerNum]
             selected_card_player.field.append(selected_card)
             selected_card_player.stats['Mana'] -= selected_card.stats['Mana']
             selected_card_player.hand.remove(selected_card)
             selected_card.emptyZone = self
-            self.game.currentState['selectedCard'] = None
+            self.game.currentState.selectedCard = None

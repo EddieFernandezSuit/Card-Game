@@ -2,7 +2,7 @@
 class Entity:
     def __init__(self, game, *args, **kwargs) -> None:
         self.game = game
-        self.game_objects = game.currentState['gameObjects']
+        self.game_objects = getattr(game.currentState, 'gameObjects', [])
         self.game_objects.append(self)
         self.components = []
         self.on_init(*args, **kwargs)

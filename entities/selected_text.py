@@ -30,5 +30,5 @@ class SelectedCardMarker(Entity):
         self.game.screen.blit(self.glyph, glyph_rect)
 
     def update(self):
-        if self.game.currentState['selectedCard'] is self.card:
+        if self.game.currentState.selectedCard is self.card:
             self.draw()

@@ -50,15 +50,15 @@ class Card(Entity):
         self.selected_marker = SelectedCardMarker(self.game, self)
 
     def on_click(self):        
-        if self.game.currentState['arrowFlies']:
+        if self.game.currentState.arrowFlies:
             return
 
-        if self.game.currentState['selectedCard'] == self:
-            self.game.currentState['selectedCard'] = None
-        elif self.game.currentState['selectedCard'] == None:
-            turn = self.game.currentState['turn'] 
-            if turn == self.playerNum and turn == self.game.currentState['client'].client_id:
-                player = self.game.currentState['players'][self.playerNum]
+        if self.game.currentState.selectedCard == self:
+            self.game.currentState.selectedCard = None
+        elif self.game.currentState.selectedCard == None:
+            turn = self.game.currentState.turn 
+            if turn == self.playerNum and turn == self.game.currentState.client.client_id:
+                player = self.game.currentState.players[self.playerNum]
                 if self.place == 'field' and self.attackUsed == 0:
                     opponent = self.game.get_opponent(self.game)
                     number_of_cards_on_opponents_field = len(opponent.field)
@@ -67,7 +67,7 @@ class Card(Entity):
                     if self.stats['Splash'] > 0: targets = [card for count, card in enumerate(opponent.field) if count <= self.stats['Splash']]
                     if number_of_cards_on_opponents_field == 0: targets = [opponent]
                     if number_of_cards_on_opponents_field == 1: targets = [opponent.field[0]]
-                    if not targets: self.game.currentState['selectedCard'] = self
+                    if not targets: self.game.currentState.selectedCard = self
 
                     for target in targets:
                         self.send_attacker_message(self, target, self.playerNum)
@@ -79,9 +79,9 @@ class Card(Entity):
                     self.game.send(play_message)
 
         elif (self.place == 'field'
-              and self.game.currentState['selectedCard'].place == 'field'
-              and self.playerNum != self.game.currentState['selectedCard'].playerNum):
-            attacker = self.game.currentState['selectedCard']
+              and self.game.currentState.selectedCard.place == 'field'
+              and self.playerNum != self.game.currentState.selectedCard.playerNum):
+            attacker = self.game.currentState.selectedCard
             self.send_attacker_message(attacker, self, attacker.playerNum)
             attacker.attack(self)
 
@@ -115,13 +115,13 @@ class Card(Entity):
 
     def get_field_id(self, player_num):
         id = 0
-        for index, card in enumerate(self.game.currentState['players'][player_num].field):
+        for index, card in enumerate(self.game.currentState.players[player_num].field):
             if self == card:
                 return index
         return id
 
     def play(self):
-        player = self.game.currentState['players'][self.playerNum]
+        player = self.game.currentState.players[self.playerNum]
         flip_card_sound = pygame.mixer.Sound('sounds/flip_card.mp3')
         flip_card_sound.set_volume(self.game.volume)
         flip_card_sound.play()
@@ -129,7 +129,7 @@ class Card(Entity):
         self.handle_bird_sound()
         zone = next((zone for zone in player.zones if not zone.isFull), None)
         if zone:
-            self.game.currentState['selectedCard'] = self
+            self.game.currentState.selectedCard = self
             zone.on_click()
 
     def handle_bird_sound(self):
@@ -148,7 +148,7 @@ class Card(Entity):
             arrow.delete()
 
         self.emptyZone.isFull = 0
-        self.game.currentState['players'][self.playerNum].field.remove(self)
+        self.game.currentState.players[self.playerNum].field.remove(self)
         self.play_rectangle.delete()
         self.selected_marker.delete()
 
@@ -186,8 +186,8 @@ class Card(Entity):
 
     def attack(self, target):
         self.attackUsed = 1
-        self.game.currentState['arrowFlies'] = 1
-        self.game.currentState['selectedCard'] = None
+        self.game.currentState.arrowFlies = 1
+        self.game.currentState.selectedCard = None
         self.arrow_woosh_sound.play()
         self.handle_bird_sound()
         arrow = Arrow(self.game, self, target)

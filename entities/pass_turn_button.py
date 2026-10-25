@@ -11,7 +11,7 @@ class PassTurnButton(Entity):
         size = 100
         self.transform_component = TransformComponent(game, pygame.Vector2(game.SCREEN_WIDTH - 200, game.SCREEN_HEIGHT/2 - 50), width=size, height=size)
         file_path = 'images/'
-        file_path += 'pass_turn_cyan.png' if self.game.currentState['client'].client_id == 0 else 'PassTurn.png'
+        file_path += 'pass_turn_cyan.png' if self.game.currentState.client.client_id == 0 else 'PassTurn.png'
         self.image_component = ImageComponent(game, filePath=file_path, entity=self)
         self.click_component = ClickComponent((), self)
         self.y_position_turn_rectangle = [0, 450]
@@ -19,7 +19,7 @@ class PassTurnButton(Entity):
         
 
     def on_click(self):
-        if self.game.currentState['client'].client_id == self.game.currentState['turn']:
+        if self.game.currentState.client.client_id == self.game.currentState.turn:
             self.pass_turn()
             pass_message = {'pass': True}
             self.game.send(pass_message)
@@ -30,22 +30,22 @@ class PassTurnButton(Entity):
         self.click_component.delete()
     
     def pass_turn(self):
-        self.game.currentState['selectedCard'] = None
+        self.game.currentState.selectedCard = None
         self.sound.set_volume(self.game.volume)
         self.sound.play()
-        for player in self.game.currentState['players']:
+        for player in self.game.currentState.players:
             if not player:
                 continue
             for card in player.field:
                 card.attackUsed = 0
 
-        self.game.currentState['turn'] = self.game.currentState['turn'] == 0
+        self.game.currentState.turn = self.game.currentState.turn == 0
         file_path = 'images/'
-        file_path += 'pass_turn_cyan.png' if self.game.currentState['turn'] == self.game.currentState['client'].client_id else 'PassTurn.png'
+        file_path += 'pass_turn_cyan.png' if self.game.currentState.turn == self.game.currentState.client.client_id else 'PassTurn.png'
         self.image_component.set_image(file_path)
 
-        turn = self.game.currentState['turn']
-        players = self.game.currentState['players']
+        turn = self.game.currentState.turn
+        players = self.game.currentState.players
         if len(players) <= turn or not players[turn]:
             return
         turn_player = players[turn]

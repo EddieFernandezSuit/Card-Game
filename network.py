@@ -250,3 +250,11 @@ class Client(NetworkObject):
     def send(self, data):
         super().send(self.client, data)
 
+    def process_messages(self):
+        while True:
+            try:
+                msg = self.messages.get_nowait()
+            except queue.Empty:
+                break
+            self.update_game_state(msg)
+
