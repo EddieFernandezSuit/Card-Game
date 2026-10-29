@@ -6,6 +6,9 @@ class GameState:
     def __init__(self, game, state_name, create_state=lambda x : 10, **kwargs) -> None:
         self.state_name = state_name
         self.gameObjects = []
+        # States that do not need networking (menu, deck builder) keep this as
+        # None; process_network must tolerate that.
+        self.client = None
         self.__dict__.update(kwargs)
         self.game = game
         self.is_state_created=False
@@ -31,4 +34,5 @@ class GameState:
         self.client.send(obj)
     
     def process_network(self):
-        self.client.process_messages()
+        if self.client is not None:
+            self.client.process_messages()

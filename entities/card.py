@@ -60,18 +60,13 @@ class Card(Entity):
             if turn == self.playerNum and turn == self.game.currentState.client.client_id:
                 player = self.game.currentState.players[self.playerNum]
                 if self.place == 'field' and self.attackUsed == 0:
-                    opponent = self.game.get_opponent(self.game)
-                    number_of_cards_on_opponents_field = len(opponent.field)
-                    targets = []
-
-                    if self.stats['Splash'] > 0: targets = [card for count, card in enumerate(opponent.field) if count <= self.stats['Splash']]
-                    if number_of_cards_on_opponents_field == 0: targets = [opponent]
-                    if number_of_cards_on_opponents_field == 1: targets = [opponent.field[0]]
-                    if not targets: self.game.currentState.selectedCard = self
-
-                    for target in targets:
-                        self.send_attacker_message(self, target, self.playerNum)
-                        self.attack(target)
+                    targets = self.get_attack_targets()
+                    if targets:
+                        self.send_attack_message(targets)
+                        self.attack(targets)
+                    else:
+                        # No splash targets: let the player pick one manually.
+                        self.game.currentState.selectedCard = self
 
                 elif self.place == 'hand' and player.stats['Mana'] >= self.stats['Mana']:
                     self.play()
@@ -82,43 +77,53 @@ class Card(Entity):
               and self.game.currentState.selectedCard.place == 'field'
               and self.playerNum != self.game.currentState.selectedCard.playerNum):
             attacker = self.game.currentState.selectedCard
-            self.send_attacker_message(attacker, self, attacker.playerNum)
-            attacker.attack(self)
+            attacker.send_attack_message([self])
+            attacker.attack([self])
 
-    def send_attacker_message(self, attacker, defender, attacking_player_num):
-        print(attacker, defender, attacking_player_num)
-        attacker_field_id = attacker.get_field_id(attacking_player_num)
-        defender_field_id = 'player'
-        defending_player_num = attacking_player_num == 0
+    def get_attack_targets(self):
+        """Targets this card hits when clicked without a manual selection.
 
-        if type(defender).__name__ == 'Card':
-            defender_field_id = defender.get_field_id(defending_player_num)
-        
-        attack_message = {'attacker': {'player_num': attacking_player_num, 'field_id': attacker_field_id}, 'defender': {'player_num': defending_player_num, 'field_id': defender_field_id}}
-        self.game.send(attack_message)
-    
-    def send_multi_target_attack(self, targets):
-        attack_message = {
+        An empty list means the player has to click a target themselves.
+        """
+        opponent = self.game.get_opponent(self.game)
+        enemy_cards = opponent.field
+
+        if not enemy_cards:
+            return [opponent]
+
+        splash = self.stats.get('Splash', 0)
+        if splash > 0:
+            return enemy_cards[:splash + 1]
+
+        if len(enemy_cards) == 1:
+            return [enemy_cards[0]]
+
+        return []
+
+    def send_attack_message(self, targets):
+        """Send one message for the whole attack, including splash targets."""
+        defending_player_num = 1 - self.playerNum
+        target_payload = []
+        for target in targets:
+            if isinstance(target, Card):
+                field_id = target.get_field_id(defending_player_num)
+            else:
+                field_id = 'player'
+            target_payload.append({'player_num': defending_player_num, 'field_id': field_id})
+
+        self.game.send({
             'attacker': {
                 'player_num': self.playerNum,
-                'field_id': self.get_field_id()
+                'field_id': self.get_field_id(self.playerNum),
             },
-            'multiple_targets': []
-        }
-        for target in targets:
-           if isinstance(target, Card):
-                attack_message['multiple_targets'].append({'player_num': target.playerNum == 0, 'field_id': target.get_field_id()})
-           else:
-                attack_message['multiple_targets'].append({'player_num': target.playerNum == 0, 'field_id': 'player'})
-        
-        self.game.send(attack_message) 
+            'targets': target_payload,
+        })
 
     def get_field_id(self, player_num):
-        id = 0
         for index, card in enumerate(self.game.currentState.players[player_num].field):
             if self == card:
                 return index
-        return id
+        return 0
 
     def play(self):
         player = self.game.currentState.players[self.playerNum]
@@ -184,15 +189,22 @@ class Card(Entity):
             self.stats_component.set_stat(self.stats['Growth Type'], self.stats[self.stats['Growth Type']] + 1)
             target.delete()
 
-    def attack(self, target):
+    def attack(self, targets):
+        targets = list(targets)
+        if not targets:
+            return
+
         self.attackUsed = 1
-        self.game.currentState.arrowFlies = 1
+        # Count arrows so the board stays locked until every splash arrow has
+        # landed instead of unlocking when the first one hits.
+        self.game.currentState.arrowFlies += len(targets)
         self.game.currentState.selectedCard = None
         self.arrow_woosh_sound.play()
         self.handle_bird_sound()
-        arrow = Arrow(self.game, self, target)
-        self.before_position = self.transform_component.position
-        self.transform_component.direction = -arrow.transform_component.direction
+        arrows = [Arrow(self.game, self, target) for target in targets]
+        # Copy: TransformComponent mutates its position Vector2 in place.
+        self.before_position = self.transform_component.position.copy()
+        self.transform_component.direction = -arrows[0].transform_component.direction
         self.transform_component.speed = 2
 
         def stop():
@@ -201,7 +213,7 @@ class Card(Entity):
             self.transform_component.position = self.before_position
 
         def go_back():
-            self.transform_component.direction = arrow.transform_component.direction
+            self.transform_component.direction = arrows[0].transform_component.direction
             self.recoil_timer = timer.Timer(5,stop)
 
         self.recoil_timer = timer.Timer(5,go_back)

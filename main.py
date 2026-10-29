@@ -44,9 +44,10 @@ def disconnect_client(client):
     # The opponent leaving at the same time can close this socket from
     # the receive thread mid-teardown, so tolerate socket failures here
     try:
-        client.update_game_state = lambda _: None
-        client.send({'leave_game': ''})
-        client.client.close()
+        if client:
+            client.update_game_state = lambda _: None
+            client.send({'leave_game': ''})
+            client.client.close()
     except OSError:
         pass
 
@@ -88,19 +89,20 @@ def click_play(game):
 
         if 'attacker' in msg_obj:
             attacking_player_num = msg_obj['attacker']['player_num']
-            defending_player_num = attacking_player_num == 0
-
             attacking_card_field_id = msg_obj['attacker']['field_id']
-            defending_card_field_id = msg_obj['defender']['field_id']
-            print(defending_card_field_id, 'defending card field id')
 
             attacker = game.currentState.players[attacking_player_num].field[attacking_card_field_id]
-            if defending_card_field_id != 'player':
-                target = game.currentState.players[defending_player_num].field[defending_card_field_id]
-            else:
-                target = game.currentState.players[defending_player_num]
+            targets = []
+            for target_info in msg_obj['targets']:
+                target_player_num = target_info['player_num']
+                target_player = game.currentState.players[target_player_num]
+                target_field_id = target_info['field_id']
+                if target_field_id == 'player':
+                    targets.append(target_player)
+                else:
+                    targets.append(target_player.field[target_field_id])
 
-            attacker.attack(target)
+            attacker.attack(targets)
 
     if hasattr(game.states['connect'], 'client'):
         game.currentState.client.update_game_state = update_game_state
@@ -272,8 +274,6 @@ def start(game):
         'connect': GameState(game, 'connect', create_connect_state)
     }
     game.set_state('menu')
-    
-from collections import Counter
 
 def update(game):
     # counts = Counter(type(o).__name__ for o in game.currentState.gameObjects)
@@ -289,21 +289,5 @@ def update(game):
     if fps_text:
         fps_text.str = f'FPS: {int(game.clock.get_fps())}'
 
-
-def get_attack_message(self, msg_obj):
-    attacking_player_num = msg_obj['attacker']['player_num']
-    defending_player_num = 1 - attacking_player_num  # Assuming 2 players only
-
-    attacker = self.game.currentState.players[attacking_player_num].field[msg_obj['attacker']['field_id']]
-    defenders = []
-    for defender_info in msg_obj['defenders']:
-        defender_field_id = defender_info['field_id']
-        if defender_field_id == 'player':
-            defender = self.game.currentState.players[defending_player_num]
-        else:
-            defender = self.game.currentState.players[defending_player_num].field[defender_field_id]
-        defenders.append(defender)
-
-    return attacker, defenders
 
 GAME = Game(start, update)
