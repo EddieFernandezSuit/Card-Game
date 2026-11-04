@@ -52,11 +52,20 @@ def disconnect_client(client):
         pass
 
 def on_click_leave_game(game: Game):
-    if 'background_music' in game.currentState:
-        game.currentState.background_music.stop()
-    if 'client' in game.currentState:
-        disconnect_client(game.currentState.client)
+    background_music = getattr(game.currentState, 'background_music', None)
+    if background_music is not None:
+        background_music.stop()
+
+    client = getattr(game.currentState, 'client', None)
+    if client is not None:
+        disconnect_client(client)
+
     game.set_state('menu')
+
+def try_pass_turn(game):
+    pass_turn_button = getattr(game.currentState, 'passTurnButton', None)
+    if pass_turn_button is not None:
+        pass_turn_button.on_click()
 
 def click_play(game):
     game.currentState = game.states['play']
@@ -69,11 +78,7 @@ def click_play(game):
     def update_game_state(msg_obj):
         print('msg', msg_obj)
         if 'player_left' in msg_obj:
-            if 'background_music' in game.currentState:
-                game.currentState.background_music.stop()
-            if 'client' in game.currentState:
-                disconnect_client(game.currentState.client)
-            game.set_state('menu')
+            on_click_leave_game(game)
             return
         if 'deck' in msg_obj:
             create_opponent_player(game, msg_obj['deck'])
@@ -264,7 +269,7 @@ def create_menu_state(game):
 def start(game):
     game.volume = .2 #from 0 to 1.0
     game.key_actions = {
-        pygame.K_SPACE: lambda: game.currentState.get('passTurnButton', None) and game.currentState.passTurnButton.on_click()
+        pygame.K_SPACE: lambda: try_pass_turn(game)
     }
 
     game.states = {
@@ -290,4 +295,5 @@ def update(game):
         fps_text.str = f'FPS: {int(game.clock.get_fps())}'
 
 
-GAME = Game(start, update)
+if __name__ == '__main__':
+    Game(start, update)
