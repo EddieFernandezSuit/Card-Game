@@ -3,6 +3,7 @@ import pygame
 from components.image_component import ImageComponent
 from components.click_component import ClickComponent
 from components.transform_component import TransformComponent
+from paths import asset_path
 
 class PassTurnButton(Entity):
     def __init__(self, game):
@@ -10,12 +11,14 @@ class PassTurnButton(Entity):
         self.handlers = []
         size = 100
         self.transform_component = TransformComponent(game, pygame.Vector2(game.SCREEN_WIDTH - 200, game.SCREEN_HEIGHT/2 - 50), width=size, height=size)
-        file_path = 'images/'
-        file_path += 'pass_turn_cyan.png' if self.game.currentState.client.client_id == 0 else 'PassTurn.png'
+        file_path = asset_path(
+            'images',
+            'pass_turn_cyan.png' if self.game.currentState.client.client_id == 0 else 'PassTurn.png',
+        )
         self.image_component = ImageComponent(game, filePath=file_path, entity=self)
         self.click_component = ClickComponent((), self)
         self.y_position_turn_rectangle = [0, 450]
-        self.sound = pygame.mixer.Sound('sounds/metal_card_shuffle.wav')
+        self.sound = pygame.mixer.Sound(asset_path('sounds/metal_card_shuffle.wav'))
         
 
     def on_click(self):
@@ -40,8 +43,10 @@ class PassTurnButton(Entity):
                 card.attackUsed = 0
 
         self.game.currentState.turn = self.game.currentState.turn == 0
-        file_path = 'images/'
-        file_path += 'pass_turn_cyan.png' if self.game.currentState.turn == self.game.currentState.client.client_id else 'PassTurn.png'
+        file_path = asset_path(
+            'images',
+            'pass_turn_cyan.png' if self.game.currentState.turn == self.game.currentState.client.client_id else 'PassTurn.png',
+        )
         self.image_component.set_image(file_path)
 
         turn = self.game.currentState.turn

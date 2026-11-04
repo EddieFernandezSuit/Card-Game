@@ -5,6 +5,7 @@ from entities.card import Card
 from entities.zone import Zone
 from entities.text import Text
 from constants import *
+from paths import data_path
 from game import Game
 import random
 import json
@@ -45,7 +46,7 @@ class Player(Entity):
         if cards_in_deck:
             self.create_deck_using_names(cards_in_deck)
         else:
-            self.create_deck_using_json('DeckBox.json')
+            self.create_deck_using_json(data_path('decks.json'))
         
         if not deck:
             self.send_deck()

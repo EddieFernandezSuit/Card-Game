@@ -3,6 +3,7 @@ import math
 from entities.entity import Entity
 from components.image_component import ImageComponent
 from components.transform_component import TransformComponent
+from paths import asset_path
 
 class Arrow(Entity):
     def on_init(self, origin_object, target_object):
@@ -10,10 +11,10 @@ class Arrow(Entity):
         self.origin_object = origin_object
         self.target_object = target_object
 
-        self.arrow_sound = pygame.mixer.Sound('sounds/arrow-impact.mp3')
+        self.arrow_sound = pygame.mixer.Sound(asset_path('sounds/arrow-impact.mp3'))
         self.add_components(
             TransformComponent(self.game, self.origin_object.transform_component.rect.center, speed=50),
-            ImageComponent(self.game, filePath='images/arrow.jpg', entity=self)
+            ImageComponent(self.game, filePath=asset_path('images/arrow.jpg'), entity=self)
         )
 
         self.transform_component.direction = (pygame.Vector2(self.target_object.transform_component.rect.center) - self.transform_component.rect.center).normalize()

@@ -12,7 +12,7 @@ def slice_audio(filename, start_time):
     start_time (int): The time in milliseconds to start slicing from.
     """
     input_file = os.path.join('original_sounds', filename)
-    output_file = os.path.join('sounds', filename)
+    output_file = os.path.join('assets', 'sounds', filename)
     format = os.path.splitext(filename)[1][1:]
     audio = AudioSegment.from_file(input_file, format)
     audio = audio[start_time:]

@@ -11,9 +11,11 @@ from game_state import GameState
 from constants import *
 from network import Client
 from game import Game
+from paths import asset_path, data_path, writable_data_path
 import pygame
 import json
 import numpy as np
+import os
 import queue
 
 
@@ -119,7 +121,7 @@ def click_play(game):
         'selectedCard': None,
         'players': game.currentState.players,
         'arrowFlies': 0,
-        'background_music': pygame.mixer.Sound('sounds/background_music.mp3'),
+        'background_music': pygame.mixer.Sound(asset_path('sounds/background_music.mp3')),
         'pm': ParticleManager(game),
         'fps_text': Text(game, 'FPS: 0', (10,10), 'small', WHITE),
         'leave_game_button': ClickableText(game, position=(game.SCREEN_WIDTH - 100, 10), str='Exit', on_click=on_click_leave_game, args=[game])
@@ -149,8 +151,8 @@ def create_deck_builder_state(game):
     Background(game)
     game.currentState.deckBox = DeckBox(game)
 
-    card_data = json_to_dictionary('cardData.json')
-    deck_box_data = json_to_dictionary('DeckBox.json')
+    card_data = json_to_dictionary(data_path('card_data.json'))
+    deck_box_data = json_to_dictionary(data_path('decks.json'))
 
     collumns = 3
     cards_in_matrix = to_matrix([k for k in card_data.keys() if not k.startswith('_')], collumns)
@@ -174,7 +176,9 @@ def create_deck_builder_state(game):
 def save_and_exit(game):
     deckBox = {deckList.deckName: deckList.cards for deckList in game.currentState.deckBox.deckLists}
 
-    with open('DeckBox.json', 'w') as db:
+    path = writable_data_path('decks.json')
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, 'w') as db:
         json.dump(deckBox, db)
 
     game.currentState = game.states['menu']

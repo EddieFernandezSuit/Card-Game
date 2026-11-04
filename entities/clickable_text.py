@@ -4,6 +4,7 @@ from constants import *
 from entities.entity import Entity
 from entities.text import Text
 from components.click_component import ClickComponent
+from paths import asset_path
 
 class ClickableText(Entity):
     """
@@ -27,7 +28,7 @@ class ClickableText(Entity):
         self.on_click = on_click
         self.text = Text(self.game, str, position, font_size)
         self.transform_component = self.text.transform_component
-        MENU_CLICK_FILENAME = 'sounds/menu_click.wav'
+        MENU_CLICK_FILENAME = asset_path('sounds/menu_click.wav')
         MENU_CLICK_SOUND = pygame.mixer.Sound(MENU_CLICK_FILENAME)
         self.click_component = ClickComponent(args, self, sound=MENU_CLICK_SOUND)
         self.update()

@@ -4,17 +4,18 @@ from components.image_component import ImageComponent
 from entities.text import Text
 from components.click_component import ClickComponent
 from constants import *
+from paths import asset_path, data_path
 import json
 import pygame
 
 class DeckBuilderCard(Entity):
     def on_init(self, cardName, position: tuple) -> None:
-        cardData = json.load(open('cardData.json'))
+        cardData = json.load(open(data_path('card_data.json')))
         self.stats = cardData[cardName]
         self.cardName = cardName
         self.add_components(
             TransformComponent(self.game, position),
-            ImageComponent(self.game, filePath='images/' + self.cardName.lower() + '.jpg', entity=self),
+            ImageComponent(self.game, filePath=asset_path('images', self.cardName.lower() + '.jpg'), entity=self),
             ClickComponent(entity=self)
         )
         self.statsText = {}

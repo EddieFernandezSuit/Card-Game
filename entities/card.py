@@ -8,6 +8,7 @@ from entities.arrow import Arrow
 from entities.play_card_rectangle import PlayCardRectangle
 from entities.selected_text import SelectedCardMarker
 from constants import *
+from paths import asset_path, data_path
 import timer
 import pygame
 import json
@@ -15,7 +16,7 @@ import datetime
 
 class Card(Entity):
     def on_init(self, playerNum, name) -> None:
-        card_data = json.load(open('cardData.json'))
+        card_data = json.load(open(data_path('card_data.json')))
         self.name = name
         self.stats = card_data[name]
         self.stats['base_health'] = self.stats['Health']
@@ -24,10 +25,10 @@ class Card(Entity):
         self.attackUsed = 0
         self.recoil_timer = None
         self.size = CARD_SIZE
-        self.arrow_woosh_sound = pygame.mixer.Sound('sounds/arrow_woosh.mp3')
+        self.arrow_woosh_sound = pygame.mixer.Sound(asset_path('sounds/arrow_woosh.mp3'))
         self.emptyZone = 0
         self.impaledArrows = []
-        filename = 'images/' + name.lower() + '.jpg'
+        filename = asset_path('images', name.lower() + '.jpg')
 
         self.add_components(
             TransformComponent(self.game, (self.game.SCREEN_WIDTH + 100,0), width=self.size, height=self.size),
@@ -127,7 +128,7 @@ class Card(Entity):
 
     def play(self):
         player = self.game.currentState.players[self.playerNum]
-        flip_card_sound = pygame.mixer.Sound('sounds/flip_card.mp3')
+        flip_card_sound = pygame.mixer.Sound(asset_path('sounds/flip_card.mp3'))
         flip_card_sound.set_volume(self.game.volume)
         flip_card_sound.play()
 
@@ -138,7 +139,7 @@ class Card(Entity):
             zone.on_click()
 
     def handle_bird_sound(self):
-        BIRD_SOUND_FILE = 'sounds/bird.mp3'
+        BIRD_SOUND_FILE = asset_path('sounds/bird.mp3')
         if self.stats['Name'] == 'Bird':
             bird_sound = pygame.mixer.Sound(BIRD_SOUND_FILE)
             bird_sound.set_volume(self.game.volume)
