@@ -1,8 +1,8 @@
 import pygame
 import pytest
 
-from entities.card import Card
-from entities.player import Player
+from card_game.entities.card import Card
+from card_game.entities.player import Player
 
 
 @pytest.fixture

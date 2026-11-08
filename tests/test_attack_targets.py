@@ -1,8 +1,8 @@
 from types import SimpleNamespace
 
 import pygame
-from entities.player import Player
-from entities.card import Card
+from card_game.entities.player import Player
+from card_game.entities.card import Card
 
 
 def _make_board(game, attacker_name, enemy_names):
@@ -157,7 +157,7 @@ def test_attack_launches_one_arrow_per_target(game, monkeypatch):
         def __init__(self, game, origin, target):
             self.transform_component = SimpleNamespace(direction=pygame.Vector2(1, 0))
 
-    monkeypatch.setattr('entities.card.Arrow', FakeArrow)
+    monkeypatch.setattr('card_game.entities.card.Arrow', FakeArrow)
     attacker, enemies = _make_board(game, 'Turtle', ['Bird', 'Bird', 'Bird'])
     game.currentState.arrowFlies = 0
     original_position = attacker.transform_component.position.copy()
@@ -174,7 +174,7 @@ def test_clicking_splash_card_attacks_all_targets_and_sends_one_message(game, mo
         def __init__(self, game, origin, target):
             self.transform_component = SimpleNamespace(direction=pygame.Vector2(1, 0))
 
-    monkeypatch.setattr('entities.card.Arrow', FakeArrow)
+    monkeypatch.setattr('card_game.entities.card.Arrow', FakeArrow)
     attacker, enemies = _make_board(game, 'Turtle', ['Bird', 'Bird', 'Bird'])
     game.currentState.client.client_id = 0
     game.currentState.turn = 0

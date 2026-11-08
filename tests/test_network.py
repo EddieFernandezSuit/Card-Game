@@ -1,5 +1,5 @@
 import pytest
-from network import NetworkObject
+from card_game.network.network import NetworkObject
 import json
 
 class FakeSocket:

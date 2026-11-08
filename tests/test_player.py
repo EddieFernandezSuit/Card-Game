@@ -1,4 +1,4 @@
-from entities.player import Player
+from card_game.entities.player import Player
 
 def test_player_zero_starts_with_full_health(game):
     player = Player(game, 0, cards_in_deck=['Bird'])

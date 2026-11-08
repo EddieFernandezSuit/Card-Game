@@ -1,6 +1,6 @@
 import pytest
-from entities.zone import Zone
-from entities.player import Player
+from card_game.entities.zone import Zone
+from card_game.entities.player import Player
 
 def test_click_with_no_selected_card_does_nothing(game):
     player = Player(game, 0)

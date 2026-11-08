@@ -1,0 +1,44 @@
+from card_game.entities.entity import Entity
+from card_game.components.transform_component import TransformComponent
+from card_game.components.image_component import ImageComponent
+from card_game.entities.text import Text
+from card_game.components.click_component import ClickComponent
+from card_game.core.constants import *
+from card_game.core.paths import asset_path, data_path
+import json
+import pygame
+
+class DeckBuilderCard(Entity):
+    def on_init(self, cardName, position: tuple) -> None:
+        cardData = json.load(open(data_path('card_data.json')))
+        self.stats = cardData[cardName]
+        self.cardName = cardName
+        self.add_components(
+            TransformComponent(self.game, position),
+            ImageComponent(self.game, filePath=asset_path('images', self.cardName.lower() + '.jpg'), entity=self),
+            ClickComponent(entity=self)
+        )
+        self.statsText = {}
+        ncount = 0
+        for key in self.stats:
+            if key != 'Growth Type' and self.stats[key]:
+                if key != 'Name':
+                    self.statsText[key] = Text(self.game, key + ' ' +  str(self.stats[key]),font_size= 'small')
+                else:
+                    self.statsText[key] = Text(self.game, str(self.stats[key]),font_size= 'small')
+                ncount += 1
+
+        self.statsText[self.stats['Growth Type']].color = LIGHTCYAN
+
+    def on_click(self):
+        self.game.currentState.deckBox.addCard(self.cardName)
+
+    def update(self):
+        ncount = 0
+        textHeight = self.game.fonts['small'].size('A')[1]
+        for key in self.statsText:
+            self.statsText[key].transform_component.position = self.transform_component.position + pygame.Vector2(5,5 + textHeight * ncount)
+            ncount += 1
+            
+    on_init.__annotations__ = {'cardName': str, 'position': 'Tuple[int, int]', 'return': None}
+    

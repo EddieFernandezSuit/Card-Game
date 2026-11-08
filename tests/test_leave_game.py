@@ -1,5 +1,5 @@
 import main
-from game_state import GameState
+from card_game.core.game_state import GameState
 
 
 class FakeMusic:

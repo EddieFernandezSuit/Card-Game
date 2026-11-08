@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from paths import asset_path, data_path
+from card_game.core.paths import asset_path, data_path
 
 
 def test_runtime_assets_exist():

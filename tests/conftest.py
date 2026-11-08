@@ -1,6 +1,6 @@
 import os
 
-from entities.player import Player
+from card_game.entities.player import Player
 
 os.environ['SDL_VIDEODRIVER'] = 'dummy'
 os.environ['SDL_AUDIODRIVER'] = 'dummy'
@@ -11,8 +11,8 @@ pygame.init()
 pygame.display.set_mode((1, 1))
 
 import pytest
-from entities.card import Card
-from constants import FONT_SIZE_SMALL, FONT_SIZE_MEDIUM, FONT_SIZE_LARGE
+from card_game.entities.card import Card
+from card_game.core.constants import FONT_SIZE_SMALL, FONT_SIZE_MEDIUM, FONT_SIZE_LARGE
 
 
 class FakeClient:
@@ -41,7 +41,7 @@ class FakeGame:
             'large': pygame.font.SysFont('freesansbold', FONT_SIZE_LARGE),
         }
         self.screen = RecordingScreen()
-        from game_state import GameState
+        from card_game.core.game_state import GameState
         state = GameState(self, 'test')
         state.gameObjects = []
         state.players = []
