@@ -7,6 +7,7 @@ from card_game.entities.entity import Entity
 from card_game.entities.arrow import Arrow
 from card_game.entities.play_card_rectangle import PlayCardRectangle
 from card_game.entities.selected_text import SelectedCardMarker
+from card_game.entities.target_highlight import TargetHighlight
 from card_game.core.constants import *
 from card_game.core.paths import asset_path, data_path
 from card_game.core import timer
@@ -49,6 +50,8 @@ class Card(Entity):
         # Created last so it is drawn after this card's image, otherwise the
         # card covers the selected marker
         self.selected_marker = SelectedCardMarker(self.game, self)
+        # Highlights this card while the selected card can attack it
+        self.target_highlight = TargetHighlight(self.game, self)
 
     def on_click(self):        
         if self.game.currentState.arrowFlies:
@@ -100,6 +103,19 @@ class Card(Entity):
             return [enemy_cards[0]]
 
         return []
+
+    def is_attack_target(self):
+        """Whether this card can be attacked by the currently selected card."""
+        selected = getattr(self.game.currentState, 'selectedCard', None)
+        if not isinstance(selected, Card) or selected is self:
+            return False
+
+        return (
+            selected.place == 'field'
+            and selected.attackUsed == 0
+            and self.place == 'field'
+            and self.playerNum != selected.playerNum
+        )
 
     def send_attack_message(self, targets):
         """Send one message for the whole attack, including splash targets."""
@@ -157,6 +173,7 @@ class Card(Entity):
         self.game.currentState.players[self.playerNum].field.remove(self)
         self.play_rectangle.delete()
         self.selected_marker.delete()
+        self.target_highlight.delete()
 
     def update(self):
         font_height = self.statsText['Name'].height
